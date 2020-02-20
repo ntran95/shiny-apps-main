@@ -141,7 +141,7 @@ server <- function(input, output) {
 
       ifelse(selected %in% gene_df$Gene.stable.ID,
         ind <- multiGrep2(selected, gene_df$Gene.stable.ID),
-        "gene not in database")
+        "Gene not in dataset")
     )
     gene_df[ind,]
   }

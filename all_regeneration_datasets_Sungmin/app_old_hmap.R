@@ -199,6 +199,7 @@ server <- function(input, output) {
     width = "600px", height = "500px")})
 
 
+
   # ======== Cluster/Data UMAP ======== #
   DatFeatPlotF <- function() {
 
@@ -665,20 +666,17 @@ server <- function(input, output) {
     return(h)
   }
 
-  getWidthPhmap <- function() {
-    if(input$pHmapClust == TRUE ) {
-      w <- "1380px"
-    } else {
-      w <- "1325px"
-    }
-  }
-
   output$plot.uiPheatmapF <- renderUI({input$runPhmap
-    isolate({h <- getHeightPhmap(); w <- getWidthPhmap()
-    plotOutput("myPhmapF", width = w, height = h)
+    isolate({h <- getHeightPhmap(); plotOutput("myPhmapF",
+      width = "1125px", height = h)
     })
   })
 
+  pHmapHeight <- function() {
+    l <- getLenInput(input$PhmapGenes)
+    l <- as.numeric(l)
+    return(l)
+  }
   
   output$downloadPhmap <- downloadHandler(
     filename = "heatmap.png", content = function(file) {
@@ -937,8 +935,7 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
           fluidRow(tags$br())
         ),
           mainPanel(fluidRow(
-            column(12, tags$br()),
-            uiOutput("GeneDB")
+              uiOutput("GeneDB")
           )
         )
       )
@@ -1187,76 +1184,56 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
 
     # ================ #
     tabPanel("Heatmap", #fluid = FALSE,
-      # sidebarLayout(fluid = TRUE,
+      sidebarLayout(fluid = TRUE,
         
-        # sidebarPanel(fluid = FALSE, width = 4,
-        #   column(12, align = "left  ",
-        #     textInput("PhmapGenes",
-        #       "Insert gene name or ensembl ID:",
-        #       value = smpl_genes_lg),
-        #     checkboxInput("pHmapClust",
-        #       label = "Check box to enable row clustering.", value = FALSE)),
-
-        #   column(12, align = "center",
-        #     actionButton("runPhmap", "Generate Plots",
-        #       style = 'padding:5px; font-size:80%')),
-        #   column(12, tags$hr(width = "50%"), align = "center"),
-
-        #   # column(12, tags$br()),
-        #   # column(12, align = "center", "Plot download (png):"),
-        #   # column(12, tags$br()),
-        #   # column(12, align = "center", downloadButton(
-        #   #   "downloadPhmap", "heatmap.png",
-        #   #   style = "padding:5px; font-size:80%")),
-
-        #   fluidRow(tags$br()),
-        #   fluidRow(tags$br()),
-        #   column(8, align = "left", tags$b('Note:'),'Highly expressed genes have a
-        #   tendency to "wash out" the color values of genes with lower expression
-        #   on this heatmap. It might be useful to remove the higher expressed genes
-        #   to get a better visualization of genes with less extreme values.'),
-        #   fluidRow(tags$br()),
-        #   fluidRow(tags$br()),
-        #   # column(12, uiOutput("plot.uiDatFeatPlotV6"), align = "center"),
-        #   fluidRow(tags$br()),
-        #   fluidRow(tags$br())
-        # ),
-        
-        # mainPanel(
-          fluidRow(
-            column(11, tags$br()),
-
-            column(11, align = "left  ",
-            textInput("PhmapGenes", width = "100%",
+        sidebarPanel(fluid = FALSE, width = 4,
+          column(12, align = "left  ",
+            textInput("PhmapGenes",
               "Insert gene name or ensembl ID:",
               value = smpl_genes_lg),
             checkboxInput("pHmapClust",
               label = "Check box to enable row clustering.", value = FALSE)),
 
-            column(11, align = "center",
-              actionButton("runPhmap", "Generate Plots",
-                style = 'padding:5px; font-size:80%')),
-            column(11, tags$hr(width = "50%"), align = "center"),
+          column(12, align = "center",
+            actionButton("runPhmap", "Generate Plots",
+              style = 'padding:5px; font-size:80%')),
+          column(12, tags$hr(width = "50%"), align = "center"),
 
-            column(11, tags$b("Mismatches or genes not present"),
+          # column(12, tags$br()),
+          # column(12, align = "center", "Plot download (png):"),
+          # column(12, tags$br()),
+          # column(12, align = "center", downloadButton(
+          #   "downloadPhmap", "heatmap.png",
+          #   style = "padding:5px; font-size:80%")),
+
+          fluidRow(tags$br()),
+          fluidRow(tags$br()),
+          column(12, align = "left", tags$b('Note:'),'Highly expressed genes have a
+          tendency to "wash out" the color values of genes with lower expression
+          on this heatmap. It might be useful to remove the higher expressed genes
+          to get a better visualization of genes with less extreme values.'),
+          fluidRow(tags$br()),
+          fluidRow(tags$br()),
+          # column(12, uiOutput("plot.uiDatFeatPlotV6"), align = "center"),
+          fluidRow(tags$br()),
+          fluidRow(tags$br())
+        ),
+        
+        mainPanel(
+          fluidRow(
+            column(8, tags$br()),
+            column(8, tags$b("Mismatches or genes not present"),
                 "(if applicable)", tags$b(":")),
-            column(11, uiOutput("notInPhmap")),
-
-            column(11, tags$br()),
-            column(11, align = "left", tags$b('Note:'),
-              'Highly expressed genes have a tendency to "wash out" the color 
-              values of genes with lower expression on this heatmap. It might 
-              be useful to remove the higher expressed genes to get a better 
-              visualization of genes with less extreme values.'),
-            column(11, tags$hr()),
+            column(8, uiOutput("notInPhmap")),
+            column(8, tags$hr()),
 
             fluidRow(tags$br()),
-            column(11, tags$b("All cell types")),
+            column(8, tags$b("All cell types")),
             fluidRow(tags$br()),
             column(12, uiOutput("plot.uiPheatmapF"))
           )
-        # )
-      # ) 
+        )
+      )
     ),
 
 

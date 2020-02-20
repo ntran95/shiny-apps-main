@@ -282,7 +282,7 @@ server <- function(input, output) {
   }
 # 
   output$cellSelectFeat <- renderUI({
-    pickerInput("cellIdentsFeat", "add/remove treatments from plot:",
+    pickerInput("cellIdentsFeat", "Add or remove treatments from plot:",
       choices = as.character(printTreats()), multiple = TRUE,
       selected = as.character(printTreats()), options = list(
        `actions-box` = TRUE), width = "85%")
@@ -359,7 +359,7 @@ server <- function(input, output) {
   }
 
   output$cellSelectVln <- renderUI({ # New cell type select
-    pickerInput("cellIdentsVln", "add/remove clusters:",
+    pickerInput("cellIdentsVln", "Add or remove clusters:",
       choices = as.character(printIdents()), multiple = TRUE,
       selected = as.character(printIdents()), options = list(
        `actions-box` = TRUE), width = "85%")
@@ -439,7 +439,7 @@ server <- function(input, output) {
   }
 
   output$cellSelectRdg <- renderUI({ # New cell type select
-    pickerInput("cellIdentsRdg", "add/remove clusters:",
+    pickerInput("cellIdentsRdg", "Add or remove clusters:",
       choices = as.character(printIdents()), multiple = TRUE,
       selected = as.character(printIdents()), options = list(
        `actions-box` = TRUE), width = "85%")
@@ -544,7 +544,7 @@ server <- function(input, output) {
   }
 
   output$cellSelectDot <- renderUI({ # New cell type select
-    pickerInput("cellIdentsDot", "add/remove clusters:",
+    pickerInput("cellIdentsDot", "Add or remove clusters:",
       choices = as.character(printIdents()), multiple = TRUE,
       selected = as.character(printIdents()), options = list(
        `actions-box` = TRUE), width = "85%")
@@ -808,7 +808,7 @@ server <- function(input, output) {
 # =============================== User Interface ==============================
 
 
-ui <- fixedPage(theme = shinytheme("paper"), # paper lumen cosmo
+ui <- fixedPage(theme = shinytheme("cosmo"), # paper lumen cosmo
   tags$head(includeCSS(paste0("./www/styles.css"))),
   div(headerPanel(app_title), style = 'width:1560px;'),
   div(tabsetPanel(

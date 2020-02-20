@@ -1278,7 +1278,7 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
         mainPanel(
           fluidRow(
             column(8, tags$br()),
-            # column(8, tags$b(uiOutput("SelectedDataDiff "))), 
+            # column(8, tags$b(uiOutput("SelectedDataDiff "))),
             column(12, align = "left", class = "diffExpMain",
               uiOutput("diffTable"),
                 tags$b('Click "Run Differential Expression"')

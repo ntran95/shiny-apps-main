@@ -43,7 +43,7 @@ for (i in 1:length(files)) {
 }
 
 # Created using process_gene_info.R script in data/ folder
-gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.1.tsv",
+gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
   sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
 # ! START items to check/change for project !
@@ -135,13 +135,20 @@ server <- function(input, output) {
   GeneDB <- function() {
     seurat_obj <- SelectDataset()
     selected <- unlist(strsplit(input$dbGenes, " "))
+    
+    present <- gene_df$Gene.name.uniq %in% rownames(seurat_obj)
+    gene_df <- cbind(in_dataset = present, gene_df)
+    
+    ifelse(length(selected) < 2,
+      ind <- grep(selected, gene_df$Gene.name.uniq),
 
-    ifelse(selected %in% gene_df$Gene.name.uniq,
-      ind <- multiGrep2(selected, gene_df$Gene.name.uniq),
+      ifelse(selected %in% gene_df$Gene.name.uniq,
+        ind <- multiGrep2(selected, gene_df$Gene.name.uniq),
 
-      ifelse(selected %in% gene_df$Gene.stable.ID,
-        ind <- multiGrep2(selected, gene_df$Gene.stable.ID),
-        "Gene not in dataset")
+        ifelse(selected %in% gene_df$Gene.stable.ID,
+          ind <- multiGrep2(selected, gene_df$Gene.stable.ID),
+          "Gene not in dataset")
+      )
     )
     gene_df[ind,]
   }

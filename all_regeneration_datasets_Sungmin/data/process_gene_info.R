@@ -8,11 +8,6 @@ gene_df <- read.table("./Danio_Features_unique_Ens91_v2.tsv",
 
 gene_df <- gene_df[gene_df$Gene.name.uniq %in% rownames(seurat_obj),]
 
-ens_id <- gene_df$Gene.stable.ID
-com_name <- gene_df$Gene.name.uniq
-
-gene_df$in.dataset <- ""
-gene_df$in.dataset <- (gene_df$Gene.name.uniq %in% rownames(seurat_obj))
 gene_df <- gene_df[,c(1:3,6,4:5)]
 gene_df$ZFIN.ID <- paste0("=HYPERLINK(", '"', gene_df$ZFIN.ID, '"',")")
 

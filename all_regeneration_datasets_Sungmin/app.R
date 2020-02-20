@@ -808,7 +808,7 @@ server <- function(input, output) {
 # =============================== User Interface ==============================
 
 
-ui <- fixedPage(theme = shinytheme("cosmo"), # paper lumen cosmo
+ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
   tags$head(includeCSS(paste0("./www/styles.css"))),
   div(headerPanel(app_title), style = 'width:1560px;'),
   div(tabsetPanel(

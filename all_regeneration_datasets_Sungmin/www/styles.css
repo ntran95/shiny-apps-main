@@ -30,7 +30,8 @@ https://css-tricks.com/multiple-class-id-selectors/
 /*Diffential expression table height*/
 .col-sm-8 .row .col-sm-12.diffExpMain {width: 1200px; height: 1000px; overflow-y: scroll;}
 
+.btn {text-transform: none;}
 /*Changing button color for cosmo theme*/
-/* button text */
-.btn {background-color: #656a8a}
-.btn-default.active.focus {background-color: #0d6dbb}
+/* .btn {background-color: #626897}
+.btn.dropdown-toggle.btn-default{background-color: #626897}
+.btn-default:hover {background-color: #4281dc} */

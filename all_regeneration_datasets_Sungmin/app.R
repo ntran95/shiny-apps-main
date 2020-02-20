@@ -919,20 +919,20 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
     ),
 
 
-    # ================ #
-    # tabPanel("Gene Database", fluid = TRUE,
-    #   sidebarLayout(
-    #     sidebarPanel(
-    #       textInput("dbGenes", "Insert gene name or ensembl ID:",
-    #         value = "gadd45gb.1 slc1a3a znf185 si:ch73-261i21.5"),
-    #       fluidRow(tags$br())
-    #     ),
-    #       mainPanel(fluidRow(
-    #           uiOutput("GeneDB")
-    #       )
-    #     )
-    #   )
-    # ),
+   # ================ #
+    tabPanel("Gene Database", fluid = TRUE,
+      sidebarLayout(
+        sidebarPanel(
+          textInput("dbGenes", "Insert gene name or ensembl ID:",
+            value = "gadd45gb.1 slc1a3a znf185 si:ch73-261i21.5"),
+          fluidRow(tags$br())
+        ),
+          mainPanel(fluidRow(
+              uiOutput("GeneDB")
+          )
+        )
+      )
+    ),
 
 
     # ================ #

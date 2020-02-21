@@ -1234,7 +1234,7 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
         column(12, align = "center", tags$hr(width = "100%")),
         column(12, tags$b("All cell types")),
         column(12, tags$br()),
-        column(12, class = "hmapId", uiOutput("plot.uiPheatmapF"))
+        column(12, class = "hmapID", uiOutput("plot.uiPheatmapF"))
       )
     ),
 
@@ -1294,7 +1294,9 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
             # column(8, tags$b(uiOutput("SelectedDataDiff "))), 
             column(12, align = "left", class = "diffExpMain",
               uiOutput("diffTable"),
-                tags$b('Click "Run Differential Expression"')
+              column(12, align = "center",
+                fluidRow(tags$br()),
+                tags$b('Click "Run Differential Expression"'))
             )
           )
         )

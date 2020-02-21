@@ -199,6 +199,7 @@ server <- function(input, output) {
     width = "600px", height = "500px")})
 
 
+
   # ======== Cluster/Data UMAP ======== #
   DatFeatPlotF <- function() {
 
@@ -665,20 +666,17 @@ server <- function(input, output) {
     return(h)
   }
 
-  getWidthPhmap <- function() {
-    if(input$pHmapClust == TRUE ) {
-      w <- "1380px"
-    } else {
-      w <- "1325px"
-    }
-  }
-
   output$plot.uiPheatmapF <- renderUI({input$runPhmap
-    isolate({h <- getHeightPhmap(); w <- getWidthPhmap()
-    plotOutput("myPhmapF", width = w, height = h)
+    isolate({h <- getHeightPhmap(); plotOutput("myPhmapF",
+      width = "1125px", height = h)
     })
   })
 
+  pHmapHeight <- function() {
+    l <- getLenInput(input$PhmapGenes)
+    l <- as.numeric(l)
+    return(l)
+  }
   
   output$downloadPhmap <- downloadHandler(
     filename = "heatmap.png", content = function(file) {
@@ -693,7 +691,6 @@ server <- function(input, output) {
   # ======== Differential Expression ======== #
   diffExp <- function() {
     seurat_obj <- SelectDataset()
-    seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsDiff]
     meta <- seurat_obj@meta.data
 
     print(input$identText1)
@@ -709,7 +706,7 @@ server <- function(input, output) {
       group2 <- rownames(meta[meta$cell.type.ident %in% subset2,])
     }
 
-    diff_results <- FindMarkers(test.use = input$statSelectDiff,
+    diff_results <- FindMarkers(
       seurat_obj, ident.1 = group1, ident.2 = group2)
 
     diff_results$Gene.name.uniq <- ""
@@ -742,13 +739,6 @@ server <- function(input, output) {
       choices = as.character(printTreats()), multiple = TRUE,
       selected = as.character(printTreats())[2],options = list(
         `actions-box` = TRUE), width = "80%")
-  })
-
-  output$cellSelectDiff <- renderUI({ # New cell type select
-    pickerInput("cellIdentsDiff", "Add or remove clusters:",
-      choices = as.character(printIdents()), multiple = TRUE,
-      selected = as.character(printIdents()), options = list(
-       `actions-box` = TRUE), width = "80%")
   })
 
   output$SelectedDataDiff <- renderText({input$runDiffExp
@@ -942,13 +932,10 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
         sidebarPanel(
           textInput("dbGenes", "Insert gene name or ensembl ID:",
             value = "gadd45gb.1 slc1a3a znf185 si:ch73-261i21.5"),
-          fluidRow(tags$br()),
-          column(12, uiOutput("plot.uiDatFeatPlotV6"), align = "center"),
           fluidRow(tags$br())
         ),
           mainPanel(fluidRow(
-            column(11, tags$br()),
-            uiOutput("GeneDB")
+              uiOutput("GeneDB")
           )
         )
       )
@@ -1143,6 +1130,7 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
           textInput("dotGenes",
             "Insert gene name or ensembl ID:",
             value = smpl_genes_lg),
+          
           checkboxInput("dPlotClust",
             label = "Check box to enable row clustering.", value = FALSE)),
 
@@ -1196,45 +1184,55 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
 
     # ================ #
     tabPanel("Heatmap", #fluid = FALSE,
-      fixedRow(
-        column(12, tags$br()),
-
-        column(5, align = "left",
-          column(12, align = "left",
-            column(12,
-              textInput("PhmapGenes", width = "100%",
+      sidebarLayout(fluid = TRUE,
+        
+        sidebarPanel(fluid = FALSE, width = 4,
+          column(12, align = "left  ",
+            textInput("PhmapGenes",
               "Insert gene name or ensembl ID:",
-                value = smpl_genes_lg),
-              checkboxInput("pHmapClust",
-                label = "Check box to enable row clustering.",
-                value = FALSE)
-              ),
-            
-            column(12, tags$br()),
-            column(12, align = "center",
-              actionButton("runPhmap", "Generate Plots",
+              value = smpl_genes_lg),
+            checkboxInput("pHmapClust",
+              label = "Check box to enable row clustering.", value = FALSE)),
+
+          column(12, align = "center",
+            actionButton("runPhmap", "Generate Plots",
               style = 'padding:5px; font-size:80%')),
-            column(12, tags$br())
-          )
-        ),
+          column(12, tags$hr(width = "50%"), align = "center"),
 
-        column(7, align = "left",
-          column(12, tags$b("Mismatches or genes not present"),
-            "(if applicable)", tags$b(":")),
-          column(12, uiOutput("notInPhmap")),
+          # column(12, tags$br()),
+          # column(12, align = "center", "Plot download (png):"),
+          # column(12, tags$br()),
+          # column(12, align = "center", downloadButton(
+          #   "downloadPhmap", "heatmap.png",
+          #   style = "padding:5px; font-size:80%")),
 
-          column(12, tags$hr()),
-          column(6, align = "left", tags$b('Note:'),
-          'Highly expressed genes have a tendency to "wash out" the color 
-          values of genes with lower expression on this heatmap. It might 
-          be useful to remove the higher expressed genes to get a better 
-          visualization of genes with less extreme values.')
+          fluidRow(tags$br()),
+          fluidRow(tags$br()),
+          column(12, align = "left", tags$b('Note:'),'Highly expressed genes have a
+          tendency to "wash out" the color values of genes with lower expression
+          on this heatmap. It might be useful to remove the higher expressed genes
+          to get a better visualization of genes with less extreme values.'),
+          fluidRow(tags$br()),
+          fluidRow(tags$br()),
+          # column(12, uiOutput("plot.uiDatFeatPlotV6"), align = "center"),
+          fluidRow(tags$br()),
+          fluidRow(tags$br())
         ),
         
-        column(12, align = "center", tags$hr(width = "100%")),
-        column(12, tags$b("All cell types")),
-        column(12, tags$br()),
-        column(12, class = "hmapID", uiOutput("plot.uiPheatmapF"))
+        mainPanel(
+          fluidRow(
+            column(8, tags$br()),
+            column(8, tags$b("Mismatches or genes not present"),
+                "(if applicable)", tags$b(":")),
+            column(8, uiOutput("notInPhmap")),
+            column(8, tags$hr()),
+
+            fluidRow(tags$br()),
+            column(8, tags$b("All cell types")),
+            fluidRow(tags$br()),
+            column(12, uiOutput("plot.uiPheatmapF"))
+          )
+        )
       )
     ),
 
@@ -1250,23 +1248,13 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
             uiOutput("diffOut1"),
             fluidRow(tags$br()),
             uiOutput("diffOut2")),
-          
-          column(12, tags$br()),
-          column(12, align = "center", uiOutput("cellSelectDiff")),
+            
           column(12, tags$hr(width = "50%"), align = "center"),
-
-          fluidRow(tags$br()),
-          column(12, align = "center",
-            pickerInput("statSelectDiff", label = "Select statistical test:",
-            multiple = FALSE, selected = "wilcox", width = "210px",
-            choices = list(wilcox = "wilcox", bimodal = "bimod", ROC = "roc",
-              t = "t", negbinom = "negbinom", poisson = "poisson", LR = "LR",
-              MAST = "MAST", DESeq2 = "DESeq2"))),
 
           fluidRow(tags$br()),
           column(12, align = "center", numericInput("pValCutoff",
             "Input adjusted p-value cutoff:", value = 0.05, min = 0.00,
-            step = 0.001, max = 1.00, width = "210px")),
+            step = 0.001, max = 1.00, width = "50%")),
 
           fluidRow(tags$br()),
           column(12, align = "center",
@@ -1286,17 +1274,14 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
           column(12, uiOutput("plot.uiDatFeatPlotV5"), align = "center"),
           fluidRow(tags$br()),
           fluidRow(tags$br())
-        ),
-
+        ),    
         mainPanel(
           fluidRow(
             column(8, tags$br()),
-            # column(8, tags$b(uiOutput("SelectedDataDiff "))),
+            # column(8, tags$b(uiOutput("SelectedDataDiff "))), 
             column(12, align = "left", class = "diffExpMain",
               uiOutput("diffTable"),
-              column(12, align = "center",
-                fluidRow(tags$br()),
-                tags$b('Click "Run Differential Expression"'))
+                tags$b('Click "Run Differential Expression"')
             )
           )
         )

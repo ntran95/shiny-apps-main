@@ -30,7 +30,12 @@ https://css-tricks.com/multiple-class-id-selectors/
 /*Diffential expression table height*/
 .col-sm-8 .row .col-sm-12.diffExpMain {width: 1200px; height: 1000px; overflow-y: scroll;}
 
+/*Diffential expression table height*/
 .btn {text-transform: none;}
+
+/*scrollable window in heatmap*/
+#hmapID.col-sm-12 {width: 1325px; height: 800px; overflow-y: scroll;}
+
 /*Changing button color for cosmo theme*/
 /* .btn {background-color: #626897}
 .btn.dropdown-toggle.btn-default{background-color: #626897}

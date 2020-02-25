@@ -614,80 +614,79 @@ server <- function(input, output) {
     }
   )
 
+  # ! check/change for project (deactivate for multiple datasets)
+  # # ======== pHeatmap ======== #
+  # pHeatmapF <- function() {
+  #   selected <- unlist(strsplit(input$PhmapGenes, " "))
 
-  # ======== pHeatmap ======== #
-  pHeatmapF <- function() {
-    selected <- unlist(strsplit(input$PhmapGenes, " "))
-
-    ifelse(selected %in% com_name,
-      selected <- selected[selected %in% com_name],
+  #   ifelse(selected %in% com_name,
+  #     selected <- selected[selected %in% com_name],
     
-      ifelse(selected %in% ens_id,
-        selected <- gene_df[ens_id %in% selected, 3],"")
-    )
+  #     ifelse(selected %in% ens_id,
+  #       selected <- gene_df[ens_id %in% selected, 3],"")
+  #   )
     
-    goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected,]
-    n_trt <- length(unique(seurat_obj@meta.data$data.set))
-    mtx_cols <- ncol(avg_mtx) - n_trt
+  #   goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected,]
+  #   n_trt <- length(unique(seurat_obj@meta.data$data.set))
+  #   mtx_cols <- ncol(avg_mtx) - n_trt
 
-    pheatmap::pheatmap(goi_mat, cluster_rows = input$pHmapClust,
-      cluster_cols = FALSE, color = viridis::viridis(100),
-      annotation_col = NULL, legend = FALSE, annotation_colors = anno_cols,
-      gaps_col = seq(n_trt, mtx_cols, by = n_trt),
-      annotation_names_col = FALSE, annotation_legend = FALSE)
-  }
+  #   pheatmap::pheatmap(goi_mat, cluster_rows = input$pHmapClust,
+  #     cluster_cols = FALSE, color = viridis::viridis(100),
+  #     annotation_col = NULL, legend = FALSE, annotation_colors = anno_cols,
+  #     gaps_col = seq(n_trt, mtx_cols, by = n_trt),
+  #     annotation_names_col = FALSE, annotation_legend = FALSE)
+  # }
 
-  mismatchPhmap <- function() {
-    selected <- unlist(strsplit(input$PhmapGenes, " "))
+  # mismatchPhmap <- function() {
+  #   selected <- unlist(strsplit(input$PhmapGenes, " "))
 
-    mismatch <- ifelse(!selected %in% c(com_name,ens_id),
-      selected[!selected %in% c(com_name, ens_id)],"")
-    return(mismatch)
-  }
+  #   mismatch <- ifelse(!selected %in% c(com_name,ens_id),
+  #     selected[!selected %in% c(com_name, ens_id)],"")
+  #   return(mismatch)
+  # }
 
-  output$notInPhmap <- renderText({input$runPhmap
-    isolate({mismatchPhmap()})
-  })
+  # output$notInPhmap <- renderText({input$runPhmap
+  #   isolate({mismatchPhmap()})
+  # })
 
-  output$SelectedDataPhmap <- renderText({input$runPhmap
-    isolate({input$DataSet})
-  })
+  # output$SelectedDataPhmap <- renderText({input$runPhmap
+  #   isolate({input$DataSet})
+  # })
 
-  output$myPhmapF <- renderPlot({input$runPhmap
-    isolate({withProgress({p <- pHeatmapF(); print(p)},
-      message = "Rendering plot..", min = 0, max = 10, value = 10)
-    })
-  })
+  # output$myPhmapF <- renderPlot({input$runPhmap
+  #   isolate({withProgress({p <- pHeatmapF(); print(p)},
+  #     message = "Rendering plot..", min = 0, max = 10, value = 10)
+  #   })
+  # })
 
-  getHeightPhmap <- function() {
-    l <- getLenInput(input$PhmapGenes)
-    h <- paste0(as.character((l * 13) + 85), "px")
-    return(h)
-  }
+  # getHeightPhmap <- function() {
+  #   l <- getLenInput(input$PhmapGenes)
+  #   h <- paste0(as.character((l * 13) + 85), "px")
+  #   return(h)
+  # }
 
-  getWidthPhmap <- function() {
-    if(input$pHmapClust == TRUE ) {
-      w <- "1380px"
-    } else {
-      w <- "1325px"
-    }
-  }
+  # getWidthPhmap <- function() {
+  #   if(input$pHmapClust == TRUE ) {
+  #     w <- "1380px"
+  #   } else {
+  #     w <- "1325px"
+  #   }
+  # }
 
-  output$plot.uiPheatmapF <- renderUI({input$runPhmap
-    isolate({h <- getHeightPhmap(); w <- getWidthPhmap()
-    plotOutput("myPhmapF", width = w, height = h)
-    })
-  })
+  # output$plot.uiPheatmapF <- renderUI({input$runPhmap
+  #   isolate({h <- getHeightPhmap(); w <- getWidthPhmap()
+  #   plotOutput("myPhmapF", width = w, height = h)
+  #   })
+  # })
 
-  
-  output$downloadPhmap <- downloadHandler(
-    filename = "heatmap.png", content = function(file) {
-      png(file, units = "in", res = as.numeric(input$pHmapDPI),
-        width = 12, height = 12 * getLenInput(input$PhmapGenes))
-      print(pHeatmapF())
-      dev.off()
-    }
-  )
+  # output$downloadPhmap <- downloadHandler(
+  #   filename = "heatmap.png", content = function(file) {
+  #     png(file, units = "in", res = as.numeric(input$pHmapDPI),
+  #       width = 12, height = 12 * getLenInput(input$PhmapGenes))
+  #     print(pHeatmapF())
+  #     dev.off()
+  #   }
+  # )
 
 
   # ======== Differential Expression ======== #
@@ -1194,49 +1193,50 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
     ),
 
 
-    # ================ #
-    tabPanel("Heatmap", #fluid = FALSE,
-      fixedRow(
-        column(12, tags$br()),
+    # ! check/change for project (deactivate for multiple datasets)
+    # # ================ #
+    # tabPanel("Heatmap", #fluid = FALSE,
+    #   fixedRow(
+    #     column(12, tags$br()),
 
-        column(5, align = "left",
-          column(12, align = "left",
-            column(12,
-              textInput("PhmapGenes", width = "100%",
-              "Insert gene name or ensembl ID:",
-                value = smpl_genes_lg),
-              checkboxInput("pHmapClust",
-                label = "Check box to enable row clustering.",
-                value = FALSE)
-              ),
+    #     column(5, align = "left",
+    #       column(12, align = "left",
+    #         column(12,
+    #           textInput("PhmapGenes", width = "100%",
+    #           "Insert gene name or ensembl ID:",
+    #             value = smpl_genes_lg),
+    #           checkboxInput("pHmapClust",
+    #             label = "Check box to enable row clustering.",
+    #             value = FALSE)
+    #           ),
             
-            column(12, tags$br()),
-            column(12, align = "center",
-              actionButton("runPhmap", "Generate Plots",
-              style = 'padding:5px; font-size:80%')),
-            column(12, tags$br())
-          )
-        ),
+    #         column(12, tags$br()),
+    #         column(12, align = "center",
+    #           actionButton("runPhmap", "Generate Plots",
+    #           style = 'padding:5px; font-size:80%')),
+    #         column(12, tags$br())
+    #       )
+    #     ),
 
-        column(7, align = "left",
-          column(12, tags$b("Mismatches or genes not present"),
-            "(if applicable)", tags$b(":")),
-          column(12, uiOutput("notInPhmap")),
+    #     column(7, align = "left",
+    #       column(12, tags$b("Mismatches or genes not present"),
+    #         "(if applicable)", tags$b(":")),
+    #       column(12, uiOutput("notInPhmap")),
 
-          column(12, tags$hr()),
-          column(6, align = "left", tags$b('Note:'),
-          'Highly expressed genes have a tendency to "wash out" the color 
-          values of genes with lower expression on this heatmap. It might 
-          be useful to remove the higher expressed genes to get a better 
-          visualization of genes with less extreme values.')
-        ),
+    #       column(12, tags$hr()),
+    #       column(6, align = "left", tags$b('Note:'),
+    #       'Highly expressed genes have a tendency to "wash out" the color 
+    #       values of genes with lower expression on this heatmap. It might 
+    #       be useful to remove the higher expressed genes to get a better 
+    #       visualization of genes with less extreme values.')
+    #     ),
         
-        column(12, align = "center", tags$hr(width = "100%")),
-        column(12, tags$b("All cell types")),
-        column(12, tags$br()),
-        column(12, class = "hmapID", uiOutput("plot.uiPheatmapF"))
-      )
-    ),
+    #     column(12, align = "center", tags$hr(width = "100%")),
+    #     column(12, tags$b("All cell types")),
+    #     column(12, tags$br()),
+    #     column(12, class = "hmapID", uiOutput("plot.uiPheatmapF"))
+    #   )
+    # ),
 
 
     # ================ #

@@ -43,8 +43,7 @@ for (i in 1:length(files)) {
 }
 
 # ! START items to check/change for project !
-# Created using process_gene_info.R script in data/folder
-gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
+gene_df <- read.table("./data/Danio_Features_unique_Ens98_v1.tsv",
   sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
 file_list <- file_list[c(6,1:5)]
@@ -812,9 +811,9 @@ server <- function(input, output) {
   )
 
   output$downloadAllAmbGenes <- downloadHandler(
-    filename = "ambiguous_genes_Ens91.xlsx",
+    filename = "ambiguous_genes_Ens98.xlsx",
     content = function(file) {
-      file.copy("./data/ambiguous_genes_Ens91.xlsx", file)
+      file.copy("./data/ambiguous_genes_Ens98.xlsx", file)
     }
   )
 

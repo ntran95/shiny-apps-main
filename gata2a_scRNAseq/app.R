@@ -37,27 +37,42 @@ getLenInput <- function(input) {
 
 files <- list.files("./data", pattern = "TRIMMED", full.names = TRUE)
 file_list <- list()
+
 for (i in 1:length(files)) {
     file_list[[i]] <- readRDS(files[i])
     DefaultAssay(file_list[[i]]) <- "RNA"
 }
 
-# Created using process_gene_info.R script in data/ folder
-gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
-  sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+if (length(file_list) > 1) {
+  multiple_datasets <- TRUE
+} else {
+  multiple_datasets <- FALSE
+}
+
+if (multiple_datasets) {
+  file_list <- file_list[c(6,1:5)]
+} else {
+  seurat_obj <- file_list[[1]]
+}
 
 # ! START items to check/change for project !
-file_list <- file_list[c(6,1:5)]
+gene_df <- read.table("./data/Danio_Features_unique_Ens98_v1.tsv",
+  sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
-seurat_obj <- file_list[[1]]
 print(object.size(file_list), units = "MB")
 
+if (multiple_datasets) {
 names(file_list) <- as.character(c(
   "All cells", "Neuromast cells","AP cells",
   "Central cells", "HC progenitors", "Mantle cells"))
+} else {
+  names(file_list) <- "All cells"
+}
 
-avg_mtx <- readRDS(paste0("./data/mtx_CLR_nrml_scld_tmpts_",
-  "in_cell_type_all_LL_cells_regen_anchored_seurat3_v1.2_.RDS"))
+if (multiple_datasets) {
+  avg_mtx <- readRDS(paste0("./data/mtx_CLR_nrml_scld_tmpts_",
+    "in_cell_type_all_LL_cells_regen_anchored_seurat3_v1.2_.RDS"))
+}
 
 trt_colors <- c("green3", "gold", "darkorange",
   "deeppink", "mediumorchid1", "deepskyblue", "blue")
@@ -67,7 +82,7 @@ smpl_genes_lg <- paste0("atoh1a her4.1 hes2.2 dld sox4a*1 myclb gadd45gb.1",
 " insm1a wnt2 sost sfrp1a pcna mki67 isl1 slc1a3a glula lfng cbln20 ebf3a",
 " znf185 si:ch211-229d2.5 si:ch73-261i21.5 spaca4l foxp4 crip1")
 
-app_title <- "Neuromast Regeneration scRNA-seq"
+app_title <- "gata2a scRNA-seq"
 # ! END items to check/change for project ! 
 
 gene_df <- gene_df[gene_df$Gene.name.uniq %in% rownames(seurat_obj),]
@@ -91,7 +106,7 @@ server <- function(input, output) {
   })
 
   # Asks if multiple conditions are present
-  whichDataset <- function() {
+  nConditions <- function() {
     seurat_obj <- SelectDataset()
     if ("data.set" %in% colnames(seurat_obj@meta.data)) {
       "data.set"
@@ -104,7 +119,7 @@ server <- function(input, output) {
   printTreats <- reactive({
     seurat_obj <- SelectDataset()
     print(seurat_obj)
-      if (whichDataset() == "data.set") {
+      if (nConditions() == "data.set") {
         sort(unique(seurat_obj@meta.data$data.set))
       } else {
         NULL # single data set
@@ -614,80 +629,79 @@ server <- function(input, output) {
     }
   )
 
+  # ! check/change for project (deactivate for multiple datasets)
+  # # ======== pHeatmap ======== #
+  # pHeatmapF <- function() {
+  #   selected <- unlist(strsplit(input$PhmapGenes, " "))
 
-  # ======== pHeatmap ======== #
-  pHeatmapF <- function() {
-    selected <- unlist(strsplit(input$PhmapGenes, " "))
-
-    ifelse(selected %in% com_name,
-      selected <- selected[selected %in% com_name],
+  #   ifelse(selected %in% com_name,
+  #     selected <- selected[selected %in% com_name],
     
-      ifelse(selected %in% ens_id,
-        selected <- gene_df[ens_id %in% selected, 3],"")
-    )
+  #     ifelse(selected %in% ens_id,
+  #       selected <- gene_df[ens_id %in% selected, 3],"")
+  #   )
     
-    goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected,]
-    n_trt <- length(unique(seurat_obj@meta.data$data.set))
-    mtx_cols <- ncol(avg_mtx) - n_trt
+  #   goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected,]
+  #   n_trt <- length(unique(seurat_obj@meta.data$data.set))
+  #   mtx_cols <- ncol(avg_mtx) - n_trt
 
-    pheatmap::pheatmap(goi_mat, cluster_rows = input$pHmapClust,
-      cluster_cols = FALSE, color = viridis::viridis(100),
-      annotation_col = NULL, legend = FALSE, annotation_colors = anno_cols,
-      gaps_col = seq(n_trt, mtx_cols, by = n_trt),
-      annotation_names_col = FALSE, annotation_legend = FALSE)
-  }
+  #   pheatmap::pheatmap(goi_mat, cluster_rows = input$pHmapClust,
+  #     cluster_cols = FALSE, color = viridis::viridis(100),
+  #     annotation_col = NULL, legend = FALSE, annotation_colors = anno_cols,
+  #     gaps_col = seq(n_trt, mtx_cols, by = n_trt),
+  #     annotation_names_col = FALSE, annotation_legend = FALSE)
+  # }
 
-  mismatchPhmap <- function() {
-    selected <- unlist(strsplit(input$PhmapGenes, " "))
+  # mismatchPhmap <- function() {
+  #   selected <- unlist(strsplit(input$PhmapGenes, " "))
 
-    mismatch <- ifelse(!selected %in% c(com_name,ens_id),
-      selected[!selected %in% c(com_name, ens_id)],"")
-    return(mismatch)
-  }
+  #   mismatch <- ifelse(!selected %in% c(com_name,ens_id),
+  #     selected[!selected %in% c(com_name, ens_id)],"")
+  #   return(mismatch)
+  # }
 
-  output$notInPhmap <- renderText({input$runPhmap
-    isolate({mismatchPhmap()})
-  })
+  # output$notInPhmap <- renderText({input$runPhmap
+  #   isolate({mismatchPhmap()})
+  # })
 
-  output$SelectedDataPhmap <- renderText({input$runPhmap
-    isolate({input$DataSet})
-  })
+  # output$SelectedDataPhmap <- renderText({input$runPhmap
+  #   isolate({input$DataSet})
+  # })
 
-  output$myPhmapF <- renderPlot({input$runPhmap
-    isolate({withProgress({p <- pHeatmapF(); print(p)},
-      message = "Rendering plot..", min = 0, max = 10, value = 10)
-    })
-  })
+  # output$myPhmapF <- renderPlot({input$runPhmap
+  #   isolate({withProgress({p <- pHeatmapF(); print(p)},
+  #     message = "Rendering plot..", min = 0, max = 10, value = 10)
+  #   })
+  # })
 
-  getHeightPhmap <- function() {
-    l <- getLenInput(input$PhmapGenes)
-    h <- paste0(as.character((l * 13) + 85), "px")
-    return(h)
-  }
+  # getHeightPhmap <- function() {
+  #   l <- getLenInput(input$PhmapGenes)
+  #   h <- paste0(as.character((l * 13) + 85), "px")
+  #   return(h)
+  # }
 
-  getWidthPhmap <- function() {
-    if(input$pHmapClust == TRUE ) {
-      w <- "1380px"
-    } else {
-      w <- "1325px"
-    }
-  }
+  # getWidthPhmap <- function() {
+  #   if(input$pHmapClust == TRUE ) {
+  #     w <- "1380px"
+  #   } else {
+  #     w <- "1325px"
+  #   }
+  # }
 
-  output$plot.uiPheatmapF <- renderUI({input$runPhmap
-    isolate({h <- getHeightPhmap(); w <- getWidthPhmap()
-    plotOutput("myPhmapF", width = w, height = h)
-    })
-  })
+  # output$plot.uiPheatmapF <- renderUI({input$runPhmap
+  #   isolate({h <- getHeightPhmap(); w <- getWidthPhmap()
+  #   plotOutput("myPhmapF", width = w, height = h)
+  #   })
+  # })
 
-  
-  output$downloadPhmap <- downloadHandler(
-    filename = "heatmap.png", content = function(file) {
-      png(file, units = "in", res = as.numeric(input$pHmapDPI),
-        width = 12, height = 12 * getLenInput(input$PhmapGenes))
-      print(pHeatmapF())
-      dev.off()
-    }
-  )
+  # output$downloadPhmap <- downloadHandler(
+  #   filename = "heatmap.png", content = function(file) {
+  #     png(file, units = "in", res = as.numeric(input$pHmapDPI),
+  #       width = 12, height = 12 * getLenInput(input$PhmapGenes))
+  #     print(pHeatmapF())
+  #     dev.off()
+  #   }
+  # )
 
 
   # ======== Differential Expression ======== #
@@ -802,9 +816,9 @@ server <- function(input, output) {
   )
 
   output$downloadAllAmbGenes <- downloadHandler(
-    filename = "ambiguous_genes_Ens91.xlsx",
+    filename = "ambiguous_genes_Ens98.xlsx",
     content = function(file) {
-      file.copy("./data/ambiguous_genes_Ens91.xlsx", file)
+      file.copy("./data/ambiguous_genes_Ens98.xlsx", file)
     }
   )
 
@@ -1194,49 +1208,50 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
     ),
 
 
-    # ================ #
-    tabPanel("Heatmap", #fluid = FALSE,
-      fixedRow(
-        column(12, tags$br()),
+    # ! check/change for project (deactivate for multiple datasets)
+    # # ================ #
+    # tabPanel("Heatmap", #fluid = FALSE,
+    #   fixedRow(
+    #     column(12, tags$br()),
 
-        column(5, align = "left",
-          column(12, align = "left",
-            column(12,
-              textInput("PhmapGenes", width = "100%",
-              "Insert gene name or ensembl ID:",
-                value = smpl_genes_lg),
-              checkboxInput("pHmapClust",
-                label = "Check box to enable row clustering.",
-                value = FALSE)
-              ),
+    #     column(5, align = "left",
+    #       column(12, align = "left",
+    #         column(12,
+    #           textInput("PhmapGenes", width = "100%",
+    #           "Insert gene name or ensembl ID:",
+    #             value = smpl_genes_lg),
+    #           checkboxInput("pHmapClust",
+    #             label = "Check box to enable row clustering.",
+    #             value = FALSE)
+    #           ),
             
-            column(12, tags$br()),
-            column(12, align = "center",
-              actionButton("runPhmap", "Generate Plots",
-              style = 'padding:5px; font-size:80%')),
-            column(12, tags$br())
-          )
-        ),
+    #         column(12, tags$br()),
+    #         column(12, align = "center",
+    #           actionButton("runPhmap", "Generate Plots",
+    #           style = 'padding:5px; font-size:80%')),
+    #         column(12, tags$br())
+    #       )
+    #     ),
 
-        column(7, align = "left",
-          column(12, tags$b("Mismatches or genes not present"),
-            "(if applicable)", tags$b(":")),
-          column(12, uiOutput("notInPhmap")),
+    #     column(7, align = "left",
+    #       column(12, tags$b("Mismatches or genes not present"),
+    #         "(if applicable)", tags$b(":")),
+    #       column(12, uiOutput("notInPhmap")),
 
-          column(12, tags$hr()),
-          column(6, align = "left", tags$b('Note:'),
-          'Highly expressed genes have a tendency to "wash out" the color 
-          values of genes with lower expression on this heatmap. It might 
-          be useful to remove the higher expressed genes to get a better 
-          visualization of genes with less extreme values.')
-        ),
+    #       column(12, tags$hr()),
+    #       column(6, align = "left", tags$b('Note:'),
+    #       'Highly expressed genes have a tendency to "wash out" the color 
+    #       values of genes with lower expression on this heatmap. It might 
+    #       be useful to remove the higher expressed genes to get a better 
+    #       visualization of genes with less extreme values.')
+    #     ),
         
-        column(12, align = "center", tags$hr(width = "100%")),
-        column(12, tags$b("All cell types")),
-        column(12, tags$br()),
-        column(12, class = "hmapID", uiOutput("plot.uiPheatmapF"))
-      )
-    ),
+    #     column(12, align = "center", tags$hr(width = "100%")),
+    #     column(12, tags$b("All cell types")),
+    #     column(12, tags$br()),
+    #     column(12, class = "hmapID", uiOutput("plot.uiPheatmapF"))
+    #   )
+    # ),
 
 
     # ================ #
@@ -1316,10 +1331,10 @@ shinyApp(ui = ui, server = server)
 # start R session
 
 # Deploy to shinyapps.io
-# rsconnect::deployApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/all_regeneration_datasets_Sungmin', account = 'piotrowskilab')
+# rsconnect::deployApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/gata2a_scRNAseq', account = 'piotrowskilab')
 
 # Execute app locally
-# options(shiny.reactlog=TRUE, shiny.fullstacktrace = TRUE); shiny::runApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/all_regeneration_datasets_Sungmin/app.R')
+# options(shiny.reactlog=TRUE, shiny.fullstacktrace = TRUE); shiny::runApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/gata2a_scRNAseq/app.R')
 
 # Logs
-# rsconnect::showLogs(account = 'piotrowskilab', appName = 'all_regeneration_datasets_Sungmin')
+# rsconnect::showLogs(account = 'piotrowskilab', appName = 'gata2a_scRNAseq')

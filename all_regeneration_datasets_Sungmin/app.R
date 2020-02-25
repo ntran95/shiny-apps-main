@@ -42,22 +42,33 @@ for (i in 1:length(files)) {
     DefaultAssay(file_list[[i]]) <- "RNA"
 }
 
-# Created using process_gene_info.R script in data/ folder
+# ! START items to check/change for project !
+# Created using process_gene_info.R script in data/folder
 gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
   sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
-# ! START items to check/change for project !
 file_list <- file_list[c(6,1:5)]
-
 seurat_obj <- file_list[[1]]
 print(object.size(file_list), units = "MB")
 
+if (file_list > 1) {
+  multiple_datasets <- TRUE
+} else {
+  multiple_datasets <- FALSE
+}
+
+if (multiple_datasets) {
 names(file_list) <- as.character(c(
   "All cells", "Neuromast cells","AP cells",
   "Central cells", "HC progenitors", "Mantle cells"))
+} else {
+  names(file_list) <- "All cells"
+}
 
-avg_mtx <- readRDS(paste0("./data/mtx_CLR_nrml_scld_tmpts_",
-  "in_cell_type_all_LL_cells_regen_anchored_seurat3_v1.2_.RDS"))
+if (multiple_datasets) {
+  avg_mtx <- readRDS(paste0("./data/mtx_CLR_nrml_scld_tmpts_",
+    "in_cell_type_all_LL_cells_regen_anchored_seurat3_v1.2_.RDS"))
+}
 
 trt_colors <- c("green3", "gold", "darkorange",
   "deeppink", "mediumorchid1", "deepskyblue", "blue")
@@ -67,7 +78,7 @@ smpl_genes_lg <- paste0("atoh1a her4.1 hes2.2 dld sox4a*1 myclb gadd45gb.1",
 " insm1a wnt2 sost sfrp1a pcna mki67 isl1 slc1a3a glula lfng cbln20 ebf3a",
 " znf185 si:ch211-229d2.5 si:ch73-261i21.5 spaca4l foxp4 crip1")
 
-app_title <- "Neuromast Regeneration scRNA-seq"
+app_title <- "gata2a scRNA-seq"
 # ! END items to check/change for project ! 
 
 gene_df <- gene_df[gene_df$Gene.name.uniq %in% rownames(seurat_obj),]
@@ -91,7 +102,7 @@ server <- function(input, output) {
   })
 
   # Asks if multiple conditions are present
-  whichDataset <- function() {
+  nConditions <- function() {
     seurat_obj <- SelectDataset()
     if ("data.set" %in% colnames(seurat_obj@meta.data)) {
       "data.set"
@@ -104,7 +115,7 @@ server <- function(input, output) {
   printTreats <- reactive({
     seurat_obj <- SelectDataset()
     print(seurat_obj)
-      if (whichDataset() == "data.set") {
+      if (nConditions() == "data.set") {
         sort(unique(seurat_obj@meta.data$data.set))
       } else {
         NULL # single data set
@@ -1316,10 +1327,10 @@ shinyApp(ui = ui, server = server)
 # start R session
 
 # Deploy to shinyapps.io
-# rsconnect::deployApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/all_regeneration_datasets_Sungmin', account = 'piotrowskilab')
+# rsconnect::deployApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/gata2a_scRNAseq', account = 'piotrowskilab')
 
 # Execute app locally
-# options(shiny.reactlog=TRUE, shiny.fullstacktrace = TRUE); shiny::runApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/all_regeneration_datasets_Sungmin/app.R')
+# options(shiny.reactlog=TRUE, shiny.fullstacktrace = TRUE); shiny::runApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/gata2a_scRNAseq/app.R')
 
 # Logs
-# rsconnect::showLogs(account = 'piotrowskilab', appName = 'all_regeneration_datasets_Sungmin')
+# rsconnect::showLogs(account = 'piotrowskilab', appName = 'gata2a_scRNAseq')

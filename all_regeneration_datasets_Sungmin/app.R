@@ -42,7 +42,6 @@ for (i in 1:length(files)) {
     DefaultAssay(file_list[[i]]) <- "RNA"
 }
 
-# Created using process_gene_info.R script in data/ folder
 gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
   sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 

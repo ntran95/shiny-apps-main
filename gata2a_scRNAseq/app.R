@@ -13,53 +13,57 @@ multiGrep <- function(toMatch, toSearch, ...){
 
 # ======== Reading in data
 # A complete Seurat object with cluster info
-seurat_unt <- readRDS("./data/seurat_obj_MOLNG2352_v1.3_.RDS")
+seurat_obj <- readRDS("./data/TRIMMED_SeurObj_gata2a_pos_Seurat3_v1.0_.RDS")
 
 # For converting ensembl IDs to comman genes names
-gene_names_df <- read.delim("./data/Danio_Features_unique_Ens87.tsv",
-  header = TRUE, stringsAsFactors = FALSE, sep = "\t")
+gene_df <- read.table("./data/Danio_Features_unique_Ens98_v1.tsv",
+  sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
-gene_names_df$in_dataset <- ""
-gene_names_df$in_dataset <- rownames(seurat_unt@data) %in% gene_names_df$gene_name
-gene_names_df <- gene_names_df[,c(1,2,5,3,4)]
+# gene_names_df$in_dataset <- ""
+# gene_names_df$in_dataset <- rownames(seurat_obj) %in% gene_names_df$gene_name
+# gene_names_df <- gene_names_df[,c(1,2,5,3,4)]
 
-
+gene_df <- gene_df[gene_df$Gene.name.uniq %in% rownames(seurat_obj),]
+ens_id <- gene_df$Gene.stable.ID
+com_name <- gene_df$Gene.name.uniq
 
 # ================================== Server ===================================
 server <- function(input, output) {
 
-  # ======== Gene Name DB ======== #
-  GeneDB <- function(){
-    dataset_seurat <- seurat_unt 
-    genes_to_select <- unlist(strsplit(input$MyText, " "))
+
+  # ======== Gene Database ======== #
+  GeneDB <- function() {
+    selected <- unlist(strsplit(input$dbGenes, " "))
     
-    ifelse(genes_to_select %in% gene_names_df$gene_name,
-      ind <- multiGrep(genes_to_select, gene_names_df$gene_name),
-        ifelse(genes_to_select %in% gene_names_df$gene_id,
-          ind <- multiGrep(genes_to_select, gene_names_df$gene_id),
-            "gene not in dataset")
+    present <- gene_df$Gene.name.uniq %in% rownames(seurat_obj)
+    gene_df <- cbind(in_dataset = present, gene_df)
+    
+    ifelse(length(selected) < 2,
+      ind <- grep(selected, gene_df$Gene.name.uniq),
+
+      ifelse(selected %in% gene_df$Gene.name.uniq,
+        ind <- multiGrep2(selected, gene_df$Gene.name.uniq),
+
+        ifelse(selected %in% gene_df$Gene.stable.ID,
+          ind <- multiGrep2(selected, gene_df$Gene.stable.ID),
+          "Gene not in dataset")
+      )
     )
-    gene_names_df[ind,]
+    gene_df[ind,]
   }
-  
-  output$GeneDB <- renderTable({
-    input$runPlots
-    isolate({
-      GeneDB()
-    })
-  })
+  output$GeneDB <- renderTable({GeneDB()})
 
 
   # ======== Violin Plot ======== #
   VlnPlotF <- function(){
-    dataset_seurat <- seurat_unt
+    dataset_seurat <- seurat_obj
     genes_to_select <- unlist(strsplit(input$MyText, " "))
     
-    ifelse(genes_to_select %in% gene_names_df$gene_name,
+    ifelse(genes_to_select %in% gene_df$gene_name,
       genes_select <- as.character(genes_to_select),
-        ifelse(genes_to_select %in% gene_names_df$gene_id,
+        ifelse(genes_to_select %in% gene_df$gene_id,
           genes_select <- as.character(
-            gene_names_df[gene_names_df$gene_id %in% genes_to_select, 2]),
+            gene_df[gene_df$gene_id %in% genes_to_select, 2]),
               "gene not in database")
     )
 
@@ -110,22 +114,30 @@ server <- function(input, output) {
 
   # ======== Feature Plot ======== #
   FeaturePlotF <- function(){
-    dataset_seurat <- seurat_unt
+    dataset_seurat <- seurat_obj
     genes_to_select <- unlist(strsplit(input$MyText, " "))
     
-    ifelse(genes_to_select %in% gene_names_df$gene_name,
+    ifelse(genes_to_select %in% gene_df$gene_name,
       genes_select <- as.character(genes_to_select),
-        ifelse(genes_to_select %in% gene_names_df$gene_id,
+        ifelse(genes_to_select %in% gene_df$gene_id,
           genes_select <- as.character(
-            gene_names_df[gene_names_df$gene_id %in% genes_to_select, 2]),
+            gene_df[gene_df$gene_id %in% genes_to_select, 2]),
               "gene not in database")
     )
 
-    FeaturePlot(dataset_seurat, genes_select,
-      nCol = 2, 
-      cols.use = c("azure3", "blue3"),
-      pt.size = input$CellSize,
-      no.axes = TRUE)
+    feat <- FeaturePlot(seurat_obj, genes_to_select,
+      reduction = "umap", cols = c("azure3", "blue3"),
+      combine = FALSE, pt.size = input$CellSize)
+
+    for(k in 1:length(feat)) {
+      feat[[k]] <- feat[[k]] + labs(x = "UMAP 1", y = "UMAP 2") + 
+      theme(axis.text.x = element_blank(), legend.position="none",
+      axis.ticks.x = element_blank(), axis.line.x = element_blank(),
+      axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+      axis.line.y = element_blank(), axis.title = element_text(size = 18),
+      panel.border = element_rect(colour = "#FFFFFF", fill = NA, size = 1))
+    }
+  return(plot_grid(plotlist = feat, ncol = 1))
   }
 
   output$myFeaturePlotF <- renderPlot({
@@ -138,7 +150,7 @@ server <- function(input, output) {
 
   getHeightFeat <- function(){
     l <- length(unlist(strsplit(input$MyText, " ")))
-    h <- as.character(ceiling(l/2) * 500)
+    h <- as.character(ceiling(l) * 1100)
     h <- paste0(h, "px")
     return(h)
   }
@@ -148,7 +160,7 @@ server <- function(input, output) {
     isolate({
       h <- getHeightFeat()
       plotOutput("myFeaturePlotF",
-        width = "1000px",
+        width = "1100px",
         height = h)
     })
   })
@@ -168,14 +180,14 @@ server <- function(input, output) {
 
   # ======== Heatmap ======== #
   HmapF <- function(){
-    dataset_seurat <- seurat_unt 
+    dataset_seurat <- seurat_obj 
     genes_to_select <- unlist(strsplit(input$MyText, " "))
     
-    ifelse(genes_to_select %in% gene_names_df$gene_name,
+    ifelse(genes_to_select %in% gene_df$gene_name,
       genes_select <- as.character(genes_to_select),
-        ifelse(genes_to_select %in% gene_names_df$gene_id,
+        ifelse(genes_to_select %in% gene_df$gene_id,
           genes_select <- as.character(
-            gene_names_df[gene_names_df$gene_id %in% genes_to_select, 2]),
+            gene_df[gene_df$gene_id %in% genes_to_select, 2]),
               "gene not in database")
     )
 
@@ -263,7 +275,7 @@ server <- function(input, output) {
 
 ui <- fixedPage(theme = shinytheme("paper"),
   tags$head(includeCSS("./www/styles.css")),
-  headerPanel("Zebrafish Prim scRNA-seq"),
+  headerPanel("gata2a scRNA-seq"),
   
   sidebarLayout(
     sidebarPanel(
@@ -271,12 +283,12 @@ ui <- fixedPage(theme = shinytheme("paper"),
       # box to paste ensembl ids
       textInput("MyText", 
         tags$b("Insert genes for all plots:"),
-        value = "atoh1a pcna dld tekt3 slc1a3a otofb"),
+        value = "atoh1a pcna"),
 
       sliderInput("CellSize",
-        "Select point size on t-SNE and violin plots:",
-        min = 0.25, max = 4, 
-        value = 1.5, step = 0.25,
+        "Select point size on UMAP and violin plots:",
+        min = 0.25, max = 2, 
+        value = 0.5, step = 0.25,
         ticks = FALSE, width = "95%"),
 
       column(12, align = "center",
@@ -307,7 +319,7 @@ ui <- fixedPage(theme = shinytheme("paper"),
       fluidRow(
         column(12, align = "center",
           downloadButton(
-            "downloadFeaturePlotF", "t-SNE.pdf",
+            "downloadFeaturePlotF", "UMAP.pdf",
             style = "padding:8px; font-size:80%"),
           downloadButton(
             "downloadHmapF", "Heatmap.pdf",
@@ -412,7 +424,7 @@ ui <- fixedPage(theme = shinytheme("paper"),
             uiOutput("GeneDB")
           )
         ),
-        tabPanel("t-SNE Plot",
+        tabPanel("Feature Plot",
           fluidRow(
             column(12, tags$br()),
             uiOutput("plot.uiFeaturePlotF")
@@ -446,7 +458,7 @@ ui <- fixedPage(theme = shinytheme("paper"),
 shinyApp(ui = ui, server = server)
 
 # bash command to run locally
-# R -e "shiny::runApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/prim_scRNAseq')"
+# options(shiny.reactlog=TRUE, shiny.fullstacktrace = TRUE); shiny::runApp("/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/gata2a_scRNAseq/app.R")
 
 # start R session
-# rsconnect::deployApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/prim_scRNAseq', account = 'piotrowskilab')
+# rsconnect::deployApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/gata2a_scRNAseq, account = 'piotrowskilab')

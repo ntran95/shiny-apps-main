@@ -413,7 +413,7 @@ ui <- fixedPage(theme = shinytheme("paper"),
               any common name that matches a portion of the text,
               and whether or not those features can be plotted. If the
               table returns "TRUE" in the third column that gene
-              can be plotted (FALSE indicates otherwise). 
+              can be plotted (FALSE indicates otherwise).
               For example, if you enter "atoh1a wnt notch" in the search
               field, the table will dislpay atoh1a and all features with wnt and
               notch in their common name, as well as their corresponding
@@ -465,4 +465,4 @@ shinyApp(ui = ui, server = server)
 # options(shiny.reactlog=TRUE, shiny.fullstacktrace = TRUE); shiny::runApp("/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/gata2a_scRNAseq/app.R")
 
 # start R session
-# rsconnect::deployApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/gata2a_scRNAseq, accoun
+# rsconnect::deployApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/gata2a_scRNAseq, account = 'piotrowskilab')

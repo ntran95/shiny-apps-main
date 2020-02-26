@@ -345,7 +345,6 @@ ui <- fixedPage(theme = shinytheme("paper"),
       tabsetPanel(
         tabPanel("Welcome!",
           fluidRow(
-
             column(12, tags$br()),
             column(10, align = "center", 
               downloadButton(
@@ -465,4 +464,4 @@ shinyApp(ui = ui, server = server)
 # options(shiny.reactlog=TRUE, shiny.fullstacktrace = TRUE); shiny::runApp("/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/gata2a_scRNAseq/app.R")
 
 # start R session
-# rsconnect::deployApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/gata2a_scRNAseq, account = 'piotrowskilab')
+# rsconnect::deployApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/gata2a_scRNAseq,  account = 'piotrowskilab')

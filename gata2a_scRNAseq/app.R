@@ -22,7 +22,7 @@ gene_df <- read.table("./data/Danio_Features_unique_Ens98_v1.tsv",
 # gene_names_df$in_dataset <- ""
 # gene_names_df$in_dataset <- rownames(seurat_obj) %in% gene_names_df$gene_name
 # gene_names_df <- gene_names_df[,c(1,2,5,3,4)]
-
+# this is a git test
 
 gene_df <- gene_df[gene_df$Gene.name.uniq %in% rownames(seurat_obj),]
 ens_id <- gene_df$Gene.stable.ID

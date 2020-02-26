@@ -1,13 +1,17 @@
 library(shiny)
+library(ggplot2)
 library(Seurat)
 library(shinythemes)
 library(shinycssloaders)
 library(shinyBS)
 
 # Grep multiple items
-multiGrep <- function(toMatch, toSearch, ...) {
+multiGrep2 <- function(toMatch, toSearch, ...) {
+  toMatch <- ifelse(grepl("*", toMatch),
+    gsub("\\*","\\\\*", toMatch), toMatch <- toMatch)
+  
   toMatch <- paste(toMatch, collapse = "|")
-  inCommon <- grep(toMatch, toSearch, ...)
+  inCommon <- grep(toMatch, toSearch, value = FALSE)
   return(inCommon)
 }
 
@@ -27,13 +31,14 @@ com_name <- gene_df$Gene.name.uniq
 
 smpl_genes_sm <- paste0("atoh1a her4.1 dld sox4a*1 foxp4 crip1")
 
+
 # ================================== Server ===================================
 server <- function(input, output) {
 
 
   # ======== Gene Database ======== #
   GeneDB <- function() {
-    selected <- unlist(strsplit(input$dbGenes, " "))
+    selected <- unlist(strsplit(input$MyText, " "))
     
     present <- gene_df$Gene.name.uniq %in% rownames(seurat_obj)
     gene_df <- cbind(in_dataset = present, gene_df)
@@ -54,80 +59,21 @@ server <- function(input, output) {
   output$GeneDB <- renderTable({GeneDB()})
 
 
-  # ======== Violin Plot ======== #
-  VlnPlotF <- function(){
-    seurat_obj <- seurat_obj
-    genes_to_select <- unlist(strsplit(input$MyText, " "))
-    
-    ifelse(genes_to_select %in% gene_df$gene_name,
-      genes_select <- as.character(genes_to_select),
-        
-      ifelse(genes_to_select %in% gene_df$gene_id,
-        genes_select <- as.character(
-          gene_df[gene_df$gene_id %in% genes_to_select, 2]),
-            "gene not in database")
-    )
-
-    VlnPlot(
-      seurat_obj,
-      genes_select,
-      point.size.use = input$CellSize,
-      nCol = 2) #, use.raw=T 
-  }
-
-  getHeightVln <- function(){
-    l <- length(unlist(strsplit(input$MyText, " ")))
-    h <- as.character(ceiling(l/2) * 500)
-    h <- paste0(h, "px")
-    return(h)
-  }
-
-  output$plot.uiVlnPlotF <- renderUI({
-    input$runPlots
-    isolate({
-      h <- getHeightVln()
-      plotOutput("myVlnPlotF",
-        width = "1000px",
-        height = h)
-    })
-  })
-
-  output$myVlnPlotF <- renderPlot({
-        input$runPlots
-    isolate({
-      p <- VlnPlotF()
-      print(p)})
-  })
-
-  output$downloadVlnPlot <- downloadHandler(
-    filename = "violin_plot.pdf",
-    content = function(file){
-      pdf(file,
-        height = as.numeric(input$MyHeight),
-        width = as.numeric(input$MyWidth),
-        onefile = FALSE) 
-      p <- VlnPlotF()
-      print(p)
-      dev.off()
-      }
-    )
-
-
   # ======== Feature Plot ======== #
   FeaturePlotF <- function(){
     seurat_obj <- seurat_obj
-    genes_to_select <- unlist(strsplit(input$MyText, " "))
+    genes_select <- unlist(strsplit(input$MyText, " "))
     
-    ifelse(genes_to_select %in% gene_df$gene_name,
-      genes_select <- as.character(genes_to_select),
+    ifelse(genes_select %in% gene_df$gene_name,
+      genes_select <- as.character(genes_select),
         
-      ifelse(genes_to_select %in% gene_df$gene_id,
+      ifelse(genes_select %in% gene_df$gene_id,
         genes_select <- as.character(
-          gene_df[gene_df$gene_id %in% genes_to_select, 2]),
+          gene_df[gene_df$gene_id %in% genes_select, 2]),
             "gene not in database")
     )
 
-    feat <- FeaturePlot(seurat_obj, genes_to_select,
+    feat <- FeaturePlot(seurat_obj, genes_select,
       reduction = "umap", cols = c("azure3", "blue3"),
       combine = FALSE, pt.size = input$CellSize)
 
@@ -139,7 +85,7 @@ server <- function(input, output) {
       axis.line.y = element_blank(), axis.title = element_text(size = 18),
       panel.border = element_rect(colour = "#FFFFFF", fill = NA, size = 1))
     }
-  return(plot_grid(plotlist = feat, ncol = 1))
+  return(cowplot::plot_grid(plotlist = feat, ncol = 1))
   }
 
   output$myFeaturePlotF <- renderPlot({
@@ -219,6 +165,65 @@ server <- function(input, output) {
     })
   })
 
+
+  # ======== Violin Plot ======== #
+  VlnPlotF <- function(){
+    seurat_obj <- seurat_obj
+    genes_select <- unlist(strsplit(input$MyText, " "))
+    
+    ifelse(genes_select %in% gene_df$gene_name,
+      genes_select <- as.character(genes_select),
+        
+      ifelse(genes_select %in% gene_df$gene_id,
+        genes_select <- as.character(
+          gene_df[gene_df$gene_id %in% genes_select, 2]),
+            "gene not in database")
+    )
+
+    VlnPlot(
+      seurat_obj,
+      genes_select,
+      point.size.use = input$CellSize,
+      nCol = 2) #, use.raw=T 
+  }
+
+  getHeightVln <- function(){
+    l <- length(unlist(strsplit(input$MyText, " ")))
+    h <- as.character(ceiling(l/2) * 500)
+    h <- paste0(h, "px")
+    return(h)
+  }
+
+  output$plot.uiVlnPlotF <- renderUI({
+    input$runPlots
+    isolate({
+      h <- getHeightVln()
+      plotOutput("myVlnPlotF",
+        width = "1000px",
+        height = h)
+    })
+  })
+
+  output$myVlnPlotF <- renderPlot({
+        input$runPlots
+    isolate({
+      p <- VlnPlotF()
+      print(p)})
+  })
+
+  output$downloadVlnPlot <- downloadHandler(
+    filename = "violin_plot.pdf",
+    content = function(file){
+      pdf(file,
+        height = as.numeric(input$MyHeight),
+        width = as.numeric(input$MyWidth),
+        onefile = FALSE) 
+      p <- VlnPlotF()
+      print(p)
+      dev.off()
+      }
+    )
+
   getHmapSizeRatio <- function(){
     l <- length(unlist(strsplit(input$MyText, " ")))
     r <- as.numeric(input$SlideWidthHmap / (l * 35))
@@ -254,9 +259,9 @@ server <- function(input, output) {
   )
 
   output$downloadtSNEclusters <- downloadHandler(
-    filename = "tsne_clusters.pdf",
+    filename = "UMAP_clusters.pdf",
     content = function(file){
-      file.copy("./data/tsne_clusters.pdf", file)
+      file.copy("./data/UMAP_clusters.pdf", file)
     }
   )
 #shinyDebuggingPanel::makeDebuggingPanelOutput()
@@ -324,7 +329,7 @@ ui <- fixedPage(theme = shinytheme("paper"),
       column(12, tags$br()),
       fluidRow(
         column(12, align = "center",
-          tags$img(src='tsne_clusters.png',
+          tags$img(src='UMAP_clusters.png',
             width = "100%", height = "100%"))
       )
     ),
@@ -343,7 +348,7 @@ ui <- fixedPage(theme = shinytheme("paper"),
             column(12, tags$br()),
             column(10, align = "center",
               tags$img(
-                src='tsne_clusters.png',
+                src='UMAP_clusters.png',
                 width = "75%",
                 height = "75%")
             ),

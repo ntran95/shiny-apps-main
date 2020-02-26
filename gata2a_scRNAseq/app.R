@@ -335,17 +335,23 @@ ui <- fixedPage(theme = shinytheme("paper"),
       ),
       column(12, tags$br()),
       fluidRow(
-        column(12, align = "center",
+        column(12, id = "umapSidebar", align = "center",
+          tags$br(),
           tags$img(src='UMAP_clusters.png',
-            width = "100%", height = "100%"))
+            width = "100%", height = "100%")
+          ),
+        column(12, tags$br()),
+        column(12, align = "left",
+          "Right click and select",
+            '"open image in new tab"', "for a larger view")
       )
     ),
   
     mainPanel(
       tabsetPanel(
         tabPanel("Welcome!",
-          fluidRow(
-
+        column(12, id = "welcomePanel",
+          fixedRow(
             column(12, tags$br()),
             column(10, align = "center", 
               downloadButton(
@@ -371,7 +377,7 @@ ui <- fixedPage(theme = shinytheme("paper"),
               genes can be directly copied/pasted from the spreadsheet into 
               the app input field and will have the necessary spacing 
               by default. Please note that this data set was produced with the
-              Ensembl 84 gene annotation in zebrafish (genome version 10).
+              Ensembl 98 gene annotation in zebrafish (genome version 10).
               We therefore recommend using Ensembl gene IDs as input, 
               as common gene names can change with annotation updates.
               All genes used for this dataset, as well genes enriched in
@@ -407,7 +413,7 @@ ui <- fixedPage(theme = shinytheme("paper"),
               'The gene name DB (database) tab is a way to quickly determine 
               whether or not a list of genes with common names can be plotted.
               This database contains all 32,105 zebrafish coding and non-coding
-              features in the Ensembl 84 annotation. When you enter at least
+              features in the Ensembl 98 annotation. When you enter at least
               two genes/features with one correct name (atoh1a works great as 
               a default value) the table will populate with
               any common name that matches a portion of the text,
@@ -422,16 +428,18 @@ ui <- fixedPage(theme = shinytheme("paper"),
               offset = 0),
             column(10, tags$hr())
           )
+        )
         ),
         tabPanel("Gene Name DB",
           fluidRow(
-            uiOutput("GeneDB")
+            column(12, id = "geneDB", tags$br(),
+              uiOutput("GeneDB"))
           )
         ),
         tabPanel("Feature Plot",
-          fluidRow(
-            column(12, tags$br()),
-            uiOutput("plot.uiFeaturePlotF")
+          fixedRow(
+            column(12, id = "featPlot", tags$br(),
+              uiOutput("plot.uiFeaturePlotF"))
           )
         ),
         tabPanel("Heatmap",
@@ -439,15 +447,15 @@ ui <- fixedPage(theme = shinytheme("paper"),
             column(12, tags$br()),
             column(4, sliderInput("SlideWidthHmap",
               "Change plot width (pixels):", ticks = FALSE,
-              min = 0, max = 7000, value = 1200)),
-            column(12, tags$br()),
-            uiOutput("plot.uiHmapF")
+              min = 0, max = 7000, value = 2000)),
+            column(12, id = "hmapPlot",
+              uiOutput("plot.uiHmapF"))
           )
         ),
         tabPanel("Violin Plot",
           fluidRow(
-            column(12, tags$br()),
-            uiOutput("plot.uiVlnPlotF")
+            column(12, id = "vlnPlot", tags$br(),
+              uiOutput("plot.uiVlnPlotF"))
             )
         )
       )
@@ -464,5 +472,5 @@ shinyApp(ui = ui, server = server)
 # bash command to run locally
 # options(shiny.reactlog=TRUE, shiny.fullstacktrace = TRUE); shiny::runApp("/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/gata2a_scRNAseq/app.R")
 
-# start R session
-# rsconnect::deployApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/gata2a_scRNAseq, account = 'piotrowskilab')
+# Deploy to shinyapps.io
+# rsconnect::deployApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/gata2a_scRNAseq', account = 'piotrowskilab')

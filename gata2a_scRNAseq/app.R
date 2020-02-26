@@ -5,7 +5,7 @@ library(shinycssloaders)
 library(shinyBS)
 
 # Grep multiple items
-multiGrep <- function(toMatch, toSearch, ...){
+multiGrep <- function(toMatch, toSearch, ...) {
   toMatch <- paste(toMatch, collapse = "|")
   inCommon <- grep(toMatch, toSearch, ...)
   return(inCommon)
@@ -13,23 +13,19 @@ multiGrep <- function(toMatch, toSearch, ...){
 
 # ======== Reading in data
 # A complete Seurat object with cluster info
-seurat_obj <- readRDS("./data/TRIMMED_SeurObj_gata2a_pos_Seurat3_v1.0_.RDS")
+seurat_obj <- readRDS("./data/SeurObj_gata2a_pos_Seurat3_v1.0_.RDS")
+# seurat_obj <- ScaleData(seurat_obj)
+# seurat_obj <- saveRDS(seurat_obj, "./data/SeurObj_gata2a_pos_Seurat3_v1.0_.RDS")
 
 # For converting ensembl IDs to comman genes names
 gene_df <- read.table("./data/Danio_Features_unique_Ens98_v1.tsv",
   sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
-# gene_names_df$in_dataset <- ""
-# gene_names_df$in_dataset <- rownames(seurat_obj) %in% gene_names_df$gene_name
-# gene_names_df <- gene_names_df[,c(1,2,5,3,4)]
-# this is a git test
-
-# git test 1
-# git test 2
-
 gene_df <- gene_df[gene_df$Gene.name.uniq %in% rownames(seurat_obj),]
 ens_id <- gene_df$Gene.stable.ID
 com_name <- gene_df$Gene.name.uniq
+
+smpl_genes_sm <- paste0("atoh1a her4.1 dld sox4a*1 foxp4 crip1")
 
 # ================================== Server ===================================
 server <- function(input, output) {
@@ -60,19 +56,20 @@ server <- function(input, output) {
 
   # ======== Violin Plot ======== #
   VlnPlotF <- function(){
-    dataset_seurat <- seurat_obj
+    seurat_obj <- seurat_obj
     genes_to_select <- unlist(strsplit(input$MyText, " "))
     
     ifelse(genes_to_select %in% gene_df$gene_name,
       genes_select <- as.character(genes_to_select),
-        ifelse(genes_to_select %in% gene_df$gene_id,
-          genes_select <- as.character(
-            gene_df[gene_df$gene_id %in% genes_to_select, 2]),
-              "gene not in database")
+        
+      ifelse(genes_to_select %in% gene_df$gene_id,
+        genes_select <- as.character(
+          gene_df[gene_df$gene_id %in% genes_to_select, 2]),
+            "gene not in database")
     )
 
     VlnPlot(
-      dataset_seurat,
+      seurat_obj,
       genes_select,
       point.size.use = input$CellSize,
       nCol = 2) #, use.raw=T 
@@ -118,15 +115,16 @@ server <- function(input, output) {
 
   # ======== Feature Plot ======== #
   FeaturePlotF <- function(){
-    dataset_seurat <- seurat_obj
+    seurat_obj <- seurat_obj
     genes_to_select <- unlist(strsplit(input$MyText, " "))
     
     ifelse(genes_to_select %in% gene_df$gene_name,
       genes_select <- as.character(genes_to_select),
-        ifelse(genes_to_select %in% gene_df$gene_id,
-          genes_select <- as.character(
-            gene_df[gene_df$gene_id %in% genes_to_select, 2]),
-              "gene not in database")
+        
+      ifelse(genes_to_select %in% gene_df$gene_id,
+        genes_select <- as.character(
+          gene_df[gene_df$gene_id %in% genes_to_select, 2]),
+            "gene not in database")
     )
 
     feat <- FeaturePlot(seurat_obj, genes_to_select,
@@ -183,30 +181,20 @@ server <- function(input, output) {
 
 
   # ======== Heatmap ======== #
-  HmapF <- function(){
-    dataset_seurat <- seurat_obj 
-    genes_to_select <- unlist(strsplit(input$MyText, " "))
+  HmapF <- function() {
+    seurat_obj <- seurat_obj 
+    genes_select <- unlist(strsplit(input$MyText, " "))
     
-    ifelse(genes_to_select %in% gene_df$gene_name,
-      genes_select <- as.character(genes_to_select),
-        ifelse(genes_to_select %in% gene_df$gene_id,
-          genes_select <- as.character(
-            gene_df[gene_df$gene_id %in% genes_to_select, 2]),
-              "gene not in database")
+    ifelse(genes_select %in% gene_df$gene_name,
+      genes_select <- as.character(genes_select),
+        
+      ifelse(genes_select %in% gene_df$gene_id,
+        genes_select <- as.character(
+          gene_df[gene_df$gene_id %in% genes_select, 2]),
+            "gene not in database")
     )
 
-    DoHeatmap(
-      object = dataset_seurat,
-      genes.use = genes_select,
-      slim.col.label = TRUE,
-      group.label.rot = TRUE,
-      group.label.loc = "top",
-      col.low = "darkblue",
-      col.mid = "lightblue",
-      col.high = "red",
-      cex.row = 12,
-      cex.col = 12,
-      remove.key = FALSE)
+    DoHeatmap(seurat_obj, genes_select)
   }
 
   output$myHmapF <- renderPlot({
@@ -287,7 +275,7 @@ ui <- fixedPage(theme = shinytheme("paper"),
       # box to paste ensembl ids
       textInput("MyText", 
         tags$b("Insert genes for all plots:"),
-        value = "atoh1a pcna"),
+        value = smpl_genes_sm),
 
       sliderInput("CellSize",
         "Select point size on UMAP and violin plots:",
@@ -439,7 +427,7 @@ ui <- fixedPage(theme = shinytheme("paper"),
             column(12, tags$br()),
             column(4, sliderInput("SlideWidthHmap",
               "Change plot width (pixels):", ticks = FALSE,
-              min = 0, max = 7000, value = 1000)),
+              min = 0, max = 7000, value = 1200)),
             column(12, tags$br()),
             uiOutput("plot.uiHmapF")
           )

@@ -472,5 +472,5 @@ shinyApp(ui = ui, server = server)
 # bash command to run locally
 # options(shiny.reactlog=TRUE, shiny.fullstacktrace = TRUE); shiny::runApp("/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/gata2a_scRNAseq/app.R")
 
-# start R session
-# rsconnect::deployApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/gata2a_scRNAseq,  account = 'piotrowskilab')
+# Deploy to shinyapps.io
+# rsconnect::deployApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/gata2a_scRNAseq', account = 'piotrowskilab')

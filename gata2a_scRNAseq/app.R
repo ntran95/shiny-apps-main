@@ -17,9 +17,8 @@ multiGrep2 <- function(toMatch, toSearch, ...) {
 
 # ======== Reading in data
 # A complete Seurat object with cluster info
-seurat_obj <- readRDS("./data/SeurObj_gata2a_pos_Seurat3_v1.0_.RDS")
-# seurat_obj <- ScaleData(seurat_obj)
-# seurat_obj <- saveRDS(seurat_obj, "./data/SeurObj_gata2a_pos_Seurat3_v1.0_.RDS")
+seurat_obj <- readRDS(
+  "./data/SeurObj_cell_update_gata2a_pos_Seurat3_v1.0_.RDS")
 
 # For converting ensembl IDs to comman genes names
 gene_df <- read.table("./data/Danio_Features_unique_Ens98_v1.tsv",
@@ -114,7 +113,7 @@ server <- function(input, output) {
   })
 
   output$downloadFeaturePlotF <- downloadHandler(
-    filename = "tSNE_plot.pdf",
+    filename = "UMAP_plot.pdf",
     content = function(file){
       pdf(file,
         height = as.numeric(input$MyHeight),
@@ -180,16 +179,24 @@ server <- function(input, output) {
             "gene not in database")
     )
 
-    VlnPlot(
-      seurat_obj,
-      genes_select,
-      point.size.use = input$CellSize,
-      nCol = 2) #, use.raw=T 
+    # VlnPlot(
+    #   seurat_obj,
+    #   genes_select,
+    #   point.size.use = input$CellSize,
+    #   nCol = 2) #, use.raw=T
+
+    g <- VlnPlot(seurat_obj, genes_select,
+    pt.size = input$CellSize, combine = FALSE)
+
+    for(k in 1:length(g)) {
+      g[[k]] <- g[[k]] + theme(legend.position = "none")
+    }
+    return(cowplot::plot_grid(plotlist = g, ncol = 1))
   }
 
   getHeightVln <- function(){
     l <- length(unlist(strsplit(input$MyText, " ")))
-    h <- as.character(ceiling(l/2) * 500)
+    h <- as.character(ceiling(l) * 500)
     h <- paste0(h, "px")
     return(h)
   }
@@ -199,7 +206,7 @@ server <- function(input, output) {
     isolate({
       h <- getHeightVln()
       plotOutput("myVlnPlotF",
-        width = "1000px",
+        width = "1200px",
         height = h)
     })
   })
@@ -258,7 +265,7 @@ server <- function(input, output) {
     }
   )
 
-  output$downloadtSNEclusters <- downloadHandler(
+  output$downloadUMAPclusters <- downloadHandler(
     filename = "UMAP_clusters.pdf",
     content = function(file){
       file.copy("./data/UMAP_clusters.pdf", file)
@@ -342,7 +349,7 @@ ui <- fixedPage(theme = shinytheme("paper"),
             column(12, tags$br()),
             column(10, align = "center", 
               downloadButton(
-                "downloadtSNEclusters", "tSNE clusters.pdf",
+                "downloadUMAPclusters", "UMAP clusters.pdf",
                 style = "padding:8px; font-size:80%")),
             
             column(12, tags$br()),

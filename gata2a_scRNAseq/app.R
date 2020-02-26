@@ -24,6 +24,9 @@ gene_df <- read.table("./data/Danio_Features_unique_Ens98_v1.tsv",
 # gene_names_df <- gene_names_df[,c(1,2,5,3,4)]
 # this is a git test
 
+# git test 1
+# git test 2
+
 gene_df <- gene_df[gene_df$Gene.name.uniq %in% rownames(seurat_obj),]
 ens_id <- gene_df$Gene.stable.ID
 com_name <- gene_df$Gene.name.uniq
@@ -462,4 +465,4 @@ shinyApp(ui = ui, server = server)
 # options(shiny.reactlog=TRUE, shiny.fullstacktrace = TRUE); shiny::runApp("/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/gata2a_scRNAseq/app.R")
 
 # start R session
-# rsconnect::deployApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/gata2a_scRNAseq, account = 'piotrowskilab')
+# rsconnect::deployApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/gata2a_scRNAseq, accoun

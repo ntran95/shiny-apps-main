@@ -525,7 +525,7 @@ server <- function(input, output) {
         axis.text.x = element_text(angle = 90, hjust = 1))
       g <- g + ggtitle(as.character(input$DataSet))
 
-    } else { 
+    } else {
       seurat_obj <- SelectDataset()
       selected <- unlist(strsplit(input$dotGenes, " "))
       

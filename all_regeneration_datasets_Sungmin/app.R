@@ -76,6 +76,16 @@ gene_df <- gene_df[gene_df$Gene.name.uniq %in% rownames(seurat_obj),]
 ens_id <- gene_df$Gene.stable.ID
 com_name <- gene_df$Gene.name.uniq
 
+# Test begin
+if (FALSE) {
+selected <- unlist(strsplit(smpl_genes_lg, " "))
+
+goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected,
+      multiGrep2(avg_mtx_names[1:10], colnames(avg_mtx))]
+
+dim(goi_mat)
+}
+# Test end
 
 # ================================== Server ===================================
 
@@ -616,7 +626,6 @@ server <- function(input, output) {
     }
   )
 
-
   # ======== pHeatmap ======== #
   pHeatmapF <- function() {
     selected <- unlist(strsplit(input$PhmapGenes, " "))
@@ -627,10 +636,13 @@ server <- function(input, output) {
       ifelse(selected %in% ens_id,
         selected <- gene_df[ens_id %in% selected, 3],"")
     )
+
+    selected_cells <- multiGrep2(input$cellIdentsHmap, colnames(avg_mtx))
+    goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected, selected_cells]
+    print(dim(goi_mat))
     
-    goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected,]
     n_trt <- length(unique(seurat_obj@meta.data$data.set))
-    mtx_cols <- ncol(avg_mtx) - n_trt
+    mtx_cols <- ncol(goi_mat) - n_trt
 
     pheatmap::pheatmap(goi_mat, cluster_rows = input$pHmapClust,
       cluster_cols = FALSE, color = viridis::viridis(100),
@@ -653,6 +665,13 @@ server <- function(input, output) {
 
   output$SelectedDataPhmap <- renderText({input$runPhmap
     isolate({input$DataSet})
+  })
+
+  output$cellSelectHmap <- renderUI({ # New cell type select
+  pickerInput("cellIdentsHmap", "Add or remove clusters:",
+    choices = as.character(printIdents()), multiple = TRUE,
+    selected = as.character(printIdents()), options = list(
+      `actions-box` = TRUE), width = "80%")
   })
 
   output$myPhmapF <- renderPlot({input$runPhmap
@@ -680,7 +699,6 @@ server <- function(input, output) {
     plotOutput("myPhmapF", width = w, height = h)
     })
   })
-
   
   output$downloadPhmap <- downloadHandler(
     filename = "heatmap.png", content = function(file) {
@@ -1209,7 +1227,10 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
                 value = smpl_genes_lg),
               checkboxInput("pHmapClust",
                 label = "Check box to enable row clustering.",
-                value = FALSE)
+                value = FALSE),
+              column(12, tags$br()),
+              column(12, align = "center", uiOutput("cellSelectHmap")),
+              column(12, tags$hr(width = "50%"), align = "center"),
               ),
             
             column(12, tags$br()),

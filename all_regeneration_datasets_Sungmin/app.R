@@ -58,6 +58,9 @@ names(file_list) <- as.character(c(
 avg_mtx <- readRDS(paste0("./data/mtx_CLR_nrml_scld_tmpts_",
   "in_cell_type_all_LL_cells_regen_anchored_seurat3_v1.2_.RDS"))
 
+avg_mtx_names <- unique(unlist(lapply(seq_along(colnames(avg_mtx)),
+  function(i){strsplit(colnames(avg_mtx), "_")[[i]][1]})))
+
 trt_colors <- c("green3", "gold", "darkorange",
   "deeppink", "mediumorchid1", "deepskyblue", "blue")
 
@@ -67,7 +70,7 @@ smpl_genes_lg <- paste0("atoh1a her4.1 hes2.2 dld sox4a*1 myclb gadd45gb.1",
 " znf185 si:ch211-229d2.5 si:ch73-261i21.5 spaca4l foxp4 crip1")
 
 app_title <- "Neuromast Regeneration scRNA-seq"
-# ! END items to check/change for project ! 
+# ! END items to check/change for project !
 
 gene_df <- gene_df[gene_df$Gene.name.uniq %in% rownames(seurat_obj),]
 ens_id <- gene_df$Gene.stable.ID

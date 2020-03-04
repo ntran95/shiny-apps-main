@@ -37,16 +37,35 @@ getLenInput <- function(input) {
 
 files <- list.files("./data", pattern = "TRIMMED", full.names = TRUE)
 file_list <- list()
+
 for (i in 1:length(files)) {
-    file_list[[i]] <- readRDS(files[i])
-    DefaultAssay(file_list[[i]]) <- "RNA"
+  file_list[[i]] <- readRDS(files[i])
+  DefaultAssay(file_list[[i]]) <- "RNA"
 }
 
-gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
-  sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+# !! items to check/change for project (START) !!
+file_list <- file_list[c(6,5,1:4)]
 
-# ! START items to check/change for project !
-file_list <- file_list[c(6,1:5)]
+
+# ------------------------------ change order of cell types
+
+
+# levels(file_list[[1]]@meta.data$cell.type.ident) <- c(
+#   "mature-HCs", "early-HCs", "HC-prog", "central-cells", "DV-cells", "AP-cells", "amp-SCs", "mantle-cells",
+#   "Inm", "blood", "spi1b-pos", "krt17-pos", "twist3-pos", "tm4sf4-pos")
+
+# levels(file_list[[2]]@meta.data$cell.type.ident) <- c(
+#   "Mature HCs", "Early HCs", "HC Progenitors", "Central cells", "DV cells", "AP cells", "Amplifying SCs", "Mantle cells")
+
+
+# file_list[[2]]@meta.data$cell.type.ident
+# colnames(file_list[[2]]@meta.data)
+# colnames(file_list[[2]]@meta.data)[13] <- "cell.type.ident"
+# saveRDS(file_list[[1]], "./data/TRIMMED_SeurObj_all_LL_cells_regen_v1.2_.RDS")
+# saveRDS(file_list[[2]], "./data/TRIMMED_all_data_sets.RDS")
+
+
+# ------------------------------ END change order of cell types
 
 seurat_obj <- file_list[[1]]
 print(object.size(file_list), units = "MB")
@@ -67,7 +86,10 @@ smpl_genes_lg <- paste0("atoh1a her4.1 hes2.2 dld sox4a*1 myclb gadd45gb.1",
 " znf185 si:ch211-229d2.5 si:ch73-261i21.5 spaca4l foxp4 crip1")
 
 app_title <- "Neuromast Regeneration scRNA-seq"
-# ! END items to check/change for project ! 
+
+gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
+  sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+# ! items to check/change for project (END) ! 
 
 gene_df <- gene_df[gene_df$Gene.name.uniq %in% rownames(seurat_obj),]
 ens_id <- gene_df$Gene.stable.ID
@@ -678,7 +700,6 @@ server <- function(input, output) {
     })
   })
 
-  
   output$downloadPhmap <- downloadHandler(
     filename = "heatmap.png", content = function(file) {
       png(file, units = "in", res = as.numeric(input$pHmapDPI),

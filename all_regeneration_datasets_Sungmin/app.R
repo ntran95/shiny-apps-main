@@ -1315,10 +1315,25 @@ shinyApp(ui = ui, server = server)
 # start R session
 
 # Deploy to shinyapps.io
+# if you have repo issues with bioconductor
+
+# options(repos = BiocManager::repositories())
+# getOption("repos")
+
+# bioc <- local({
+#   env <- new.env()
+#   on.exit(rm(env))
+#   evalq(source("http://bioconductor.org/biocLite.R", local = TRUE), env)
+#   biocinstallRepos()
+# })
+
 # rsconnect::deployApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/all_regeneration_datasets_Sungmin', account = 'piotrowskilab')
+# rsconnect::deployApp('/n/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/all_regeneration_datasets_Sungmin', account = 'piotrowskilab')
 
 # Execute app locally
 # options(shiny.reactlog=TRUE, shiny.fullstacktrace = TRUE); shiny::runApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/all_regeneration_datasets_Sungmin/app.R')
 
 # Logs
 # rsconnect::showLogs(account = 'piotrowskilab', appName = 'all_regeneration_datasets_Sungmin')
+
+# available.packages(contriburl = "https://cran.rstudio.com")

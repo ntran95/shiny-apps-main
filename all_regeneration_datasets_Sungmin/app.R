@@ -627,6 +627,10 @@ server <- function(input, output) {
   )
 
   # ======== pHeatmap ======== #
+  selectedCellsHmap <- function() {
+    multiGrep2(input$cellIdentsHmap, colnames(avg_mtx))
+  }
+
   pHeatmapF <- function() {
     selected <- unlist(strsplit(input$PhmapGenes, " "))
 
@@ -637,9 +641,8 @@ server <- function(input, output) {
         selected <- gene_df[ens_id %in% selected, 3],"")
     )
 
-    selected_cells <- multiGrep2(input$cellIdentsHmap, colnames(avg_mtx))
-    goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected, selected_cells]
-    print(dim(goi_mat))
+    selected_cells <<- multiGrep2(input$cellIdentsHmap, colnames(avg_mtx))
+    goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected, selectedCellsHmap()]
     
     n_trt <- length(unique(seurat_obj@meta.data$data.set))
     mtx_cols <- ncol(goi_mat) - n_trt
@@ -680,23 +683,23 @@ server <- function(input, output) {
     })
   })
 
+  getWidthPhmap <- function() {
+    if(input$pHmapClust == TRUE ) {
+      w <- paste0(((length(selectedCellsHmap()) * 14) + 150), "px")
+    } else {
+      w <- paste0(((length(selectedCellsHmap()) * 14) + 90), "px")
+    }
+  }
+
   getHeightPhmap <- function() {
     l <- getLenInput(input$PhmapGenes)
     h <- paste0(as.character((l * 13) + 85), "px")
     return(h)
   }
 
-  getWidthPhmap <- function() {
-    if(input$pHmapClust == TRUE ) {
-      w <- "1380px"
-    } else {
-      w <- "1325px"
-    }
-  }
-
   output$plot.uiPheatmapF <- renderUI({input$runPhmap
-    isolate({h <- getHeightPhmap(); w <- getWidthPhmap()
-    plotOutput("myPhmapF", width = w, height = h)
+    isolate({w <- getWidthPhmap(); h <- getHeightPhmap()
+      plotOutput("myPhmapF", width = w, height = h)
     })
   })
   

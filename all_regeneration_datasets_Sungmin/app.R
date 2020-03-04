@@ -46,27 +46,6 @@ for (i in 1:length(files)) {
 # !! items to check/change for project (START) !!
 file_list <- file_list[c(6,5,1:4)]
 
-
-# ------------------------------ change order of cell types
-
-
-# levels(file_list[[1]]@meta.data$cell.type.ident) <- c(
-#   "mature-HCs", "early-HCs", "HC-prog", "central-cells", "DV-cells", "AP-cells", "amp-SCs", "mantle-cells",
-#   "Inm", "blood", "spi1b-pos", "krt17-pos", "twist3-pos", "tm4sf4-pos")
-
-# levels(file_list[[2]]@meta.data$cell.type.ident) <- c(
-#   "Mature HCs", "Early HCs", "HC Progenitors", "Central cells", "DV cells", "AP cells", "Amplifying SCs", "Mantle cells")
-
-
-# file_list[[2]]@meta.data$cell.type.ident
-# colnames(file_list[[2]]@meta.data)
-# colnames(file_list[[2]]@meta.data)[13] <- "cell.type.ident"
-# saveRDS(file_list[[1]], "./data/TRIMMED_SeurObj_all_LL_cells_regen_v1.2_.RDS")
-# saveRDS(file_list[[2]], "./data/TRIMMED_all_data_sets.RDS")
-
-
-# ------------------------------ END change order of cell types
-
 seurat_obj <- file_list[[1]]
 print(object.size(file_list), units = "MB")
 

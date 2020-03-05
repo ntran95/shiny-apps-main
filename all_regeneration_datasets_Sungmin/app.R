@@ -50,8 +50,8 @@ file_list <- file_list[c(6,5,1:4)]
 print(object.size(file_list), units = "MB")
 
 names(file_list) <- as.character(c(
-  "All cell types", "Neuromast cells","AP cells",
-  "Central cells", "HC progenitors", "Mantle cells"))
+  "all she-pos cells", "neuromast cells","AP cells",
+  "central cells", "HC progenitors", "mantle cells"))
 
 avg_mtx <- readRDS(paste0("./data/mtx_CLR_nrml_scld_tmpts_",
   "in_cell_type_all_LL_cells_regen_anchored_seurat3_v1.2_.RDS"))
@@ -81,8 +81,8 @@ server <- function(input, output) {
 
   # ======== Dataset selection ======== #
   SelectDataset <- reactive({
-    seurat_obj <- file_list[[input$DataSet]]
-    print(names(file_list[input$DataSet]))
+    seurat_obj <- file_list[[input$Analysis]]
+    print(names(file_list[input$Analysis]))
 
     cluster_clrs <<- gg_color_hue(
       length(levels(seurat_obj@active.ident)))
@@ -307,7 +307,7 @@ server <- function(input, output) {
   })
 
   output$SelectedDataFeat <- renderText({input$runFeatPlot
-    isolate({input$DataSet})
+    isolate({input$Analysis})
   })
 
   output$myFeaturePlotF <- renderPlot({input$runFeatPlot
@@ -384,7 +384,7 @@ server <- function(input, output) {
   })
 
   output$SelectedDataVln <- renderText({input$runVlnPlot
-      isolate({input$DataSet})
+      isolate({input$Analysis})
   })
 
   output$myVlnPlotF <- renderPlot({input$runVlnPlot
@@ -464,7 +464,7 @@ server <- function(input, output) {
   })
 
   output$SelectedDataRdg <- renderText({input$runRdgPlot
-    isolate({input$DataSet})
+    isolate({input$Analysis})
   })
 
   output$myRdgPlotF <- renderPlot({input$runRdgPlot
@@ -524,7 +524,7 @@ server <- function(input, output) {
         group.by = input$selectGrpDot)
       g <- g + coord_flip() + theme(
         axis.text.x = element_text(angle = 90, hjust = 1))
-      g <- g + ggtitle(as.character(input$DataSet))
+      g <- g + ggtitle(as.character(input$Analysis))
 
     } else {
       seurat_obj <- SelectDataset()
@@ -544,7 +544,7 @@ server <- function(input, output) {
         group.by = input$selectGrpDot)
       g <- g + coord_flip() + theme(
         axis.text.x = element_text(angle = 90, hjust = 1))
-      g <- g + ggtitle(as.character(input$DataSet))
+      g <- g + ggtitle(as.character(input$Analysis))
     }
     return(g)
   })
@@ -569,7 +569,7 @@ server <- function(input, output) {
   })
 
   output$SelectedDataDot <- renderText({input$runDotPlot
-      isolate({input$DataSet})
+      isolate({input$Analysis})
   })
 
   output$myDotPlotF <- renderPlot({input$runDotPlot
@@ -653,7 +653,7 @@ server <- function(input, output) {
   })
 
   output$SelectedDataPhmap <- renderText({input$runPhmap
-    isolate({input$DataSet})
+    isolate({input$Analysis})
   })
 
   avg_mtx_names <- unique(unlist(lapply(seq_along(colnames(avg_mtx)),
@@ -763,7 +763,7 @@ server <- function(input, output) {
   })
 
   output$SelectedDataDiff <- renderText({input$runDiffExp
-    isolate({input$DataSet})
+    isolate({input$Analysis})
   })
 
   makeDiffTable <- function() {
@@ -856,10 +856,10 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
         fluidRow(tags$br()),
         fluidRow(tags$br()),
         column(12, align = "center",
-          tags$b("Select Data Set"),
-          pickerInput("DataSet", label = "",
+          tags$b("Select Analysis"),
+          pickerInput("Analysis", label = "",
             choices = list(Combined = names(file_list)),
-            selected = "All cell types", width = "50%")
+            selected = "all she-pos cells", width = "50%")
         ),
         fluidRow(tags$br()),
         fluidRow(tags$br()),
@@ -1246,7 +1246,7 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
         ),
         
         column(12, align = "center", tags$hr(width = "100%")),
-        column(12, tags$b("All cell types")),
+        column(12, tags$b("Analysis: all she-pos cells")),
         column(12, tags$br()),
         column(12, class = "hmapID", uiOutput("plot.uiPheatmapF"))
       )

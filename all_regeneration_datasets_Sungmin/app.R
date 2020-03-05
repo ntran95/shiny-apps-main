@@ -341,7 +341,7 @@ server <- function(input, output) {
   )
 
   # ======== Violin Plot ======== #
-  VlnPlotF <- function() {
+  VlnPlotF <- reactive({
     seurat_obj <- SelectDataset()
     selected <- unlist(strsplit(input$vlnGenes, " "))
     
@@ -362,7 +362,7 @@ server <- function(input, output) {
       g[[k]] <- g[[k]] + theme(legend.position = "none")
     }
     return(plot_grid(plotlist = g, ncol = 1))
-  }
+  })
 
   output$cellSelectVln <- renderUI({ # New cell type select
     pickerInput("cellIdentsVln", "Add or remove clusters:",
@@ -421,7 +421,7 @@ server <- function(input, output) {
 
 
   # ======== Ridge Plot ======== #
-  RdgPlotF <- function() {
+  RdgPlotF <- reactive({
     seurat_obj <- SelectDataset()
     selected <- unlist(strsplit(input$rdgGenes, " "))
     
@@ -442,7 +442,7 @@ server <- function(input, output) {
     }
 
     return(plot_grid(plotlist = g, ncol = 1))
-  }
+  })
 
   output$cellSelectRdg <- renderUI({ # New cell type select
     pickerInput("cellIdentsRdg", "Add or remove clusters:",
@@ -499,7 +499,7 @@ server <- function(input, output) {
 
 
   # ======== Dot Plot ======== #
-  DotPlotF <- function() {
+  DotPlotF <- reactive({
     clustering <- input$dPlotClust
     if (clustering == TRUE) {
           seurat_obj <- SelectDataset()
@@ -547,7 +547,7 @@ server <- function(input, output) {
       g <- g + ggtitle(as.character(input$DataSet))
     }
     return(g)
-  }
+  })
 
   output$cellSelectDot <- renderUI({ # New cell type select
     pickerInput("cellIdentsDot", "Add or remove clusters:",
@@ -615,11 +615,11 @@ server <- function(input, output) {
   )
 
   # ======== pHeatmap ======== #
-  selectedCellsHmap <- function() {
+  selectedCellsHmap <- reactive({
     multiGrep2(input$cellIdentsHmap, colnames(avg_mtx))
-  }
+  })
 
-  pHeatmapF <- function() {
+  pHeatmapF <- reactive({
     selected <- unlist(strsplit(input$PhmapGenes, " "))
 
     ifelse(selected %in% com_name,
@@ -638,7 +638,7 @@ server <- function(input, output) {
       annotation_col = NULL, legend = FALSE, annotation_colors = anno_cols,
       gaps_col = seq(n_trt, mtx_cols, by = n_trt),
       annotation_names_col = FALSE, annotation_legend = FALSE)
-  }
+  })
 
   mismatchPhmap <- function() {
     selected <- unlist(strsplit(input$PhmapGenes, " "))
@@ -702,7 +702,7 @@ server <- function(input, output) {
 
 
   # ======== Differential Expression ======== #
-  diffExp <- function() {
+  diffExp <- reactive({
     seurat_obj <- SelectDataset()
     seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsDiff]
     meta <- seurat_obj@meta.data
@@ -731,7 +731,7 @@ server <- function(input, output) {
       diff_results$p_val_adj < pval, c(6,1:5)]
     diff_results <<- diff_results[
       order(diff_results$avg_logFC, decreasing = TRUE),]
-  }
+  })
 
   # Requires input$identText to execute before diffExp()
   diffReact <- eventReactive(c(input$identText1, input$identText2), diffExp())

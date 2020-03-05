@@ -260,7 +260,6 @@ server <- function(input, output) {
   # ======== Feature Plot ======== #
   FeaturePlotF <- reactive({
     seurat_obj <- SelectDataset()
-    print(paste("object cell number:", dim(seurat_obj)[2]))
     selected <- unlist(strsplit(input$featureGenes, " "))
     
     ifelse(selected %in% com_name,
@@ -344,7 +343,6 @@ server <- function(input, output) {
   # ======== Violin Plot ======== #
   VlnPlotF <- function() {
     seurat_obj <- SelectDataset()
-    print(paste("object cell number:", dim(seurat_obj)[2]))
     selected <- unlist(strsplit(input$vlnGenes, " "))
     
     ifelse(selected %in% com_name,

@@ -258,7 +258,7 @@ server <- function(input, output) {
 
 
   # ======== Feature Plot ======== #
-  FeaturePlotF <- function() {
+  FeaturePlotF <- reactive({
     seurat_obj <- SelectDataset()
     print(paste("object cell number:", dim(seurat_obj)[2]))
     selected <- unlist(strsplit(input$featureGenes, " "))
@@ -286,7 +286,7 @@ server <- function(input, output) {
       panel.border = element_rect(colour = "#FFFFFF", fill = NA, size = 1))
     }
   return(plot_grid(plotlist = feat, ncol = 1))
-  }
+  })
 
   output$cellSelectFeat <- renderUI({
     pickerInput("cellIdentsFeat", "Add or remove treatments from plot:",

@@ -46,11 +46,11 @@ for (i in 1:length(files)) {
 # !! items to check/change for project (START) !!
 file_list <- file_list[c(6,5,1:4)]
 
-seurat_obj <- file_list[[1]]
+# seurat_obj <- file_list[[1]]
 print(object.size(file_list), units = "MB")
 
 names(file_list) <- as.character(c(
-  "All cells", "Neuromast cells","AP cells",
+  "All cell types", "Neuromast cells","AP cells",
   "Central cells", "HC progenitors", "Mantle cells"))
 
 avg_mtx <- readRDS(paste0("./data/mtx_CLR_nrml_scld_tmpts_",
@@ -69,7 +69,7 @@ gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
   sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 # ! items to check/change for project (END) !
 
-gene_df <- gene_df[gene_df$Gene.name.uniq %in% rownames(seurat_obj),]
+# gene_df <- gene_df[gene_df$Gene.name.uniq %in% rownames(seurat_obj),]
 ens_id <- gene_df$Gene.stable.ID
 com_name <- gene_df$Gene.name.uniq
 
@@ -122,6 +122,7 @@ server <- function(input, output) {
 
   # returns the correct ID class for cell subset
   IDtype <- function() {
+    seurat_obj <- SelectDataset()
     if ("cell.type.ident" %in% colnames(seurat_obj@meta.data)) {
       seurat_obj@meta.data$cell.type.ident
     } else {
@@ -257,7 +258,7 @@ server <- function(input, output) {
 
 
   # ======== Feature Plot ======== #
-  FeaturePlotF <- function() {
+  FeaturePlotF <- reactive({
     seurat_obj <- SelectDataset()
     selected <- unlist(strsplit(input$featureGenes, " "))
     
@@ -284,8 +285,8 @@ server <- function(input, output) {
       panel.border = element_rect(colour = "#FFFFFF", fill = NA, size = 1))
     }
   return(plot_grid(plotlist = feat, ncol = 1))
-  }
-# 
+  })
+
   output$cellSelectFeat <- renderUI({
     pickerInput("cellIdentsFeat", "Add or remove treatments from plot:",
       choices = as.character(printTreats()), multiple = TRUE,
@@ -655,10 +656,13 @@ server <- function(input, output) {
     isolate({input$DataSet})
   })
 
+  avg_mtx_names <- unique(unlist(lapply(seq_along(colnames(avg_mtx)),
+    function(i){strsplit(colnames(avg_mtx), "_")[[i]][1]})))
+
   output$cellSelectHmap <- renderUI({ # New cell type select
   pickerInput("cellIdentsHmap", "Add or remove clusters:",
-    choices = as.character(printIdents()), multiple = TRUE,
-    selected = as.character(printIdents()), options = list(
+    choices = avg_mtx_names, multiple = TRUE,
+    selected = avg_mtx_names, options = list(
       `actions-box` = TRUE), width = "80%")
   })
 

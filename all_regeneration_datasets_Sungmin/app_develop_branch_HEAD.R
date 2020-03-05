@@ -55,6 +55,7 @@ names(file_list) <- as.character(c(
 
 avg_mtx <- readRDS(paste0("./data/mtx_CLR_nrml_scld_tmpts_",
   "in_cell_type_all_LL_cells_regen_anchored_seurat3_v1.2_.RDS"))
+
 trt_colors <- c("green3", "gold", "darkorange",
   "deeppink", "mediumorchid1", "deepskyblue", "blue")
 
@@ -613,11 +614,8 @@ server <- function(input, output) {
     }
   )
 
-  # ======== pHeatmap ======== #
-  selectedCellsHmap <- function() {
-    multiGrep2(input$cellIdentsHmap, colnames(avg_mtx))
-  }
 
+  # ======== pHeatmap ======== #
   pHeatmapF <- function() {
     selected <- unlist(strsplit(input$PhmapGenes, " "))
 
@@ -627,12 +625,10 @@ server <- function(input, output) {
       ifelse(selected %in% ens_id,
         selected <- gene_df[ens_id %in% selected, 3],"")
     )
-
-    selected_cells <<- multiGrep2(input$cellIdentsHmap, colnames(avg_mtx))
-    goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected, selectedCellsHmap()]
     
+    goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected,]
     n_trt <- length(unique(seurat_obj@meta.data$data.set))
-    mtx_cols <- ncol(goi_mat) - n_trt
+    mtx_cols <- ncol(avg_mtx) - n_trt
 
     pheatmap::pheatmap(goi_mat, cluster_rows = input$pHmapClust,
       cluster_cols = FALSE, color = viridis::viridis(100),
@@ -657,26 +653,11 @@ server <- function(input, output) {
     isolate({input$DataSet})
   })
 
-  output$cellSelectHmap <- renderUI({ # New cell type select
-  pickerInput("cellIdentsHmap", "Add or remove clusters:",
-    choices = as.character(printIdents()), multiple = TRUE,
-    selected = as.character(printIdents()), options = list(
-      `actions-box` = TRUE), width = "80%")
-  })
-
   output$myPhmapF <- renderPlot({input$runPhmap
     isolate({withProgress({p <- pHeatmapF(); print(p)},
       message = "Rendering plot..", min = 0, max = 10, value = 10)
     })
   })
-
-  getWidthPhmap <- function() {
-    if(input$pHmapClust == TRUE ) {
-      w <- paste0(((length(selectedCellsHmap()) * 14) + 150), "px")
-    } else {
-      w <- paste0(((length(selectedCellsHmap()) * 14) + 90), "px")
-    }
-  }
 
   getHeightPhmap <- function() {
     l <- getLenInput(input$PhmapGenes)
@@ -684,11 +665,20 @@ server <- function(input, output) {
     return(h)
   }
 
+  getWidthPhmap <- function() {
+    if(input$pHmapClust == TRUE ) {
+      w <- "1380px"
+    } else {
+      w <- "1325px"
+    }
+  }
+
   output$plot.uiPheatmapF <- renderUI({input$runPhmap
-    isolate({w <- getWidthPhmap(); h <- getHeightPhmap()
-      plotOutput("myPhmapF", width = w, height = h)
+    isolate({h <- getHeightPhmap(); w <- getWidthPhmap()
+    plotOutput("myPhmapF", width = w, height = h)
     })
   })
+
   output$downloadPhmap <- downloadHandler(
     filename = "heatmap.png", content = function(file) {
       png(file, units = "in", res = as.numeric(input$pHmapDPI),
@@ -1216,10 +1206,7 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
                 value = smpl_genes_lg),
               checkboxInput("pHmapClust",
                 label = "Check box to enable row clustering.",
-                value = FALSE),
-              column(12, tags$br()),
-              column(12, align = "center", uiOutput("cellSelectHmap")),
-              column(12, tags$hr(width = "50%"), align = "center"),
+                value = FALSE)
               ),
             
             column(12, tags$br()),

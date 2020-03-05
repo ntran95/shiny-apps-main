@@ -67,7 +67,7 @@ app_title <- "Neuromast Regeneration scRNA-seq"
 
 gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
   sep = "\t", header = TRUE, stringsAsFactors = FALSE)
-# ! items to check/change for project (END) ! 
+# ! items to check/change for project (END) !
 
 gene_df <- gene_df[gene_df$Gene.name.uniq %in% rownames(seurat_obj),]
 ens_id <- gene_df$Gene.stable.ID

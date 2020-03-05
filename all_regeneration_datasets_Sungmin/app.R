@@ -628,10 +628,8 @@ server <- function(input, output) {
         selected <- gene_df[ens_id %in% selected, 3],"")
     )
 
-    selected_cells <<- multiGrep2(input$cellIdentsHmap, colnames(avg_mtx))
     goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected, selectedCellsHmap()]
-    
-    n_trt <- length(unique(seurat_obj@meta.data$data.set))
+    n_trt <- length(unique(file_list[[1]]@meta.data$data.set))
     mtx_cols <- ncol(goi_mat) - n_trt
 
     pheatmap::pheatmap(goi_mat, cluster_rows = input$pHmapClust,
@@ -644,7 +642,7 @@ server <- function(input, output) {
   mismatchPhmap <- function() {
     selected <- unlist(strsplit(input$PhmapGenes, " "))
 
-    mismatch <- ifelse(!selected %in% c(com_name,ens_id),
+    mismatch <- ifelse(!selected %in% c(com_name, ens_id),
       selected[!selected %in% c(com_name, ens_id)],"")
     return(mismatch)
   }
@@ -1077,7 +1075,7 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
             column(8, tags$b("Gene mismatches"), "(if present)", tags$b(":")),
             column(8,uiOutput("notInVln")),
             column(8, tags$hr()),
-            # column(8, tags$b(uiOutput("SelectedDataVln"))), 
+            # column(8, tags$b(uiOutput("SelectedDataVln"))),
             column(12, uiOutput("plot.uiVlnPlotF")
             )
           )

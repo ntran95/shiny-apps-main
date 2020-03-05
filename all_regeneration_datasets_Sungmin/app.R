@@ -857,6 +857,8 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
         fluidRow(tags$br()),
         column(12, align = "center",
           tags$b("Select Analysis"),
+
+          column(12, tags$br()),
           pickerInput("Analysis", label = "",
             choices = list(Combined = names(file_list)),
             selected = "all she-pos cells", width = "50%")

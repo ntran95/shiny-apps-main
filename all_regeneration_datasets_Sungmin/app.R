@@ -5,20 +5,21 @@ library(ggplot2)
 library(shinythemes)
 library(shinyWidgets)
 library(dplyr)
+library(devtools)
 
 # Git branch
 branch <- "split-app"
 
 # =================================================================== Preamble
-source(paste0("https://github.com/diazdc/shiny-apps-main/",
+source_url(paste0("https://github.com/diazdc/shiny-apps-main/",
   "blob/", branch,"/all_regeneration_datasets_Sungmin/preamble.R"))
 
 # ===================================================================== Server
-source(paste0("https://github.com/diazdc/shiny-apps-main/",
+source_url(paste0("https://github.com/diazdc/shiny-apps-main/",
   "blob/", branch,"/all_regeneration_datasets_Sungmin/server.R"))
 
 # ========================================================================= UI
-source(paste0("https://github.com/diazdc/shiny-apps-main/",
+source_url(paste0("https://github.com/diazdc/shiny-apps-main/",
   "blob/", branch,"/all_regeneration_datasets_Sungmin/ui.R"))
 
 # =============================================================================

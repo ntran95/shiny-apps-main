@@ -50,7 +50,7 @@ file_list <- file_list[c(6,5,1:4)]
 print(object.size(file_list), units = "MB")
 
 names(file_list) <- as.character(c(
-  "all she-pos cells", "neuromast cells","AP cells",
+  "all she-pos. cells", "neuromast cells","AP cells",
   "central cells", "HC progenitors", "mantle cells"))
 
 avg_mtx <- readRDS(paste0("./data/mtx_CLR_nrml_scld_tmpts_",
@@ -240,8 +240,9 @@ server <- function(input, output) {
   }
 
   output$myDatFeatPlotH1 <- renderPlot({DatFeatPlotF()[[1]]})
-  output$plot.uiDatFeatPlotH1 <- renderUI(
-    {plotOutput("myDatFeatPlotH1", width = "850px", height = "450px")})
+  output$plot.uiDatFeatPlotH1 <- renderUI({
+    plotOutput("myDatFeatPlotH1", width = "850px", height = "450px")
+  })
 
   n_panels <- 1:6
 
@@ -284,7 +285,14 @@ server <- function(input, output) {
       axis.line.y = element_blank(), axis.title = element_text(size = 18),
       panel.border = element_rect(colour = "#FFFFFF", fill = NA, size = 1))
     }
-  return(plot_grid(plotlist = feat, ncol = 1))
+  # return(plot_grid(plotlist = feat, ncol = 1))
+
+  pg <- plot_grid(plotlist = feat, ncol = 1) +
+      labs(title = paste("Selected analysis:",
+        as.character(input$Analysis)), subtitle = "", caption = "") +
+        theme(plot.title = element_text(face = "bold", size = 15, hjust = 0))
+    
+  return(pg)
   })
 
   output$cellSelectFeat <- renderUI({
@@ -361,7 +369,13 @@ server <- function(input, output) {
     for(k in 1:length(g)) {
       g[[k]] <- g[[k]] + theme(legend.position = "none")
     }
-    return(plot_grid(plotlist = g, ncol = 1))
+
+    pg <- plot_grid(plotlist = g, ncol = 1) +
+      labs(title = paste("Selected analysis:",
+        as.character(input$Analysis)), subtitle = "", caption = "") +
+        theme(plot.title = element_text(face = "bold", size = 15, hjust = 0))
+    
+    return(pg)
   })
 
   output$cellSelectVln <- renderUI({ # New cell type select
@@ -441,7 +455,14 @@ server <- function(input, output) {
       g[[k]] <- g[[k]] + theme(legend.position = "none")
     }
 
-    return(plot_grid(plotlist = g, ncol = 1))
+    # return(plot_grid(plotlist = g, ncol = 1))
+    
+    pg <- plot_grid(plotlist = g, ncol = 1) +
+      labs(title = paste("Selected analysis:",
+        as.character(input$Analysis)), subtitle = "", caption = "") +
+        theme(plot.title = element_text(face = "bold", size = 15, hjust = 0))
+    
+    return(pg)
   })
 
   output$cellSelectRdg <- renderUI({ # New cell type select
@@ -518,13 +539,25 @@ server <- function(input, output) {
       dist_mat <- dist(seurat_obj_sub@assays$RNA@data)
       clust <- hclust(dist_mat)
       markers_clust <- clust$labels
+
+      # if (input$selectGrpDot == "data.set") {
+      #     caption_txt <- paste(
+      #       "selected cells:", paste(input$cellIdentsDot, collapse = ", "))
+      #     stringr::str_wrap(caption_txt, width = 10)
+      #   } else {
+      #     ""
+      #   }
       
       g <- DotPlot(seurat_obj, features = markers_clust,
         cols = "RdYlBu", dot.scale = input$dotScale,
         group.by = input$selectGrpDot)
+        
+      g <- g + labs(title = paste("Selected analysis:",
+        as.character(input$Analysis)), subtitle = "", caption = "") +
+        theme(plot.title = element_text(face = "plain", size = 14))
+
       g <- g + coord_flip() + theme(
         axis.text.x = element_text(angle = 90, hjust = 1))
-      g <- g + ggtitle(as.character(input$Analysis))
 
     } else {
       seurat_obj <- SelectDataset()
@@ -538,13 +571,26 @@ server <- function(input, output) {
         )
 
       seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsDot]
+      print(input$cellIdentsDot)
+
+      # if (input$selectGrpDot == "data.set") {
+      #     caption_txt <- paste(
+      #       "selected cells:", paste(input$cellIdentsDot, collapse = ", "))
+      #     stringr::str_wrap(caption_txt, width = 10)
+      #   } else {
+      #     ""
+      #   }
 
       g <- DotPlot(seurat_obj, features = selected,
         cols = "RdYlBu", dot.scale = input$dotScale,
-        group.by = input$selectGrpDot)
+        group.by = input$selectGrpDot) 
+
+      g <- g + labs(title = paste("Selected analysis:",
+        as.character(input$Analysis)), subtitle = "", caption = "") +
+        theme(plot.title = element_text(face = "plain", size = 14))
+
       g <- g + coord_flip() + theme(
         axis.text.x = element_text(angle = 90, hjust = 1))
-      g <- g + ggtitle(as.character(input$Analysis))
     }
     return(g)
   })
@@ -633,9 +679,12 @@ server <- function(input, output) {
     n_trt <- length(unique(file_list[[1]]@meta.data$data.set))
     mtx_cols <- ncol(goi_mat) - n_trt
 
+    hmapColors <- colorRampPalette(
+      rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu")))(100)
+
     pheatmap::pheatmap(goi_mat, cluster_rows = input$pHmapClust,
-      cluster_cols = FALSE, color = viridis::viridis(100),
-      annotation_col = NULL, legend = FALSE, annotation_colors = anno_cols,
+      cluster_cols = FALSE, color = hmapColors, annotation_col = NULL,
+      legend = FALSE, annotation_colors = anno_cols,
       gaps_col = seq(n_trt, mtx_cols, by = n_trt),
       annotation_names_col = FALSE, annotation_legend = FALSE)
   })
@@ -861,7 +910,7 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
           column(12, tags$br()),
           pickerInput("Analysis", label = "",
             choices = list(Combined = names(file_list)),
-            selected = "all she-pos cells", width = "50%")
+            selected = "all she-pos. cells", width = "50%")
         ),
         fluidRow(tags$br()),
         fluidRow(tags$br()),
@@ -1244,11 +1293,12 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
           'Highly expressed genes have a tendency to "wash out" the color 
           values of genes with lower expression on this heatmap. It might 
           be useful to remove the higher expressed genes to get a better 
-          visualization of genes with less extreme values.')
+          visualization of genes with less extreme values.'),
+          
         ),
         
         column(12, align = "center", tags$hr(width = "100%")),
-        column(12, tags$b("Analysis: all she-pos cells")),
+        column(12, tags$b("Selected analysis: all she-pos. cells")),
         column(12, tags$br()),
         column(12, class = "hmapID", uiOutput("plot.uiPheatmapF"))
       )

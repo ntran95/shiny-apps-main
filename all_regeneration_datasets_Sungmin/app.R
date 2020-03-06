@@ -37,27 +37,24 @@ getLenInput <- function(input) {
 
 files <- list.files("./data", pattern = "TRIMMED", full.names = TRUE)
 file_list <- list()
+
 for (i in 1:length(files)) {
-    file_list[[i]] <- readRDS(files[i])
-    DefaultAssay(file_list[[i]]) <- "RNA"
+  file_list[[i]] <- readRDS(files[i])
+  DefaultAssay(file_list[[i]]) <- "RNA"
 }
 
-gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
-  sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+# !! items to check/change for project (START) !!
+file_list <- file_list[c(6,5,1:4)]
 
-# ! START items to check/change for project !
-file_list <- file_list[c(6,1:5)]
-
-seurat_obj <- file_list[[1]]
+# seurat_obj <- file_list[[1]]
 print(object.size(file_list), units = "MB")
 
 names(file_list) <- as.character(c(
-  "All cells", "Neuromast cells","AP cells",
-  "Central cells", "HC progenitors", "Mantle cells"))
+  "all she-pos. cells", "neuromast cells","AP cells",
+  "central cells", "HC progenitors", "mantle cells"))
 
 avg_mtx <- readRDS(paste0("./data/mtx_CLR_nrml_scld_tmpts_",
   "in_cell_type_all_LL_cells_regen_anchored_seurat3_v1.2_.RDS"))
-
 trt_colors <- c("green3", "gold", "darkorange",
   "deeppink", "mediumorchid1", "deepskyblue", "blue")
 
@@ -67,9 +64,13 @@ smpl_genes_lg <- paste0("atoh1a her4.1 hes2.2 dld sox4a*1 myclb gadd45gb.1",
 " znf185 si:ch211-229d2.5 si:ch73-261i21.5 spaca4l foxp4 crip1")
 
 app_title <- "Neuromast Regeneration scRNA-seq"
-# ! END items to check/change for project ! 
 
-gene_df <- gene_df[gene_df$Gene.name.uniq %in% rownames(seurat_obj),]
+gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
+  sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+# ! items to check/change for project (END) !
+
+# gene_df <- gene_df[gene_df$Gene.name.uniq %in% rownames(seurat_obj),]
+
 ens_id <- gene_df$Gene.stable.ID
 com_name <- gene_df$Gene.name.uniq
 
@@ -81,8 +82,8 @@ server <- function(input, output) {
 
   # ======== Dataset selection ======== #
   SelectDataset <- reactive({
-    seurat_obj <- file_list[[input$DataSet]]
-    print(names(file_list[input$DataSet]))
+    seurat_obj <- file_list[[input$Analysis]]
+    print(names(file_list[input$Analysis]))
 
     cluster_clrs <<- gg_color_hue(
       length(levels(seurat_obj@active.ident)))
@@ -122,6 +123,7 @@ server <- function(input, output) {
 
   # returns the correct ID class for cell subset
   IDtype <- function() {
+    seurat_obj <- SelectDataset()
     if ("cell.type.ident" %in% colnames(seurat_obj@meta.data)) {
       seurat_obj@meta.data$cell.type.ident
     } else {
@@ -239,8 +241,9 @@ server <- function(input, output) {
   }
 
   output$myDatFeatPlotH1 <- renderPlot({DatFeatPlotF()[[1]]})
-  output$plot.uiDatFeatPlotH1 <- renderUI(
-    {plotOutput("myDatFeatPlotH1", width = "850px", height = "450px")})
+  output$plot.uiDatFeatPlotH1 <- renderUI({
+    plotOutput("myDatFeatPlotH1", width = "850px", height = "450px")
+  })
 
   n_panels <- 1:6
 
@@ -257,7 +260,7 @@ server <- function(input, output) {
 
 
   # ======== Feature Plot ======== #
-  FeaturePlotF <- function() {
+  FeaturePlotF <- reactive({
     seurat_obj <- SelectDataset()
     selected <- unlist(strsplit(input$featureGenes, " "))
     
@@ -283,9 +286,16 @@ server <- function(input, output) {
       axis.line.y = element_blank(), axis.title = element_text(size = 18),
       panel.border = element_rect(colour = "#FFFFFF", fill = NA, size = 1))
     }
-  return(plot_grid(plotlist = feat, ncol = 1))
-  }
-# 
+  # return(plot_grid(plotlist = feat, ncol = 1))
+
+  pg <- plot_grid(plotlist = feat, ncol = 1) +
+      labs(title = paste("Selected analysis:",
+        as.character(input$Analysis)), subtitle = "", caption = "") +
+        theme(plot.title = element_text(face = "bold", size = 15, hjust = 0))
+    
+  return(pg)
+  })
+
   output$cellSelectFeat <- renderUI({
     pickerInput("cellIdentsFeat", "Add or remove treatments from plot:",
       choices = as.character(printTreats()), multiple = TRUE,
@@ -306,7 +316,7 @@ server <- function(input, output) {
   })
 
   output$SelectedDataFeat <- renderText({input$runFeatPlot
-    isolate({input$DataSet})
+    isolate({input$Analysis})
   })
 
   output$myFeaturePlotF <- renderPlot({input$runFeatPlot
@@ -340,7 +350,7 @@ server <- function(input, output) {
   )
 
   # ======== Violin Plot ======== #
-  VlnPlotF <- function() {
+  VlnPlotF <- reactive({
     seurat_obj <- SelectDataset()
     selected <- unlist(strsplit(input$vlnGenes, " "))
     
@@ -360,8 +370,14 @@ server <- function(input, output) {
     for(k in 1:length(g)) {
       g[[k]] <- g[[k]] + theme(legend.position = "none")
     }
-    return(plot_grid(plotlist = g, ncol = 1))
-  }
+
+    pg <- plot_grid(plotlist = g, ncol = 1) +
+      labs(title = paste("Selected analysis:",
+        as.character(input$Analysis)), subtitle = "", caption = "") +
+        theme(plot.title = element_text(face = "bold", size = 15, hjust = 0))
+    
+    return(pg)
+  })
 
   output$cellSelectVln <- renderUI({ # New cell type select
     pickerInput("cellIdentsVln", "Add or remove clusters:",
@@ -383,7 +399,7 @@ server <- function(input, output) {
   })
 
   output$SelectedDataVln <- renderText({input$runVlnPlot
-      isolate({input$DataSet})
+      isolate({input$Analysis})
   })
 
   output$myVlnPlotF <- renderPlot({input$runVlnPlot
@@ -420,7 +436,7 @@ server <- function(input, output) {
 
 
   # ======== Ridge Plot ======== #
-  RdgPlotF <- function() {
+  RdgPlotF <- reactive({
     seurat_obj <- SelectDataset()
     selected <- unlist(strsplit(input$rdgGenes, " "))
     
@@ -440,8 +456,15 @@ server <- function(input, output) {
       g[[k]] <- g[[k]] + theme(legend.position = "none")
     }
 
-    return(plot_grid(plotlist = g, ncol = 1))
-  }
+    # return(plot_grid(plotlist = g, ncol = 1))
+    
+    pg <- plot_grid(plotlist = g, ncol = 1) +
+      labs(title = paste("Selected analysis:",
+        as.character(input$Analysis)), subtitle = "", caption = "") +
+        theme(plot.title = element_text(face = "bold", size = 15, hjust = 0))
+    
+    return(pg)
+  })
 
   output$cellSelectRdg <- renderUI({ # New cell type select
     pickerInput("cellIdentsRdg", "Add or remove clusters:",
@@ -463,7 +486,7 @@ server <- function(input, output) {
   })
 
   output$SelectedDataRdg <- renderText({input$runRdgPlot
-    isolate({input$DataSet})
+    isolate({input$Analysis})
   })
 
   output$myRdgPlotF <- renderPlot({input$runRdgPlot
@@ -498,7 +521,7 @@ server <- function(input, output) {
 
 
   # ======== Dot Plot ======== #
-  DotPlotF <- function() {
+  DotPlotF <- reactive({
     clustering <- input$dPlotClust
     if (clustering == TRUE) {
           seurat_obj <- SelectDataset()
@@ -517,15 +540,27 @@ server <- function(input, output) {
       dist_mat <- dist(seurat_obj_sub@assays$RNA@data)
       clust <- hclust(dist_mat)
       markers_clust <- clust$labels
+
+      # if (input$selectGrpDot == "data.set") {
+      #     caption_txt <- paste(
+      #       "selected cells:", paste(input$cellIdentsDot, collapse = ", "))
+      #     stringr::str_wrap(caption_txt, width = 10)
+      #   } else {
+      #     ""
+      #   }
       
       g <- DotPlot(seurat_obj, features = markers_clust,
         cols = "RdYlBu", dot.scale = input$dotScale,
         group.by = input$selectGrpDot)
+        
+      g <- g + labs(title = paste("Selected analysis:",
+        as.character(input$Analysis)), subtitle = "", caption = "") +
+        theme(plot.title = element_text(face = "plain", size = 14))
+
       g <- g + coord_flip() + theme(
         axis.text.x = element_text(angle = 90, hjust = 1))
-      g <- g + ggtitle(as.character(input$DataSet))
 
-    } else { 
+    } else {
       seurat_obj <- SelectDataset()
       selected <- unlist(strsplit(input$dotGenes, " "))
       
@@ -537,16 +572,29 @@ server <- function(input, output) {
         )
 
       seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsDot]
+      print(input$cellIdentsDot)
+
+      # if (input$selectGrpDot == "data.set") {
+      #     caption_txt <- paste(
+      #       "selected cells:", paste(input$cellIdentsDot, collapse = ", "))
+      #     stringr::str_wrap(caption_txt, width = 10)
+      #   } else {
+      #     ""
+      #   }
 
       g <- DotPlot(seurat_obj, features = selected,
         cols = "RdYlBu", dot.scale = input$dotScale,
-        group.by = input$selectGrpDot)
+        group.by = input$selectGrpDot) 
+
+      g <- g + labs(title = paste("Selected analysis:",
+        as.character(input$Analysis)), subtitle = "", caption = "") +
+        theme(plot.title = element_text(face = "plain", size = 14))
+
       g <- g + coord_flip() + theme(
         axis.text.x = element_text(angle = 90, hjust = 1))
-      g <- g + ggtitle(as.character(input$DataSet))
     }
     return(g)
-  }
+  })
 
   output$cellSelectDot <- renderUI({ # New cell type select
     pickerInput("cellIdentsDot", "Add or remove clusters:",
@@ -568,7 +616,7 @@ server <- function(input, output) {
   })
 
   output$SelectedDataDot <- renderText({input$runDotPlot
-      isolate({input$DataSet})
+      isolate({input$Analysis})
   })
 
   output$myDotPlotF <- renderPlot({input$runDotPlot
@@ -613,9 +661,12 @@ server <- function(input, output) {
     }
   )
 
-
   # ======== pHeatmap ======== #
-  pHeatmapF <- function() {
+  selectedCellsHmap <- reactive({
+    multiGrep2(input$cellIdentsHmap, colnames(avg_mtx))
+  })
+
+  pHeatmapF <- reactive({
     selected <- unlist(strsplit(input$PhmapGenes, " "))
 
     ifelse(selected %in% com_name,
@@ -624,22 +675,25 @@ server <- function(input, output) {
       ifelse(selected %in% ens_id,
         selected <- gene_df[ens_id %in% selected, 3],"")
     )
-    
-    goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected,]
-    n_trt <- length(unique(seurat_obj@meta.data$data.set))
-    mtx_cols <- ncol(avg_mtx) - n_trt
+
+    goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected, selectedCellsHmap()]
+    n_trt <- length(unique(file_list[[1]]@meta.data$data.set))
+    mtx_cols <- ncol(goi_mat) - n_trt
+
+    hmapColors <- colorRampPalette(
+      rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu")))(100)
 
     pheatmap::pheatmap(goi_mat, cluster_rows = input$pHmapClust,
-      cluster_cols = FALSE, color = viridis::viridis(100),
-      annotation_col = NULL, legend = FALSE, annotation_colors = anno_cols,
+      cluster_cols = FALSE, color = hmapColors, annotation_col = NULL,
+      legend = FALSE, annotation_colors = anno_cols,
       gaps_col = seq(n_trt, mtx_cols, by = n_trt),
       annotation_names_col = FALSE, annotation_legend = FALSE)
-  }
+  })
 
   mismatchPhmap <- function() {
     selected <- unlist(strsplit(input$PhmapGenes, " "))
 
-    mismatch <- ifelse(!selected %in% c(com_name,ens_id),
+    mismatch <- ifelse(!selected %in% c(com_name, ens_id),
       selected[!selected %in% c(com_name, ens_id)],"")
     return(mismatch)
   }
@@ -649,7 +703,17 @@ server <- function(input, output) {
   })
 
   output$SelectedDataPhmap <- renderText({input$runPhmap
-    isolate({input$DataSet})
+    isolate({input$Analysis})
+  })
+
+  avg_mtx_names <- unique(unlist(lapply(seq_along(colnames(avg_mtx)),
+    function(i){strsplit(colnames(avg_mtx), "_")[[i]][1]})))
+
+  output$cellSelectHmap <- renderUI({ # New cell type select
+  pickerInput("cellIdentsHmap", "Add or remove clusters:",
+    choices = avg_mtx_names, multiple = TRUE,
+    selected = avg_mtx_names, options = list(
+      `actions-box` = TRUE), width = "80%")
   })
 
   output$myPhmapF <- renderPlot({input$runPhmap
@@ -658,31 +722,33 @@ server <- function(input, output) {
     })
   })
 
-  getHeightPhmap <- function() {
-    l <- getLenInput(input$PhmapGenes)
-    h <- paste0(as.character((l * 13) + 85), "px")
-    return(h)
-  }
-
-  getWidthPhmap <- function() {
+  getWidthPhmap <- reactive({
     if(input$pHmapClust == TRUE ) {
-      w <- "1380px"
+      w <- (length(selectedCellsHmap()) * 14) + 150
+      return(w)
     } else {
-      w <- "1325px"
+      w <- (length(selectedCellsHmap()) * 14) + 90
+      return(w)
     }
-  }
+  })
+
+  getHeightPhmap <- reactive({
+    l <- getLenInput(input$PhmapGenes)
+    h <- (l * 13) + 85
+    return(h)
+  })
 
   output$plot.uiPheatmapF <- renderUI({input$runPhmap
-    isolate({h <- getHeightPhmap(); w <- getWidthPhmap()
-    plotOutput("myPhmapF", width = w, height = h)
+    isolate({
+      w <- paste0(getWidthPhmap(), "px"); h <- paste0(getHeightPhmap(), "px")
+        plotOutput("myPhmapF", width = w, height = h)
     })
   })
 
-  
   output$downloadPhmap <- downloadHandler(
-    filename = "heatmap.png", content = function(file) {
-      png(file, units = "in", res = as.numeric(input$pHmapDPI),
-        width = 12, height = 12 * getLenInput(input$PhmapGenes))
+    filename = "heatmap.pdf", content = function(file) {
+      pdf(file, width = (getWidthPhmap() / 90),
+          height = (getHeightPhmap() / 90))
       print(pHeatmapF())
       dev.off()
     }
@@ -690,7 +756,7 @@ server <- function(input, output) {
 
 
   # ======== Differential Expression ======== #
-  diffExp <- function() {
+  diffExp <- reactive({
     seurat_obj <- SelectDataset()
     seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsDiff]
     meta <- seurat_obj@meta.data
@@ -719,7 +785,7 @@ server <- function(input, output) {
       diff_results$p_val_adj < pval, c(6,1:5)]
     diff_results <<- diff_results[
       order(diff_results$avg_logFC, decreasing = TRUE),]
-  }
+  })
 
   # Requires input$identText to execute before diffExp()
   diffReact <- eventReactive(c(input$identText1, input$identText2), diffExp())
@@ -751,7 +817,7 @@ server <- function(input, output) {
   })
 
   output$SelectedDataDiff <- renderText({input$runDiffExp
-    isolate({input$DataSet})
+    isolate({input$Analysis})
   })
 
   makeDiffTable <- function() {
@@ -778,46 +844,6 @@ server <- function(input, output) {
       file.copy("./data/cluster_markers.xlsx", file)
     }
   )
-
-  output$downloadDatasetGenes <- downloadHandler(
-    filename = "genes_in_data_set.xlsx",
-    content = function(file) {
-      file.copy("./data/genes_in_data_set.xlsx", file)
-    }
-  )
-
-  output$downloadUMAPtreatment <- downloadHandler(
-    filename = "UMAP_treatment.pdf",
-    content = function(file) {
-      file.copy("./data/UMAP_treatment.pdf", file)
-    }
-  )
-
-  output$downloadUMAPclusters <- downloadHandler(
-    filename = "UMAP_clusters.pdf",
-    content = function(file) {
-      file.copy("./data/UMAP_clusters.pdf", file)
-    }
-  )
-
-  output$downloadAllAmbGenes <- downloadHandler(
-    filename = "ambiguous_genes_Ens91.xlsx",
-    content = function(file) {
-      file.copy("./data/ambiguous_genes_Ens91.xlsx", file)
-    }
-  )
-
-  output$downloadAmbGenesDataset <- downloadHandler(
-    filename = "ambiguous_genes_in_dataset.xlsx",
-    content = function(file) {
-      file.copy("./data/ambiguous_genes_in_dataset.xlsx", file)
-    }
-  )
-
-  # ! https://www.r-bloggers.com/a-little-trick-for-debugging-shiny/
-  # observeEvent(input$browser, {
-  #   browser()
-  # })
 } # Server close
 
 
@@ -844,10 +870,12 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
         fluidRow(tags$br()),
         fluidRow(tags$br()),
         column(12, align = "center",
-          tags$b("Select Data Set"),
-          pickerInput("DataSet", label = "",
+          tags$b("Select Analysis"),
+
+          column(12, tags$br()),
+          pickerInput("Analysis", label = "",
             choices = list(Combined = names(file_list)),
-            selected = "All cell types", width = "50%")
+            selected = "all she-pos. cells", width = "50%")
         ),
         fluidRow(tags$br()),
         fluidRow(tags$br()),
@@ -926,11 +954,6 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
               Ensembl 91 zebrafish annotation.')),
         fluidRow(tags$br()),
         fluidRow(tags$br())
-        
-        # ! https://www.r-bloggers.com/a-little-trick-for-debugging-shiny/
-        # type $('#browser').show(); in browser java console in web browser
-        # actionButton("browser", "browser"),
-        # tags$script("$('#browser').hide();")
       )
     ),
 
@@ -969,6 +992,11 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
             style = 'padding:5px; font-size:80%')),
           
           column(12, tags$hr(width = "50%"), align = "center"),
+          column(12, align = "center",
+            downloadButton("downloadFeaturePlotF", "Download png",
+            style = 'padding:5px; font-size:80%')),
+
+          column(12, tags$br()),
           column(12, align = "center", uiOutput("cellSelectFeat")),
 
           column(12, tags$br()),
@@ -988,13 +1016,7 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
               numericInput("ptSizeFeature", "Input cell size:", value = 1.00,
                 min = 0.25, step = 0.25, max = 2.00, width = "100%"))
           ),
-          
-          column(12, tags$br()),
-          column(12, align = "center",
-            downloadButton("downloadFeaturePlotF", "Feature plot.png",
-            style = 'padding:5px; font-size:80%')),
 
-          fluidRow(tags$br()),
           fluidRow(tags$br()),
           fluidRow(tags$br()),
           column(12, uiOutput("plot.uiDatFeatPlotV1"), align = "center"),
@@ -1012,7 +1034,7 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
             
             fluidRow(tags$br()),
             column(12, uiOutput("plot.uiFeaturePlotF")
-              )
+            )
           )
         )
       )
@@ -1033,27 +1055,24 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
             style = 'padding:5px; font-size:80%')),
 
           column(12, tags$hr(width = "50%"), align = "center"),
+          column(12, align = "center", downloadButton(
+            "downloadVlnPlot", "Download pdf",
+            style = 'padding:5px; font-size:80%')),
+
+          column(12, tags$br()),
           column(12, align = "center", uiOutput("cellSelectVln")), # New
           
           column(12, tags$br()),
           column(12, align = "center",
             column(6,
               radioGroupButtons("selectGrpVln",
-                "Group cells by:", choices = list(Dataset = "data.set",
+                "Group cells by:", choices = list(Time = "data.set",
                   Cluster = "cell.type.ident"), width = "100%")),
             column(6,
               numericInput("ptSizeVln", "Input cell size:", value = 0.25,
               min = 0.00, step = 0.75, max = 2.00, width = "80%"))
           ),
 
-          column(12, tags$br()),
-          column(12, align = "center", "Plot download (pdf):"),
-          column(12, tags$br()),
-          column(12, align = "center", downloadButton(
-            "downloadVlnPlot", "Violin plot.pdf",
-            style = 'padding:5px; font-size:80%')),
-
-          fluidRow(tags$br()),
           fluidRow(tags$br()),
           fluidRow(tags$br()),
           column(12, uiOutput("plot.uiDatFeatPlotV2"), align = "center"),
@@ -1067,7 +1086,7 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
             column(8, tags$b("Gene mismatches"), "(if present)", tags$b(":")),
             column(8,uiOutput("notInVln")),
             column(8, tags$hr()),
-            # column(8, tags$b(uiOutput("SelectedDataVln"))), 
+            # column(8, tags$b(uiOutput("SelectedDataVln"))),
             column(12, uiOutput("plot.uiVlnPlotF")
             )
           )
@@ -1090,27 +1109,24 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
             style = 'padding:5px; font-size:80%')),
 
           column(12, tags$hr(width = "50%"), align = "center"),
+          column(12, align = "center", downloadButton(
+            "downloadRdgPlot", "Download pdf",
+            style = 'padding:5px; font-size:80%')),
+
+          column(12, tags$br()),
           column(12, align = "center", uiOutput("cellSelectRdg")), # New
           
           column(12, tags$br()),
            column(12, align = "center",
             column(6,
               radioGroupButtons("selectGrpRdg",
-                "Group cells by:", choices = list(Dataset = "data.set",
+                "Group cells by:", choices = list(Time = "data.set",
                   Cluster = "cell.type.ident"), width = "100%")),
             column(6,
               numericInput("ptSizeRdg", "Input cell size:", value = 0.25,
               min = 0.00, step = 0.75, max = 2.00, width = "80%"))
-          ),
-
-          column(12, tags$br()),
-          column(12, align = "center", "Plot download (pdf):"),
-          column(12, tags$br()),
-          column(12, align = "center", downloadButton(
-            "downloadRdgPlot", "Ridge plot.pdf",
-            style = 'padding:5px; font-size:80%')),
+          ),          
           
-          fluidRow(tags$br()),
           fluidRow(tags$br()),
           fluidRow(tags$br()),
           column(12, uiOutput("plot.uiDatFeatPlotV3"), align = "center"),
@@ -1148,28 +1164,26 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
           column(12, align = "center",
             actionButton("runDotPlot", "Generate Plots",
             style = 'padding:5px; font-size:80%')),
+
           column(12, tags$hr(width = "50%"), align = "center"),
+          column(12, align = "center", downloadButton(
+            "downloadDotPlot", "Download pdf",
+            style = 'padding:5px; font-size:80%')),
+
+          column(12, tags$br()),
           column(12, align = "center", uiOutput("cellSelectDot")), # New
           
           column(12, tags$br()),
           column(12, align = "center",
             column(6,
               radioGroupButtons("selectGrpDot",
-                "Group cells by:", choices = list(Dataset = "data.set",
+                "Group cells by:", choices = list(Time = "data.set",
                   Cluster = "cell.type.ident"), width = "100%")),
             column(6,
               numericInput("dotScale", "Dot diameter:", value = 10, min = 4,
                 step = 1, max = 20, width = "80%"), align = "center")
           ),
 
-          column(12, tags$br()),
-          column(12, align = "center", "Plot download (pdf):"),
-          column(12, tags$br()),
-          column(12, align = "center", downloadButton(
-            "downloadDotPlot", "dot plot.pdf",
-            style = 'padding:5px; font-size:80%')),
-
-          fluidRow(tags$br()),
           fluidRow(tags$br()),
           fluidRow(tags$br()),
           column(12, uiOutput("plot.uiDatFeatPlotV4"), align = "center"),
@@ -1206,13 +1220,16 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
                 value = smpl_genes_lg),
               checkboxInput("pHmapClust",
                 label = "Check box to enable row clustering.",
-                value = FALSE)
+                value = FALSE),
+              column(12, align = "center", uiOutput("cellSelectHmap")),
+              column(12, tags$br())
               ),
             
-            column(12, tags$br()),
             column(12, align = "center",
               actionButton("runPhmap", "Generate Plots",
-              style = 'padding:5px; font-size:80%')),
+                style = 'padding:5px; font-size:80%'),
+            downloadButton("downloadPhmap", "Download pdf",
+                style = 'padding:5px; font-size:80%')),
             column(12, tags$br())
           )
         ),
@@ -1231,7 +1248,7 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
         ),
         
         column(12, align = "center", tags$hr(width = "100%")),
-        column(12, tags$b("All cell types")),
+        column(12, tags$b("Selected analysis: all she-pos. cells")),
         column(12, tags$br()),
         column(12, class = "hmapID", uiOutput("plot.uiPheatmapF"))
       )
@@ -1281,7 +1298,6 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
 
           fluidRow(tags$br()),
           fluidRow(tags$br()),
-          fluidRow(tags$br()),
           column(12, uiOutput("plot.uiDatFeatPlotV5"), align = "center"),
           fluidRow(tags$br()),
           fluidRow(tags$br())
@@ -1315,10 +1331,19 @@ shinyApp(ui = ui, server = server)
 # start R session
 
 # Deploy to shinyapps.io
+# if you have repo issues with bioconductor
+
+# options(repos = BiocManager::repositories())
+# getOption("repos")
+
+
 # rsconnect::deployApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/all_regeneration_datasets_Sungmin', account = 'piotrowskilab')
+# rsconnect::deployApp('/n/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/all_regeneration_datasets_Sungmin', account = 'piotrowskilab')
 
 # Execute app locally
 # options(shiny.reactlog=TRUE, shiny.fullstacktrace = TRUE); shiny::runApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/all_regeneration_datasets_Sungmin/app.R')
 
 # Logs
 # rsconnect::showLogs(account = 'piotrowskilab', appName = 'all_regeneration_datasets_Sungmin')
+
+# available.packages(contriburl = "https://cran.rstudio.com")

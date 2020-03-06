@@ -70,6 +70,7 @@ gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
 # ! items to check/change for project (END) !
 
 # gene_df <- gene_df[gene_df$Gene.name.uniq %in% rownames(seurat_obj),]
+
 ens_id <- gene_df$Gene.stable.ID
 com_name <- gene_df$Gene.name.uniq
 
@@ -721,29 +722,33 @@ server <- function(input, output) {
     })
   })
 
-  getWidthPhmap <- function() {
+  getWidthPhmap <- reactive({
     if(input$pHmapClust == TRUE ) {
-      w <- paste0(((length(selectedCellsHmap()) * 14) + 150), "px")
+      w <- (length(selectedCellsHmap()) * 14) + 150
+      return(w)
     } else {
-      w <- paste0(((length(selectedCellsHmap()) * 14) + 90), "px")
+      w <- (length(selectedCellsHmap()) * 14) + 90
+      return(w)
     }
-  }
+  })
 
-  getHeightPhmap <- function() {
+  getHeightPhmap <- reactive({
     l <- getLenInput(input$PhmapGenes)
-    h <- paste0(as.character((l * 13) + 85), "px")
+    h <- (l * 13) + 85
     return(h)
-  }
+  })
 
   output$plot.uiPheatmapF <- renderUI({input$runPhmap
-    isolate({w <- getWidthPhmap(); h <- getHeightPhmap()
-      plotOutput("myPhmapF", width = w, height = h)
+    isolate({
+      w <- paste0(getWidthPhmap(), "px"); h <- paste0(getHeightPhmap(), "px")
+        plotOutput("myPhmapF", width = w, height = h)
     })
   })
+
   output$downloadPhmap <- downloadHandler(
-    filename = "heatmap.png", content = function(file) {
-      png(file, units = "in", res = as.numeric(input$pHmapDPI),
-        width = 12, height = 12 * getLenInput(input$PhmapGenes))
+    filename = "heatmap.pdf", content = function(file) {
+      pdf(file, width = (getWidthPhmap() / 90),
+          height = (getHeightPhmap() / 90))
       print(pHeatmapF())
       dev.off()
     }
@@ -839,46 +844,6 @@ server <- function(input, output) {
       file.copy("./data/cluster_markers.xlsx", file)
     }
   )
-
-  output$downloadDatasetGenes <- downloadHandler(
-    filename = "genes_in_data_set.xlsx",
-    content = function(file) {
-      file.copy("./data/genes_in_data_set.xlsx", file)
-    }
-  )
-
-  output$downloadUMAPtreatment <- downloadHandler(
-    filename = "UMAP_treatment.pdf",
-    content = function(file) {
-      file.copy("./data/UMAP_treatment.pdf", file)
-    }
-  )
-
-  output$downloadUMAPclusters <- downloadHandler(
-    filename = "UMAP_clusters.pdf",
-    content = function(file) {
-      file.copy("./data/UMAP_clusters.pdf", file)
-    }
-  )
-
-  output$downloadAllAmbGenes <- downloadHandler(
-    filename = "ambiguous_genes_Ens91.xlsx",
-    content = function(file) {
-      file.copy("./data/ambiguous_genes_Ens91.xlsx", file)
-    }
-  )
-
-  output$downloadAmbGenesDataset <- downloadHandler(
-    filename = "ambiguous_genes_in_dataset.xlsx",
-    content = function(file) {
-      file.copy("./data/ambiguous_genes_in_dataset.xlsx", file)
-    }
-  )
-
-  # ! https://www.r-bloggers.com/a-little-trick-for-debugging-shiny/
-  # observeEvent(input$browser, {
-  #   browser()
-  # })
 } # Server close
 
 
@@ -989,11 +954,6 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
               Ensembl 91 zebrafish annotation.')),
         fluidRow(tags$br()),
         fluidRow(tags$br())
-        
-        # ! https://www.r-bloggers.com/a-little-trick-for-debugging-shiny/
-        # type $('#browser').show(); in browser java console in web browser
-        # actionButton("browser", "browser"),
-        # tags$script("$('#browser').hide();")
       )
     ),
 
@@ -1032,6 +992,11 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
             style = 'padding:5px; font-size:80%')),
           
           column(12, tags$hr(width = "50%"), align = "center"),
+          column(12, align = "center",
+            downloadButton("downloadFeaturePlotF", "Download png",
+            style = 'padding:5px; font-size:80%')),
+
+          column(12, tags$br()),
           column(12, align = "center", uiOutput("cellSelectFeat")),
 
           column(12, tags$br()),
@@ -1051,13 +1016,7 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
               numericInput("ptSizeFeature", "Input cell size:", value = 1.00,
                 min = 0.25, step = 0.25, max = 2.00, width = "100%"))
           ),
-          
-          column(12, tags$br()),
-          column(12, align = "center",
-            downloadButton("downloadFeaturePlotF", "Feature plot.png",
-            style = 'padding:5px; font-size:80%')),
 
-          fluidRow(tags$br()),
           fluidRow(tags$br()),
           fluidRow(tags$br()),
           column(12, uiOutput("plot.uiDatFeatPlotV1"), align = "center"),
@@ -1075,7 +1034,7 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
             
             fluidRow(tags$br()),
             column(12, uiOutput("plot.uiFeaturePlotF")
-              )
+            )
           )
         )
       )
@@ -1096,6 +1055,11 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
             style = 'padding:5px; font-size:80%')),
 
           column(12, tags$hr(width = "50%"), align = "center"),
+          column(12, align = "center", downloadButton(
+            "downloadVlnPlot", "Download pdf",
+            style = 'padding:5px; font-size:80%')),
+
+          column(12, tags$br()),
           column(12, align = "center", uiOutput("cellSelectVln")), # New
           
           column(12, tags$br()),
@@ -1109,14 +1073,6 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
               min = 0.00, step = 0.75, max = 2.00, width = "80%"))
           ),
 
-          column(12, tags$br()),
-          column(12, align = "center", "Plot download (pdf):"),
-          column(12, tags$br()),
-          column(12, align = "center", downloadButton(
-            "downloadVlnPlot", "Violin plot.pdf",
-            style = 'padding:5px; font-size:80%')),
-
-          fluidRow(tags$br()),
           fluidRow(tags$br()),
           fluidRow(tags$br()),
           column(12, uiOutput("plot.uiDatFeatPlotV2"), align = "center"),
@@ -1153,6 +1109,11 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
             style = 'padding:5px; font-size:80%')),
 
           column(12, tags$hr(width = "50%"), align = "center"),
+          column(12, align = "center", downloadButton(
+            "downloadRdgPlot", "Download pdf",
+            style = 'padding:5px; font-size:80%')),
+
+          column(12, tags$br()),
           column(12, align = "center", uiOutput("cellSelectRdg")), # New
           
           column(12, tags$br()),
@@ -1164,16 +1125,8 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
             column(6,
               numericInput("ptSizeRdg", "Input cell size:", value = 0.25,
               min = 0.00, step = 0.75, max = 2.00, width = "80%"))
-          ),
-
-          column(12, tags$br()),
-          column(12, align = "center", "Plot download (pdf):"),
-          column(12, tags$br()),
-          column(12, align = "center", downloadButton(
-            "downloadRdgPlot", "Ridge plot.pdf",
-            style = 'padding:5px; font-size:80%')),
+          ),          
           
-          fluidRow(tags$br()),
           fluidRow(tags$br()),
           fluidRow(tags$br()),
           column(12, uiOutput("plot.uiDatFeatPlotV3"), align = "center"),
@@ -1211,7 +1164,13 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
           column(12, align = "center",
             actionButton("runDotPlot", "Generate Plots",
             style = 'padding:5px; font-size:80%')),
+
           column(12, tags$hr(width = "50%"), align = "center"),
+          column(12, align = "center", downloadButton(
+            "downloadDotPlot", "Download pdf",
+            style = 'padding:5px; font-size:80%')),
+
+          column(12, tags$br()),
           column(12, align = "center", uiOutput("cellSelectDot")), # New
           
           column(12, tags$br()),
@@ -1225,14 +1184,6 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
                 step = 1, max = 20, width = "80%"), align = "center")
           ),
 
-          column(12, tags$br()),
-          column(12, align = "center", "Plot download (pdf):"),
-          column(12, tags$br()),
-          column(12, align = "center", downloadButton(
-            "downloadDotPlot", "dot plot.pdf",
-            style = 'padding:5px; font-size:80%')),
-
-          fluidRow(tags$br()),
           fluidRow(tags$br()),
           fluidRow(tags$br()),
           column(12, uiOutput("plot.uiDatFeatPlotV4"), align = "center"),
@@ -1270,15 +1221,15 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
               checkboxInput("pHmapClust",
                 label = "Check box to enable row clustering.",
                 value = FALSE),
-              column(12, tags$br()),
               column(12, align = "center", uiOutput("cellSelectHmap")),
-              column(12, tags$hr(width = "50%"), align = "center"),
+              column(12, tags$br())
               ),
             
-            column(12, tags$br()),
             column(12, align = "center",
               actionButton("runPhmap", "Generate Plots",
-              style = 'padding:5px; font-size:80%')),
+                style = 'padding:5px; font-size:80%'),
+            downloadButton("downloadPhmap", "Download pdf",
+                style = 'padding:5px; font-size:80%')),
             column(12, tags$br())
           )
         ),
@@ -1293,8 +1244,7 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
           'Highly expressed genes have a tendency to "wash out" the color 
           values of genes with lower expression on this heatmap. It might 
           be useful to remove the higher expressed genes to get a better 
-          visualization of genes with less extreme values.'),
-          
+          visualization of genes with less extreme values.')
         ),
         
         column(12, align = "center", tags$hr(width = "100%")),
@@ -1348,7 +1298,6 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
 
           fluidRow(tags$br()),
           fluidRow(tags$br()),
-          fluidRow(tags$br()),
           column(12, uiOutput("plot.uiDatFeatPlotV5"), align = "center"),
           fluidRow(tags$br()),
           fluidRow(tags$br())
@@ -1387,12 +1336,6 @@ shinyApp(ui = ui, server = server)
 # options(repos = BiocManager::repositories())
 # getOption("repos")
 
-# bioc <- local({
-#   env <- new.env()
-#   on.exit(rm(env))
-#   evalq(source("http://bioconductor.org/biocLite.R", local = TRUE), env)
-#   biocinstallRepos()
-# })
 
 # rsconnect::deployApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/all_regeneration_datasets_Sungmin', account = 'piotrowskilab')
 # rsconnect::deployApp('/n/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/all_regeneration_datasets_Sungmin', account = 'piotrowskilab')

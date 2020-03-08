@@ -1,3 +1,5 @@
+
+
 ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
   tags$head(includeCSS(paste0("./www/styles.css"))),
   div(headerPanel(app_title), style = 'width:1560px;'),

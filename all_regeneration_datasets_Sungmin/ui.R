@@ -1,13 +1,6 @@
-library(shiny)
-library(cowplot)
-library(Seurat)
-library(ggplot2)
-library(shinythemes)
-library(shinyWidgets)
-library(dplyr)
-library(rsconnect)
 
-ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
+
+ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
   tags$head(includeCSS(paste0("./www/styles.css"))),
   div(headerPanel(app_title), style = 'width:1560px;'),
   div(tabsetPanel(

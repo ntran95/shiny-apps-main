@@ -1,4 +1,4 @@
-print("test 1") %>% strsplit(" ")
+print("test split") %>% strsplit(" ")
 
 multiGrep2 <- function(toMatch, toSearch, ...) {
   toMatch <- ifelse(grepl("*", toMatch),

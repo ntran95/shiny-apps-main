@@ -2,8 +2,8 @@ library(shiny)
 library(cowplot)
 library(Seurat)
 library(ggplot2)
-library(shinythemes)
-library(shinyWidgets)
+# library(shinythemes)
+# library(shinyWidgets)
 library(dplyr)
 library(rsconnect)
 
@@ -13,7 +13,7 @@ branch <- "split-app"
 
 # =================================================================== Preamble
 source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
-  branch", /all_regeneration_datasets_Sungmin/preamble.R"))
+  branch, "/all_regeneration_datasets_Sungmin/preamble.R"))
 
 
 # ===================================================================== Server

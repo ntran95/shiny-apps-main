@@ -1,4 +1,4 @@
-
+app_title <- "Neuromast Regeneration scRNA-seq"
 
 ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
   tags$head(includeCSS(paste0("./www/styles.css"))),

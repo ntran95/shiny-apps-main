@@ -1,4 +1,11 @@
-
+library(shiny)
+library(cowplot)
+library(Seurat)
+library(ggplot2)
+library(shinythemes)
+library(shinyWidgets)
+library(dplyr)
+library(rsconnect)
 
 server <- function(input, output) {
 

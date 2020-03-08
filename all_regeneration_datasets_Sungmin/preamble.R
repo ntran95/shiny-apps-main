@@ -1,4 +1,11 @@
-
+library(shiny)
+library(cowplot)
+library(Seurat)
+library(ggplot2)
+library(shinythemes)
+library(shinyWidgets)
+library(dplyr)
+library(rsconnect)
 
 multiGrep2 <- function(toMatch, toSearch, ...) {
   toMatch <- ifelse(grepl("*", toMatch),

@@ -1,5 +1,11 @@
+library(shiny)
+library(cowplot)
+library(Seurat)
+library(ggplot2)
 library(shinythemes)
 library(shinyWidgets)
+library(dplyr)
+library(rsconnect)
 
 ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
   tags$head(includeCSS(paste0("./www/styles.css"))),

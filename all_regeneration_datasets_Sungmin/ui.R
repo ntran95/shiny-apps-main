@@ -1,4 +1,5 @@
-
+library(shinythemes)
+library(shinyWidgets)
 
 ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo
   tags$head(includeCSS(paste0("./www/styles.css"))),

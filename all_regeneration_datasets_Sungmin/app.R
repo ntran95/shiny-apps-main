@@ -5,7 +5,7 @@ library(ggplot2)
 library(shinythemes)
 library(shinyWidgets)
 library(dplyr)
-library(devtools)
+library(rsconnect)
 
 
 # Git branch
@@ -41,13 +41,14 @@ if (FALSE) {
   rsconnect::deployApp(paste0("/Volumes/projects/ddiaz/Analysis/",
     "Scripts/rsconnect/shinyapps.io/", app_name),
     account = "piotrowskilab")
+  
   # Server
   rsconnect::deployApp(paste0("/n/projects/ddiaz/Analysis/",
     "Scripts/rsconnect/shinyapps.io/", app_name),
     account = "piotrowskilab")
 
   #Execute app locally
-  options(shiny.reactlog=TRUE, shiny.fullstacktrace = TRUE)
+  options(shiny.reactlog = TRUE, shiny.fullstacktrace = TRUE)
   shiny::runApp(paste0("/Volumes/projects/ddiaz/Analysis/",
     "Scripts/rsconnect/shinyapps.io/", app_name, "/app.R"))
 

@@ -1,19 +1,10 @@
-library(shiny)
-library(cowplot)
-library(Seurat)
-library(ggplot2)
-library(shinythemes)
-library(shinyWidgets)
-library(dplyr)
-library(rsconnect)
-
 # Git branch
 branch <- "split-app"
 app_name <- "test_split_regen"
 
 # =================================================================== Preamble
-source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
-  branch, "/", app_name, "/preamble.R"))
+# source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
+#   branch, "/", app_name, "/preamble.R"))
 
 
 # ===================================================================== Server
@@ -28,6 +19,7 @@ source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
 
 # =============================================================================
 shinyApp(ui = ui, server = server)
+# options = list(launch.browser = FALSE)
 
 
 # ========== Deploy/execute tools

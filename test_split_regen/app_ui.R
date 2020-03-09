@@ -1,7 +1,6 @@
 
 
-ui <- shinyUI(
-  fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
+ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
   tags$head(includeCSS(paste0("./www/styles.css"))),
   div(headerPanel(app_title), style = 'width:1560px;'),
   div(tabsetPanel(
@@ -470,4 +469,4 @@ ui <- shinyUI(
     )
   ), style = 'width:1500px;')#,
 # shinyDebuggingPanel::withDebuggingPanel()
-))
+)

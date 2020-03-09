@@ -83,7 +83,7 @@ source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
 
 # ========================================================================= UI
 source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
-  branch, "/", app_name, "/app_ui.R"))
+  branch, "/", app_name, "/app_ui.R"), local = TRUE)
 
 
 # =============================================================================

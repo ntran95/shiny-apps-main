@@ -72,6 +72,9 @@ gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
 ens_id <- gene_df$Gene.stable.ID
 com_name <- gene_df$Gene.name.uniq
 
+branch <- "split-app"
+app_name <- "test_split_regen"
+
 
 # ===================================================================== Server
 source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",

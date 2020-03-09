@@ -1,4 +1,3 @@
-# Git branch
 library(shiny)
 library(cowplot)
 library(Seurat)
@@ -67,36 +66,28 @@ app_title <- "Neuromast Regeneration scRNA-seq"
 
 gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
   sep = "\t", header = TRUE, stringsAsFactors = FALSE)
-# ! items to check/change for project (END) !
+# !! items to check/change for project (END) !!
 
 ens_id <- gene_df$Gene.stable.ID
 com_name <- gene_df$Gene.name.uniq
 
 branch <- "split-app"
 app_name <- "test_split_regen"
-pryr::where("server")
 
-# ===================================================================== Server
+
+# =========== Server
 source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
   branch, "/", app_name, "/app_server.R"))
+pryr::where("server")
 
 
-# ========================================================================= UI
+# =========== UI
 source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
-  branch, "/", app_name, "/app_ui.R"), local = TRUE)
+  branch, "/", app_name, "/app_ui.R"))
 
 
-# =============================================================================
-shinyApp(ui = ui, server = server)
-# options = list(launch.browser = FALSE)
-
-
-# ========== Deploy/execute tools
-# options(repos = BiocManager::repositories())
-# getOption("repos")
-
+# =========== Deploy/execute tools
 if (FALSE) {
-
   # Deploy local
   rsconnect::deployApp(paste0("/Volumes/projects/ddiaz/Analysis/",
     "Scripts/rsconnect/shinyapps.io/", app_name),
@@ -108,14 +99,15 @@ if (FALSE) {
     account = "piotrowskilab")
 
   #Execute app locally
-  # options(shiny.reactlog = TRUE, shiny.fullstacktrace = TRUE)
-  # shiny::runApp(paste0("/Volumes/projects/ddiaz/Analysis/",
-  #   "Scripts/rsconnect/shinyapps.io/", app_name, "/app.R"))
   options(shiny.reactlog = TRUE, shiny.fullstacktrace = TRUE)
-  shiny::runApp()
+  shiny::runApp(paste0("/Volumes/projects/ddiaz/Analysis/",
+    "Scripts/rsconnect/shinyapps.io/", app_name, "/app.R"))
 
   # Logs
   rsconnect::showLogs(account = 'piotrowskilab',
     appName = app_name)
 }
-# available.packages(contriburl = "https://cran.rstudio.com")
+
+
+# =========== # Execute app
+shinyApp(ui = ui, server = server) # MUST be at last line of app.R

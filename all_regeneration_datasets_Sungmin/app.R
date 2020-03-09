@@ -54,6 +54,7 @@ names(file_list) <- as.character(c(
 
 avg_mtx <- readRDS(paste0("./data/mtx_CLR_nrml_scld_tmpts_",
   "in_cell_type_all_LL_cells_regen_anchored_seurat3_v1.2_.RDS"))
+
 trt_colors <- c("green3", "gold", "darkorange",
   "deeppink", "mediumorchid1", "deepskyblue", "blue")
 
@@ -71,14 +72,13 @@ gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
 ens_id <- gene_df$Gene.stable.ID
 com_name <- gene_df$Gene.name.uniq
 
-branch <- "split-app"
-app_name <- "test_split_regen"
+branch <- "master"
+app_name <- "all_regeneration_datasets_Sungmin"
 
 
 # =========== Server
 source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
   branch, "/", app_name, "/app_server.R"), local = TRUE)
-pryr::where("server")
 
 
 # =========== UI
@@ -92,7 +92,7 @@ if (FALSE) {
   rsconnect::deployApp(paste0("/Volumes/projects/ddiaz/Analysis/",
     "Scripts/rsconnect/shinyapps.io/", app_name),
     account = "piotrowskilab")
-  
+
   # Deploy from server
   rsconnect::deployApp(paste0("/n/projects/ddiaz/Analysis/",
     "Scripts/rsconnect/shinyapps.io/", app_name),

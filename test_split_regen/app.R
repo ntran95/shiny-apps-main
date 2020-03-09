@@ -78,12 +78,12 @@ app_name <- "test_split_regen"
 
 # ===================================================================== Server
 source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
-  branch, "/", app_name, "/server.R"))
+  branch, "/", app_name, "/app_server.R"))
 
 
 # ========================================================================= UI
 source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
-  branch, "/", app_name, "/ui.R"))
+  branch, "/", app_name, "/app_ui.R"))
 
 
 # =============================================================================

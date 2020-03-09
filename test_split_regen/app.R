@@ -108,9 +108,11 @@ if (FALSE) {
     account = "piotrowskilab")
 
   #Execute app locally
+  # options(shiny.reactlog = TRUE, shiny.fullstacktrace = TRUE)
+  # shiny::runApp(paste0("/Volumes/projects/ddiaz/Analysis/",
+  #   "Scripts/rsconnect/shinyapps.io/", app_name, "/app.R"))
   options(shiny.reactlog = TRUE, shiny.fullstacktrace = TRUE)
-  shiny::runApp(paste0("/Volumes/projects/ddiaz/Analysis/",
-    "Scripts/rsconnect/shinyapps.io/", app_name, "/app.R"))
+  shiny::runApp(paste0("./app.R"))
 
   # Logs
   rsconnect::showLogs(account = 'piotrowskilab',

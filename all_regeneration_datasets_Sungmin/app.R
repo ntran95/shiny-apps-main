@@ -6,7 +6,7 @@ library(shinythemes)
 library(shinyWidgets)
 library(dplyr)
 library(rsconnect)
-#
+
 multiGrep2 <- function(toMatch, toSearch, ...) {
   toMatch <- ifelse(grepl("*", toMatch),
     gsub("\\*","\\\\*", toMatch), toMatch <- toMatch)

@@ -74,7 +74,7 @@ com_name <- gene_df$Gene.name.uniq
 
 branch <- "split-app"
 app_name <- "test_split_regen"
-
+pryr::where("server")
 
 # ===================================================================== Server
 source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
@@ -112,7 +112,7 @@ if (FALSE) {
   # shiny::runApp(paste0("/Volumes/projects/ddiaz/Analysis/",
   #   "Scripts/rsconnect/shinyapps.io/", app_name, "/app.R"))
   options(shiny.reactlog = TRUE, shiny.fullstacktrace = TRUE)
-  shiny::runApp(paste0("./app.R"))
+  shiny::runApp()
 
   # Logs
   rsconnect::showLogs(account = 'piotrowskilab',

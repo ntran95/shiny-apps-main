@@ -77,23 +77,23 @@ app_name <- "test_split_regen"
 
 # =========== Server
 source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
-  branch, "/", app_name, "/app_server.R"))
+  branch, "/", app_name, "/app_server.R"), local = TRUE)
 pryr::where("server")
 
 
 # =========== UI
 source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
-  branch, "/", app_name, "/app_ui.R"))
+  branch, "/", app_name, "/app_ui.R"), local = TRUE)
 
 
 # =========== Deploy/execute tools
 if (FALSE) {
-  # Deploy local
+  # Deploy from local
   rsconnect::deployApp(paste0("/Volumes/projects/ddiaz/Analysis/",
     "Scripts/rsconnect/shinyapps.io/", app_name),
     account = "piotrowskilab")
   
-  # Server
+  # Deploy from server
   rsconnect::deployApp(paste0("/n/projects/ddiaz/Analysis/",
     "Scripts/rsconnect/shinyapps.io/", app_name),
     account = "piotrowskilab")

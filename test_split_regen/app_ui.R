@@ -1,5 +1,3 @@
-
-
 ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
   tags$head(includeCSS(paste0("./www/styles.css"))),
   div(headerPanel(app_title), style = 'width:1560px;'),
@@ -20,7 +18,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
         fluidRow(tags$br()),
         fluidRow(tags$br()),
         column(12, align = "center",
-          tags$b("Select Analysis"),
+          tags$b("This is a test"),
 
           column(12, tags$br()),
           pickerInput("Analysis", label = "",

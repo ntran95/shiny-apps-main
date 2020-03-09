@@ -1,9 +1,6 @@
-
-
 ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
   tags$head(includeCSS(paste0("./www/styles.css"))),
-  div(headerPanel("Neuromast Regeneration scRNA-seq"),
-    style = 'width:1560px;'),
+  div(headerPanel(app_title), style = 'width:1560px;'),
   div(tabsetPanel(
     
     # ================ #

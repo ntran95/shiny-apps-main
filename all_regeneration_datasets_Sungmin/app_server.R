@@ -583,8 +583,7 @@ server <- function(input, output) {
 
   # ======== pHeatmap ======== #
   selectedCellsHmap <- reactive({
-    multiGrep2(input$cellIdentsHmap,
-      colnames(hmap_list[[input$mtxSelectHmap]]))
+    multiGrep2(input$cellIdentsHmap, colnames(hmap_list[[1]]))
   })
 
   pHeatmapF <- reactive({
@@ -630,8 +629,8 @@ server <- function(input, output) {
     isolate({input$Analysis})
   })
 
-  avg_mtx_names <- unique(unlist(lapply(seq_along(colnames(avg_mtx)),
-    function(i){strsplit(colnames(avg_mtx), "_")[[i]][1]})))
+  avg_mtx_names <- unique(unlist(lapply(seq_along(colnames(hmap_list[[1]])),
+    function(i){strsplit(colnames(hmap_list[[1]]), "_")[[i]][1]})))
 
   output$cellSelectHmap <- renderUI({ # New cell type select
   pickerInput("cellIdentsHmap", "Add or remove clusters:",

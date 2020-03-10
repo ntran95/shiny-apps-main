@@ -396,7 +396,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
           change the expression normalization method to decrease/increase
           the effect highly expressed genes. You can find details on each 
           method in the ',
-            tags$a(href = "http://bioinfo/n/projects/ddiaz/Analysis/Scripts/sb2191-regen/regen-summary/site/IntegratedData/",
+            tags$a(href = "https://www.rdocumentation.org/packages/Seurat/versions/3.1.4/topics/NormalizeData",
               tags$b("Seurat documentation")), "."),
           
           column(12, tags$br()),

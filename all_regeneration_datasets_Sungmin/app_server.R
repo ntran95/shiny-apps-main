@@ -597,6 +597,7 @@ server <- function(input, output) {
     )
 
     goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected, selectedCellsHmap()]
+    goi_mat <- goi_mat[match(selected, rownames(goi_mat)),]
     n_trt <- length(unique(file_list[[1]]@meta.data$data.set))
     mtx_cols <- ncol(goi_mat) - n_trt
 

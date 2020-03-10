@@ -595,7 +595,7 @@ server <- function(input, output) {
       ifelse(selected %in% ens_id,
         selected <- gene_df[ens_id %in% selected, 3],"")
     )
-
+    browser()
     goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected, selectedCellsHmap()]
     goi_mat <- goi_mat[match(selected, rownames(goi_mat)),]
     n_trt <- length(unique(file_list[[1]]@meta.data$data.set))

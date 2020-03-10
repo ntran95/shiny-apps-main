@@ -161,7 +161,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
               numericInput("featDPI", "Download quality (DPI):",
                 value = 200, min = 50, step = 25, max = 400, width = "100%")),
             column(6, align = "left",
-              numericInput("ptSizeFeature", "Input cell size:", value = 1.00,
+              numericInput("ptSizeFeature", "Input cell size:", value = 0.50,
                 min = 0.25, step = 0.25, max = 2.00, width = "100%"))
           ),
 
@@ -388,7 +388,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
           column(12, uiOutput("notInPhmap")),
 
           column(12, tags$hr()),
-          column(8, align = "left", tags$b('Note:'),
+          column(9, align = "left", tags$b('Note:'),
           'Highly expressed genes have a tendency to "wash out" the color 
           values of genes with lower expression on this heatmap. It might 
           be useful to remove the higher expressed genes to get a better 

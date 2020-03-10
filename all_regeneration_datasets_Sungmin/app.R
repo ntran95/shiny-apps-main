@@ -37,14 +37,15 @@ getLenInput <- function(input) {
 files <- list.files("./data", pattern = "TRIMMED", full.names = TRUE)
 file_list <- list()
 
-print("Loading data...")
+print("Loading objects...")
 for (i in 1:length(files)) {
   file_list[[i]] <- readRDS(files[i])
   DefaultAssay(file_list[[i]]) <- "RNA"
 }
 print("done.")
 
-# !! items to check/change for project (START) !!
+
+# ! ================== items to check/change for project (START)
 file_list <- file_list[c(6,5,1:4)]
 
 # seurat_obj <- file_list[[1]]
@@ -56,6 +57,18 @@ names(file_list) <- as.character(c(
 
 avg_mtx <- readRDS(paste0("./data/mtx_CLR_nrml_scld_tmpts_",
   "in_cell_type_all_LL_cells_regen_anchored_seurat3_v1.2_.RDS"))
+
+if(FALSE) {
+files <- list.files("./data", pattern = "mtx", full.names = TRUE)
+file_list <- list()
+
+print("Loading matrices...")
+for (i in 1:length(files)) {
+  file_list[[i]] <- readRDS(files[i])
+  DefaultAssay(file_list[[i]]) <- "RNA"
+}
+print("done.")
+}
 
 trt_colors <- c("green3", "gold", "darkorange",
   "deeppink", "mediumorchid1", "deepskyblue", "blue")

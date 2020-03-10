@@ -388,16 +388,16 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
           column(12, uiOutput("notInPhmap")),
 
           column(12, tags$hr()),
-          column(6, align = "left", tags$b('Note:'),
+          column(8, align = "left", tags$b('Note:'),
           'Highly expressed genes have a tendency to "wash out" the color 
           values of genes with lower expression on this heatmap. It might 
           be useful to remove the higher expressed genes to get a better 
           visualization of genes with less extreme values. You can also 
           change the expression normalization method to decrease/increase
           the effect highly expressed genes. You can find details on each 
-          method at this',
+          method in the ',
             tags$a(href = "http://bioinfo/n/projects/ddiaz/Analysis/Scripts/sb2191-regen/regen-summary/site/IntegratedData/",
-              tags$b("link")), "."),
+              tags$b("Seurat documentation")), "."),
           
           column(12, tags$br()),
           column(12, align = "left",

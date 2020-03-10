@@ -392,7 +392,16 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
           'Highly expressed genes have a tendency to "wash out" the color 
           values of genes with lower expression on this heatmap. It might 
           be useful to remove the higher expressed genes to get a better 
-          visualization of genes with less extreme values.')
+          visualization of genes with less extreme values.'),
+          
+          column(6, align = "left",
+            radioGroupButtons("mtxSelectHmap", "Normalization method:",
+              choices = list(Log = "LOG", CLR = "CLR", RC = "RC"),
+              width = "100%")
+          )
+        )
+  })
+
         ),
         
         column(12, align = "center", tags$hr(width = "100%")),

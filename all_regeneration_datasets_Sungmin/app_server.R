@@ -583,7 +583,8 @@ server <- function(input, output) {
 
   # ======== pHeatmap ======== #
   selectedCellsHmap <- reactive({
-    multiGrep2(input$cellIdentsHmap, colnames(avg_mtx))
+    multiGrep2(input$cellIdentsHmap,
+      colnames(hmap_list[[input$mtxSelectHmap]]))
   })
 
   pHeatmapF <- reactive({

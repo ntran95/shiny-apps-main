@@ -504,7 +504,7 @@ server <- function(input, output) {
 
       g <- DotPlot(seurat_obj, features = selected,
         cols = "RdYlBu", dot.scale = input$dotScale,
-        group.by = input$selectGrpDot) 
+        group.by = input$selectGrpDot)
 
       g <- g + labs(title = paste("Selected analysis:",
         as.character(input$Analysis)), subtitle = "", caption = "") +
@@ -596,8 +596,10 @@ server <- function(input, output) {
         selected <- gene_df[ens_id %in% selected, 3],"")
     )
 
+    avg_mtx <- hmap_list[[input$mtxSelectHmap]]
     goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected, selectedCellsHmap()]
     goi_mat <- goi_mat[match(selected, rownames(goi_mat)),]
+
     n_trt <- length(unique(file_list[[1]]@meta.data$data.set))
     mtx_cols <- ncol(goi_mat) - n_trt
 

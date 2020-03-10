@@ -37,23 +37,31 @@ getLenInput <- function(input) {
 files <- list.files("./data", pattern = "TRIMMED", full.names = TRUE)
 file_list <- list()
 
+print("Loading Seurat objects...")
 for (i in 1:length(files)) {
   file_list[[i]] <- readRDS(files[i])
   DefaultAssay(file_list[[i]]) <- "RNA"
 }
+print("done.")
 
-# !! items to check/change for project (START) !!
+hmap_files <- list.files("./data", pattern = "mtx", full.names = TRUE)
+hmap_list <- list()
+
+print("Loading heatmap matrices...")
+for (i in 1:length(hmap_files)) {
+  hmap_list[[i]] <- readRDS(hmap_files[i])
+}
+print("done.")
+
+
+# ! =========== items to check/change for project {START}
 file_list <- file_list[c(6,5,1:4)]
-
-# seurat_obj <- file_list[[1]]
-print(object.size(file_list), units = "MB")
+hmap_list <- hmap_list[c(2,1,3)]
 
 names(file_list) <- as.character(c(
   "all she-pos. cells", "neuromast cells","AP cells",
   "central cells", "HC progenitors", "mantle cells"))
-
-avg_mtx <- readRDS(paste0("./data/mtx_CLR_nrml_scld_tmpts_",
-  "in_cell_type_all_LL_cells_regen_anchored_seurat3_v1.2_.RDS"))
+names(hmap_list) <- as.character(c("LOG", "CLR", "RC"))
 
 trt_colors <- c("green3", "gold", "darkorange",
   "deeppink", "mediumorchid1", "deepskyblue", "blue")
@@ -67,13 +75,14 @@ app_title <- "Neuromast Regeneration scRNA-seq"
 
 gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
   sep = "\t", header = TRUE, stringsAsFactors = FALSE)
-# !! items to check/change for project (END) !!
+
+branch <- "master" # CHECK BEFORE DEPLOYMENT!
+app_name <- "all_regeneration_datasets_Sungmin"
+# ! =========== {END}
+
 
 ens_id <- gene_df$Gene.stable.ID
 com_name <- gene_df$Gene.name.uniq
-
-branch <- "hmap-gene-order" # CHECK before execution
-app_name <- "all_regeneration_datasets_Sungmin"
 
 
 # =========== Server
@@ -86,8 +95,14 @@ source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
   branch, "/", app_name, "/app_ui.R"), local = TRUE)
 
 
-# =========== Deploy/execute tools
-if (FALSE) {
+print("Size of all Seurat objects:")
+print(object.size(file_list), units = "MB")
+
+
+# ======================================================== Deploy/execute tools 
+
+
+if (FALSE) { # Not run
   # Deploy from local
   rsconnect::deployApp(paste0("/Volumes/projects/ddiaz/Analysis/",
     "Scripts/rsconnect/shinyapps.io/", app_name),
@@ -98,7 +113,7 @@ if (FALSE) {
     "Scripts/rsconnect/shinyapps.io/", app_name),
     account = "piotrowskilab")
 
-  #Execute app locally
+  #Execute app locally - please define app name first
   options(shiny.reactlog = TRUE, shiny.fullstacktrace = TRUE)
   shiny::runApp(paste0("/Volumes/projects/ddiaz/Analysis/",
     "Scripts/rsconnect/shinyapps.io/", app_name, "/app.R"))

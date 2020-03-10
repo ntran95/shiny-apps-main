@@ -595,8 +595,8 @@ server <- function(input, output) {
       ifelse(selected %in% ens_id,
         selected <- gene_df[ens_id %in% selected, 3],"")
     )
-
-    avg_mtx <- hmap_list[input$mtxSelectHmap]
+    browser()
+    avg_mtx <- hmap_list[[input$mtxSelectHmap]]
     goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected, selectedCellsHmap()]
     goi_mat <- goi_mat[match(selected, rownames(goi_mat)),]
    

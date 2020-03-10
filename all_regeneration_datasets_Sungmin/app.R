@@ -78,14 +78,14 @@ app_title <- "Neuromast Regeneration scRNA-seq"
 
 gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
   sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+
+branch <- "add-avg-exp-mtx" # CHECK BEFORE DEPLOYMENT
+app_name <- "all_regeneration_datasets_Sungmin"
 # ! =========== {END}
 
 
 ens_id <- gene_df$Gene.stable.ID
 com_name <- gene_df$Gene.name.uniq
-
-branch <- "add-avg-exp-mtx" # CHECK BEFORE DEPLOYMENT
-app_name <- "all_regeneration_datasets_Sungmin"
 
 
 # =========== Server
@@ -100,8 +100,12 @@ source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
 
 print("Size of all Seurat objects:")
 print(object.size(file_list), units = "MB")
+
+
 # ======================================================== Deploy/execute tools 
-if (FALSE) {
+
+
+if (FALSE) { # Not run
   # Deploy from local
   rsconnect::deployApp(paste0("/Volumes/projects/ddiaz/Analysis/",
     "Scripts/rsconnect/shinyapps.io/", app_name),
@@ -112,7 +116,7 @@ if (FALSE) {
     "Scripts/rsconnect/shinyapps.io/", app_name),
     account = "piotrowskilab")
 
-  #Execute app locally
+  #Execute app locally - please define app name first
   options(shiny.reactlog = TRUE, shiny.fullstacktrace = TRUE)
   shiny::runApp(paste0("/Volumes/projects/ddiaz/Analysis/",
     "Scripts/rsconnect/shinyapps.io/", app_name, "/app.R"))

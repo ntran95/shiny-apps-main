@@ -37,10 +37,12 @@ getLenInput <- function(input) {
 files <- list.files("./data", pattern = "TRIMMED", full.names = TRUE)
 file_list <- list()
 
+print("Loading data...")
 for (i in 1:length(files)) {
   file_list[[i]] <- readRDS(files[i])
   DefaultAssay(file_list[[i]]) <- "RNA"
 }
+print("done.")
 
 # !! items to check/change for project (START) !!
 file_list <- file_list[c(6,5,1:4)]

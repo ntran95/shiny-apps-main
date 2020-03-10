@@ -63,9 +63,6 @@ names(file_list) <- as.character(c(
   "central cells", "HC progenitors", "mantle cells"))
 names(hmap_list) <- as.character(c("LOG", "CLR", "RC"))
 
-# avg_mtx <- readRDS(paste0("./data/mtx_CLR_nrml_scld_tmpts_",
-#   "in_cell_type_all_LL_cells_regen_anchored_seurat3_v1.2_.RDS"))
-
 trt_colors <- c("green3", "gold", "darkorange",
   "deeppink", "mediumorchid1", "deepskyblue", "blue")
 

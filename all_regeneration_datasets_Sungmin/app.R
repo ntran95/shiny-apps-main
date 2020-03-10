@@ -76,7 +76,7 @@ app_title <- "Neuromast Regeneration scRNA-seq"
 gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
   sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
-branch <- "add-avg-exp-mtx" # CHECK BEFORE DEPLOYMENT
+branch <- "master" # CHECK BEFORE DEPLOYMENT!
 app_name <- "all_regeneration_datasets_Sungmin"
 # ! =========== {END}
 

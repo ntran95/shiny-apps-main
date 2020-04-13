@@ -55,28 +55,24 @@ print("done.")
 
 
 # ! =========== items to check/change for project {START}
-file_list <- file_list[c(6,5,1:4)]
-hmap_list <- hmap_list[c(2,1,3)]
+file_list <- file_list[c(1)]
+hmap_list <- hmap_list[c(1)]
 
-names(file_list) <- as.character(c(
-  "all she-pos. cells", "neuromast cells","AP cells",
-  "central cells", "HC progenitors", "mantle cells"))
-names(hmap_list) <- as.character(c("LOG", "CLR", "RC"))
+names(file_list) <- as.character(c("All cells"))
+names(hmap_list) <- as.character(c("LOG"))
 
-trt_colors <- c("green3", "gold", "darkorange",
-  "deeppink", "mediumorchid1", "deepskyblue", "blue")
+trt_colors <- c("green3", "darkorange",
+  "deeppink", "mediumorchid1", "deepskyblue")
 
-smpl_genes_sm <- paste0("atoh1a her4.1")
-smpl_genes_lg <- paste0("atoh1a her4.1 hes2.2 dld sox4a*1 myclb gadd45gb.1",
-" insm1a wnt2 sost sfrp1a pcna mki67 isl1 slc1a3a glula lfng cbln20 ebf3a",
-" znf185 si:ch211-229d2.5 si:ch73-261i21.5 spaca4l foxp4 crip1")
+smpl_genes_sm <- paste0("mpeg1.1 mfap4")
+smpl_genes_lg <- paste0("mpeg1.1 mfap4 lcp1 f13a1b tnfa lyz ctss1 txn ccl34b.1")
 
-app_title <- "Neuromast Regeneration scRNA-seq"
+app_title <- "Macrophage scRNA-seq"
 
 gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
   sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
-branch <- "master" # CHECK BEFORE DEPLOYMENT!
+branch <- "macro-test" # CHECK BEFORE DEPLOYMENT!
 app_name <- "all_regeneration_datasets_Sungmin"
 # ! =========== {END}
 

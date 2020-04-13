@@ -73,7 +73,7 @@ gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
   sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
 branch <- "macro-test" # CHECK BEFORE DEPLOYMENT!
-app_name <- "all_regeneration_datasets_Sungmin"
+app_name <- "test-macrophage"
 # ! =========== {END}
 
 

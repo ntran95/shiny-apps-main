@@ -161,7 +161,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
               numericInput("featDPI", "Download quality (DPI):",
                 value = 200, min = 50, step = 25, max = 400, width = "100%")),
             column(6, align = "left",
-              numericInput("ptSizeFeature", "Input cell size:", value = 1.00,
+              numericInput("ptSizeFeature", "Input cell size:", value = 0.50,
                 min = 0.25, step = 0.25, max = 2.00, width = "100%"))
           ),
 
@@ -356,7 +356,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
 
 
     # ================ #
-    tabPanel("Heatmap", #fluid = FALSE,
+    tabPanel("pBulk Heatmap", #fluid = FALSE,
       fixedRow(
         column(12, tags$br()),
 
@@ -388,17 +388,87 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
           column(12, uiOutput("notInPhmap")),
 
           column(12, tags$hr()),
-          column(6, align = "left", tags$b('Note:'),
+          column(9, align = "left", tags$b('Note:'),
           'Highly expressed genes have a tendency to "wash out" the color 
           values of genes with lower expression on this heatmap. It might 
           be useful to remove the higher expressed genes to get a better 
-          visualization of genes with less extreme values.')
+          visualization of genes with less extreme values. You can also 
+          change the expression normalization method to decrease/increase
+          the effect highly expressed genes. You can find details on each 
+          method in the ',
+            tags$a(href = "https://www.rdocumentation.org/packages/Seurat/versions/3.1.4/topics/NormalizeData",
+              tags$b("Seurat documentation")), "."),
+          
+          column(12, tags$br()),
+          column(12, align = "left",
+            radioGroupButtons("mtxSelectHmap", "Normalization method:",
+              choices = list(Log = "LOG", CLR = "CLR", RC = "RC"),
+              width = "100%")
+          )
         ),
         
         column(12, align = "center", tags$hr(width = "100%")),
         column(12, tags$b("Selected analysis: all she-pos. cells")),
         column(12, tags$br()),
         column(12, class = "hmapID", uiOutput("plot.uiPheatmapF"))
+      )
+    ),
+
+
+    # ================ #
+    tabPanel("Cell Heatmap", #fluid = FALSE,
+      sidebarLayout(fluid = TRUE,
+        
+        sidebarPanel(fluid = FALSE, width = 4,
+          column(12, align = "left  ",
+          textInput("dotGenes",
+            "Insert gene name or ensembl ID:",
+            value = smpl_genes_lg),
+          checkboxInput("cellHmapClust",
+            label = "Check box to enable row clustering.", value = FALSE)),
+
+          column(12, align = "center",
+            actionButton("runDotPlot", "Generate Plots",
+            style = 'padding:5px; font-size:80%')),
+
+          column(12, tags$hr(width = "50%"), align = "center"),
+          column(12, align = "center", downloadButton(
+            "downloadDotPlot", "Download pdf",
+            style = 'padding:5px; font-size:80%')),
+
+          column(12, tags$br()),
+          column(12, align = "center", uiOutput("cellSelectDot")), # New
+          
+          column(12, tags$br()),
+          column(12, align = "center",
+            column(6,
+              radioGroupButtons("selectGrpDot",
+                "Group cells by:", choices = list(Time = "data.set",
+                  Cluster = "cell.type.ident"), width = "100%")),
+            column(6,
+              numericInput("dotScale", "Dot diameter:", value = 10, min = 4,
+                step = 1, max = 20, width = "80%"), align = "center")
+          ),
+
+          fluidRow(tags$br()),
+          fluidRow(tags$br()),
+          column(12, uiOutput("plot.uiDatFeatPlotV4"), align = "center"),
+          fluidRow(tags$br()),
+          fluidRow(tags$br())
+        ),
+        
+        mainPanel(
+          fluidRow(
+            column(8, tags$br()),
+            column(8, tags$b("Mismatches or genes not present"),
+                "(if applicable)", tags$b(":")),
+            column(8, uiOutput("notInDot")),
+            column(8, tags$hr()),
+
+            fluidRow(tags$br()),
+            column(12, uiOutput("plot.uiDotPlotF"))
+          )
+        )
       )
     ),
 

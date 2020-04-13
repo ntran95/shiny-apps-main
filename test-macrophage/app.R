@@ -83,12 +83,17 @@ com_name <- gene_df$Gene.name.uniq
 
 # =========== Server
 source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
-  branch, "/", app_name, "/app_server.R"), local = TRUE)
+  branch, "/", app_name, "/app_server.R"), local = TRUE, verbose = TRUE)
 
 
 # =========== UI
 source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
-  branch, "/", app_name, "/app_ui.R"), local = TRUE)
+  branch, "/", app_name, "/app_ui.R"), local = TRUE, verbose = TRUE)
+
+
+# =========== GitHub test
+source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
+  branch, "/", app_name, "/test_github.R"), local = TRUE, verbose = TRUE)
 
 
 print("Size of all Seurat objects:")

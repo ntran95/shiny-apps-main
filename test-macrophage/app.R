@@ -80,24 +80,18 @@ app_name <- "test-macrophage"
 ens_id <- gene_df$Gene.stable.ID
 com_name <- gene_df$Gene.name.uniq
 
+print("Size of all Seurat objects:")
+print(object.size(file_list), units = "MB")
+
 
 # =========== Server
 source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
-  branch, "/", app_name, "/app_server.R"), local = TRUE, verbose = TRUE)
+  branch, "/", app_name, "/app_server.R"), local = TRUE)
 
 
 # =========== UI
 source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
-  branch, "/", app_name, "/app_ui.R"), local = TRUE, verbose = TRUE)
-
-
-# =========== GitHub test
-source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
-  branch, "/", app_name, "/test_github.R"), local = TRUE, verbose = TRUE)
-
-
-print("Size of all Seurat objects:")
-print(object.size(file_list), units = "MB")
+  branch, "/", app_name, "/app_ui.R"), local = TRUE)
 
 
 # ======================================================== Deploy/execute tools 
@@ -122,6 +116,10 @@ if (FALSE) { # Not run
   options(shiny.reactlog = TRUE, shiny.fullstacktrace = TRUE)
   shiny::runApp(paste0("/Volumes/projects/ddiaz/Analysis/",
     "Scripts/rsconnect/shinyapps.io/", app_name, "/app.R"))
+
+  #Execute app locally - please define app name first
+  options(shiny.reactlog = TRUE, shiny.fullstacktrace = TRUE)
+  shiny::runApp(paste0("/Users/ddiaz/Desktop/test-macrophage/app.R"))
 
   # Logs
   rsconnect::showLogs(account = 'piotrowskilab',

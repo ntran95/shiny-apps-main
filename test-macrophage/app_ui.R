@@ -111,7 +111,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
       sidebarLayout(
         sidebarPanel(
           textInput("dbGenes", "Insert gene name or ensembl ID:",
-            value = smpl_genes_lg),
+            value = "gadd45gb.1 slc1a3a znf185 si:ch73-261i21.5"),
           fluidRow(tags$br()),
           column(12, uiOutput("plot.uiDatFeatPlotV6"), align = "center"),
           fluidRow(tags$br())

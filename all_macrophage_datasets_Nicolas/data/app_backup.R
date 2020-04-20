@@ -1304,7 +1304,7 @@ shinyApp(ui = ui, server = server)
 # start R session
 
 # Deploy to shinyapps.io
-# options(shiny.reactlog=TRUE, shiny.fullstacktrace = TRUE); shiny::runApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/all_macrophage_datasets_Nicolas/app.R')
+# rsconnect::deployApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/all_macrophage_datasets_Nicolas', account = 'piotrowskilab')
 
 # Execute app locally
 # options(shiny.reactlog=TRUE, shiny.fullstacktrace = TRUE); shiny::runApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/all_macrophage_datasets_Nicolas/app.R')

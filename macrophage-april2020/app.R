@@ -1309,6 +1309,12 @@ shinyApp(ui = ui, server = server)
 # Execute app locally
 # options(shiny.reactlog=TRUE, shiny.fullstacktrace = TRUE); shiny::runApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/all_macrophage_datasets_Nicolas/app.R')
 # options(shiny.reactlog=TRUE, shiny.fullstacktrace = TRUE); shiny::runApp('/Users/ddiaz/Desktop/macrophage-old')
+# options(shiny.reactlog=TRUE, shiny.fullstacktrace = TRUE); shiny::runApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/macrophage-april2020/app.R')
 
 # Logs
 # rsconnect::showLogs(account = 'piotrowskilab', appName = 'all_macrophage_datasets_Nicolas')
+if (FALSE) {
+  profvis::profvis({
+      shiny::runApp('/Users/ddiaz/Desktop/macrophage-april2020/app.R')
+    })
+}

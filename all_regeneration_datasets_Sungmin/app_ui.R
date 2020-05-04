@@ -346,7 +346,18 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                 "(if applicable)", tags$b(":")),
             column(8, uiOutput("notInDot")),
             column(8, tags$hr()),
-
+            
+            column(8, align = "left",
+              # column(4,  align = "center", "Manual figure adjustment:",
+              #   column(11, style = "padding-top: 8px;",
+              #     switchInput("manAdjustDot", value = FALSE))),
+              column(3, align = "left", numericInput(
+                "manAdjustDotW", label = "Width (pixels):", value = 600, step = 50,
+                width = "100%")),
+              column(3,  align = "left", numericInput(
+                "manAdjustDotH", label = "Height (pixels):", value = 600, step = 50,
+                width = "100%"))
+              ),
             fluidRow(tags$br()),
             column(12, uiOutput("plot.uiDotPlotF"))
           )

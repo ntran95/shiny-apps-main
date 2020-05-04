@@ -460,14 +460,6 @@ server <- function(input, output) {
       dist_mat <- dist(seurat_obj_sub@assays$RNA@data)
       clust <- hclust(dist_mat)
       markers_clust <- clust$labels
-
-      # if (input$selectGrpDot == "data.set") {
-      #     caption_txt <- paste(
-      #       "selected cells:", paste(input$cellIdentsDot, collapse = ", "))
-      #     stringr::str_wrap(caption_txt, width = 10)
-      #   } else {
-      #     ""
-      #   }
       
       g <- DotPlot(seurat_obj, features = markers_clust,
         cols = "RdYlBu", dot.scale = input$dotScale,
@@ -493,14 +485,6 @@ server <- function(input, output) {
 
       seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsDot]
       print(input$cellIdentsDot)
-
-      # if (input$selectGrpDot == "data.set") {
-      #     caption_txt <- paste(
-      #       "selected cells:", paste(input$cellIdentsDot, collapse = ", "))
-      #     stringr::str_wrap(caption_txt, width = 10)
-      #   } else {
-      #     ""
-      #   }
 
       g <- DotPlot(seurat_obj, features = selected,
         cols = "RdYlBu", dot.scale = input$dotScale,
@@ -561,17 +545,23 @@ server <- function(input, output) {
     }
   }
 
-  output$plot.uiDotPlotF <- renderUI({input$runDotPlot
-    isolate({h <- getHeightDot(); plotOutput("myDotPlotF",
-      width = dplotWidth(), height = h)
-    })
-  })
-
   dotHeight <- function() {
     l <- getLenInput(input$dotGenes)
     l <- as.numeric(l)
     return(l)
   }
+
+  # output$plot.uiDotPlotF <- renderUI({input$runDotPlot
+  #   isolate({h <- getHeightDot(); plotOutput("myDotPlotF",
+  #     width = dplotWidth(), height = h)
+  #   })
+  # })
+
+  output$plot.uiDotPlotF <- renderUI({input$runDotPlot
+  isolate({h <- getHeightDot(); plotOutput("myDotPlotF",
+    width = paste0(input$manAdjustDotW, "px"),
+    height = paste0(input$manAdjustDotH, "px"))})
+  })
   
   output$downloadDotPlot <- downloadHandler(
     filename = "dot_plot.pdf", content = function(file) {

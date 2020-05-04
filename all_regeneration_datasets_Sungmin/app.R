@@ -76,7 +76,7 @@ app_title <- "Neuromast Regeneration scRNA-seq"
 gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
   sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
-branch <- "master" # CHECK BEFORE DEPLOYMENT!
+branch <- "develop" # CHECK BEFORE DEPLOYMENT!
 app_name <- "all_regeneration_datasets_Sungmin"
 # ! =========== {END}
 
@@ -118,6 +118,11 @@ if (FALSE) { # Not run
   }
 
   #Execute app locally - please define app name first
+  options(shiny.reactlog = TRUE, shiny.fullstacktrace = TRUE)
+  shiny::runApp(paste0("/Volumes/projects/ddiaz/Analysis/",
+    "Scripts/rsconnect/shinyapps.io/", app_name, "/app.R"))
+
+  #Execute app from desktop
   options(shiny.reactlog = TRUE, shiny.fullstacktrace = TRUE)
   shiny::runApp(paste0("/Volumes/projects/ddiaz/Analysis/",
     "Scripts/rsconnect/shinyapps.io/", app_name, "/app.R"))

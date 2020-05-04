@@ -76,7 +76,7 @@ app_title <- "Neuromast Regeneration scRNA-seq"
 gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
   sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
-branch <- "develop" # CHECK BEFORE DEPLOYMENT!
+branch <- "master" # CHECK BEFORE DEPLOYMENT!
 app_name <- "all_regeneration_datasets_Sungmin"
 # ! =========== {END}
 
@@ -85,7 +85,7 @@ ens_id <- gene_df$Gene.stable.ID
 com_name <- gene_df$Gene.name.uniq
 
 
-# =========== Server
+# =========== server
 source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
   branch, "/", app_name, "/app_server.R"), local = TRUE)
 

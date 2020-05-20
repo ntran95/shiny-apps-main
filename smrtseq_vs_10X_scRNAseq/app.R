@@ -71,7 +71,7 @@ smpl_genes_lg <- paste0("atoh1a her4.1 hes2.2 dld sox4a*1 myclb gadd45gb.1",
 " insm1a wnt2 sost sfrp1a pcna mki67 isl1 slc1a3a glula lfng cbln20 ebf3a",
 " znf185 si:ch211-229d2.5 si:ch73-261i21.5 spaca4l foxp4 crip1")
 
-app_title <- "Neuromast scRNA-seq Analysis between Smart-seq2 and 10X Containing Homeo & 1hr Timepoints"
+app_title <- "Neuromast scRNA-seq Between Homeo & 1hr Timepoints Containing Smart-Seq2 & 10X Cells"
 
 gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
   sep = "\t", header = TRUE, stringsAsFactors = FALSE)
@@ -86,12 +86,12 @@ com_name <- gene_df$Gene.name.uniq
 
 
 # =========== Server
-source(paste0("https://raw.githubusercontent.com/ntran95/shiny_apps_main_smrtseq_10X/",
+source(paste0("https://raw.githubusercontent.com/ntran95/shiny-apps-main/",
   branch, "/", app_name, "/app_server.R"), local = TRUE)
 
 
 # =========== UI
-source(paste0("https://raw.githubusercontent.com/ntran95/shiny_apps_main_smrtseq_10X/",
+source(paste0("https://raw.githubusercontent.com/ntran95/shiny-apps-main/",
   branch, "/", app_name, "/app_ui.R"), local = TRUE)
 
 

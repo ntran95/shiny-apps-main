@@ -7,6 +7,21 @@ library(shinyWidgets)
 library(dplyr)
 library(rsconnect)
 
+# ===================== installing devel version of Seurat to help rsconnect to shin.io 
+
+#install.packages('devtools')
+library(devtools)
+dev_mode(on=T)
+#devtools::install_github(repo = 'satijalab/seurat', ref = 'develop')
+library(Seurat)
+
+
+# when finished do:
+
+#dev_mode(on=F)  #and you are back to having stable Seurat
+
+# ===================== 
+
 multiGrep2 <- function(toMatch, toSearch, ...) {
   toMatch <- ifelse(grepl("*", toMatch),
     gsub("\\*","\\\\*", toMatch), toMatch <- toMatch)
@@ -110,10 +125,10 @@ if (TRUE) { # Not run
    }
 
   # Deploy from server
-  if(branch == "master") {
-    rsconnect::deployApp(paste0("/home/ntran2/bgmp/shiny-apps-main/", app_name),
-      account = "piotrowskilab")
-  }
+  # if(branch == "master") {
+  #   rsconnect::deployApp(paste0("/home/ntran2/bgmp/shiny-apps-main/", app_name),
+  #     account = "piotrowskilab")
+  # }
 
   #Execute app locally - please define app name first
   options(shiny.reactlog = TRUE, shiny.fullstacktrace = TRUE)

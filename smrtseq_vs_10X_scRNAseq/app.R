@@ -102,25 +102,22 @@ print(object.size(file_list), units = "MB")
 # ======================================================== Deploy/execute tools 
 
 
-if (FALSE) { # Not run
-  # Deploy from local
-  if(branch == "master") {
-  rsconnect::deployApp(paste0("/Volumes/projects/ddiaz/Analysis/",
-    "Scripts/rsconnect/shinyapps.io/", app_name),
-    account = "piotrowskilab")
-  }
+if (TRUE) { # Not run
+  # # Deploy from local
+   if(branch == "master") {
+   rsconnect::deployApp(paste0("/Volumes/easystore/SIMR_2019/shiny-apps-main/", app_name),
+     account = "piotrowskilab")
+   }
 
   # Deploy from server
   if(branch == "master") {
-    rsconnect::deployApp(paste0("/n/projects/ddiaz/Analysis/",
-      "Scripts/rsconnect/shinyapps.io/", app_name),
+    rsconnect::deployApp(paste0("/home/ntran2/bgmp/shiny-apps-main/", app_name),
       account = "piotrowskilab")
   }
 
   #Execute app locally - please define app name first
   options(shiny.reactlog = TRUE, shiny.fullstacktrace = TRUE)
-  shiny::runApp(paste0("/Volumes/projects/ddiaz/Analysis/",
-    "Scripts/rsconnect/shinyapps.io/", app_name, "/app.R"))
+  shiny::runApp(paste0("/Volumes/easystore/SIMR_2019/shiny-apps-main/", app_name, "/app.R"))
 
   # Logs
   rsconnect::showLogs(account = 'piotrowskilab',

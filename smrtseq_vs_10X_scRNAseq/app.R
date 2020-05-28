@@ -1,6 +1,6 @@
 library(shiny)
 library(cowplot)
-library(Seurat)
+#library(Seurat)
 library(ggplot2)
 library(shinythemes)
 library(shinyWidgets)
@@ -37,7 +37,7 @@ gg_color_hue <- function(n) {
 }
 
 getLenInput <- function(input) {
-  selected <- unlist(strsplit(input, " "))
+  selected <- unlist(strsplit(input, " ")) #splits the input genes into a list, sep by  " "
   
   ifelse(selected %in% com_name,
     selected <- gene_df[com_name %in% selected, 3],
@@ -117,22 +117,22 @@ print(object.size(file_list), units = "MB")
 # ======================================================== Deploy/execute tools 
 
 
-if (TRUE) { # Not run
+if (FALSE) { # Not run
   # # Deploy from local
-   if(branch == "master") {
-   rsconnect::deployApp(paste0("/Volumes/easystore/SIMR_2019/shiny-apps-main/", app_name),
-     account = "piotrowskilab")
-   }
+   # if(branch == "master") {
+   # rsconnect::deployApp(paste0("/Volumes/easystore/SIMR_2019/shiny-apps-main/", app_name),
+   #   account = "piotrowskilab")
+   # }
 
   # Deploy from server
-  # if(branch == "master") {
-  #   rsconnect::deployApp(paste0("/home/ntran2/bgmp/shiny-apps-main/", app_name),
-  #     account = "piotrowskilab")
-  # }
+   if(branch == "master") {
+     rsconnect::deployApp(paste0("/home/ntran2/bgmp/shiny-apps-main/", app_name),
+       account = "piotrowskilab")
+   }
 
   #Execute app locally - please define app name first
-  options(shiny.reactlog = TRUE, shiny.fullstacktrace = TRUE)
-  shiny::runApp(paste0("/Volumes/easystore/SIMR_2019/shiny-apps-main/", app_name, "/app.R"))
+  # options(shiny.reactlog = TRUE, shiny.fullstacktrace = TRUE)
+  # shiny::runApp(paste0("home/ntran2/bgmp/shiny-apps-main/", app_name, "/app.R"))
 
   # Logs
   rsconnect::showLogs(account = 'piotrowskilab',

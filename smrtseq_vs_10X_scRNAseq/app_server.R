@@ -456,8 +456,8 @@ server <- function(input, output) {
       
       seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsDot]
 
-      seurat_obj_sub <- seurat_obj[rownames(seurat_obj) %in% selected,]
-      dist_mat <- dist(seurat_obj_sub@assays$RNA@data)
+      seurat_obj_sub <- seurat_obj[rownames(seurat_obj) %in% selected,] #filters the obj obly by the selected input
+      dist_mat <- dist(seurat_obj_sub@assays$RNA@data)  #turns the selected genes into a matrix
       clust <- hclust(dist_mat)
       markers_clust <- clust$labels
 
@@ -580,7 +580,81 @@ server <- function(input, output) {
       dev.off()
     }
   )
+  
+## ========== DoHeatMap ======= ##
+  
+  pHeatmapF <- reactive({
+      clustering <- input$pHmapClust  #enable row clustering
+      if (clustering == TRUE){
+      seurat_obj <- SelectDataset()
+      selected <- unlist(strsplit(input$PhmapGenes, " "))
 
+      ifelse(selected %in% com_name,
+        selected <- selected[selected %in% com_name],
+
+        ifelse(selected %in% ens_id,
+          selected <- gene_df[ens_id %in% selected, 3],"")
+      )
+      
+      seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsHmap]
+      
+      dist_mat <- dist(seurat_obj_sub@assays$RNA@data)
+      clust <- hclust(dist_mat)   #reorder genes
+      markers_clust <- clust$labels
+      
+      g <- DoHeatmap(seurat_obj, features = markers_clust,
+                     group.by = selectGrpHmap) + scale_fill_gradientn(colors = c("red", "yellow", "blue"))
+      
+      g <- g + labs(title = paste("Selected analysis:",
+                                  as.character(input$Analysis)), subtitle = "", caption = "") +
+        theme(plot.title = element_text(face = "plain", size = 14))
+      
+      } else {
+        seurat_obj <- SelectDataset()
+        selected <- unlist(strsplit(input$PhmapGenes, " "))
+        
+        ifelse(selected %in% com_name,
+               selected <- selected[selected %in% com_name],
+               
+               ifelse(selected %in% ens_id,
+                      selected <- gene_df[ens_id %in% selected, 3],"")
+        )
+        
+        seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsHmap]
+        print(input$cellIdentsHmap)
+        
+        g <- DoHeatmap(seurat_obj, features = selected,
+                       group.by = selectGrpHmap) + scale_fill_gradientn(colors = c("red", 
+                                                                      "yellow", "blue"))
+        
+        g <- g + labs(title = paste("Selected analysis:",
+                                    as.character(input$Analysis)), subtitle = "", caption = "") +
+          theme(plot.title = element_text(face = "plain", size = 14))
+        
+      }
+      
+      return(g)
+      
+  })
+  
+  #renders the drop-down box w/ Ident choices
+  output$cellSelectHmap <- renderUI({ # New cell type select
+  pickerInput("cellIdentsHmap", "Add or remove clusters:",
+    choices = as.character(printIdents()), multiple = TRUE,
+    selected = as.character(printIdents()), options = list(
+    `actions-box` = TRUE), width = "85%")
+})
+  
+  mismatchPhmap <- function() {
+    selected <- unlist(strsplit(input$PhmapGenes, " "))
+
+    mismatch <- ifelse(!selected %in% c(com_name, ens_id),
+      selected[!selected %in% c(com_name, ens_id)],"")
+    return(mismatch)
+  }
+  
+    
+    
   # # ======== pHeatmap ======== # -omit heatmap for this app
   # selectedCellsHmap <- reactive({
   #   multiGrep2(input$cellIdentsHmap, colnames(hmap_list[[1]]))
@@ -591,7 +665,7 @@ server <- function(input, output) {
   # 
   #   ifelse(selected %in% com_name,
   #     selected <- selected[selected %in% com_name],
-  #   
+  # 
   #     ifelse(selected %in% ens_id,
   #       selected <- gene_df[ens_id %in% selected, 3],"")
   #   )
@@ -606,11 +680,13 @@ server <- function(input, output) {
   #   hmapColors <- colorRampPalette(
   #     rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu")))(100)
   # 
-  #   pheatmap::pheatmap(goi_mat, cluster_rows = input$pHmapClust,
-  #     cluster_cols = FALSE, color = hmapColors, annotation_col = NULL,
-  #     legend = FALSE, annotation_colors = anno_cols,
-  #     gaps_col = seq(n_trt, mtx_cols, by = n_trt),
-  #     annotation_names_col = FALSE, annotation_legend = FALSE)
+  #   # pheatmap::pheatmap(goi_mat, cluster_rows = input$pHmapClust,
+  #   #   cluster_cols = FALSE, color = hmapColors, annotation_col = NULL,
+  #   #   legend = FALSE, annotation_colors = anno_cols,
+  #   #   gaps_col = seq(n_trt, mtx_cols, by = n_trt),
+  #   #   annotation_names_col = FALSE, annotation_legend = FALSE)
+  #   
+  #   DoHeatmap(seurat_obj, features = selected) + NoLegend()
   # })
   # 
   # mismatchPhmap <- function() {

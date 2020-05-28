@@ -653,6 +653,52 @@ server <- function(input, output) {
     return(mismatch)
   }
   
+  #prints the mismatches or genes not present (for ui.R)
+  output$notInPhmap <- renderText({input$runPhmap
+    isolate({mismatchPhmap()})
+  })
+  
+  output$SelectedDataPhmap <- renderText({input$runPhmap
+    isolate({input$Analysis})
+  })
+  
+  #renders plot w/ progress bar
+  output$myPhmapF <- renderPlot({input$runPhmap
+    isolate({withProgress({p <- pHeatmapF(); print(p)},
+      message = "Rendering plot..", min = 0, max = 10, value = 10)
+    })
+  })
+  
+  getHeightPhmap <- reactive({
+    l <- getLenInput(input$PhmapGenes)
+    h <- paste0(as.character(l * 35), "px")
+    return(h)
+  })
+  
+  getWidthPhmap <- function () {
+    if(input$selectGrpHmap == "data.set") {
+      w <- "500px"
+    } else {
+      w <- "800px"
+    }
+  }
+  
+  output$plot.uiPheatmapF <- renderUI({input$runPhmap
+    isolate({
+      w <- paste0(getWidthPhmap(), "px"); h <- paste0(getHeightPhmap(), "px")
+        plotOutput("myPhmapF", width = w, height = h)
+    })
+  })
+  
+  #download
+  output$downloadPhmap <- downloadHandler(
+    filename = "heatmap.pdf", content = function(file) {
+      pdf(file, width = (getWidthPhmap() / 90),
+          height = (getHeightPhmap() / 90))
+      print(pHeatmapF())
+      dev.off()
+    }
+  )
     
     
   # # ======== pHeatmap ======== # -omit heatmap for this app

@@ -353,9 +353,65 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
         )
       )
     ),
+   
+   # ================ # DoHeatmap
+   tabPanel("Heat Map", #fluid = FALSE,
+    sidebarLayout(fluid = TRUE,
+                          
+      sidebarPanel(fluid = FALSE, width = 4,
+        column(12, align = "left  ",
+        textInput("PhmapGenes",
+                  "Insert gene name or ensembl ID:",
+                  value = smpl_genes_lg),
+        checkboxInput("pHmapClust",
+                      label = "Check box to enable row clustering.", value = FALSE)),
+ 
+         column(12, align = "center",
+                actionButton("runPhmap", "Generate Plots",
+                             style = 'padding:5px; font-size:80%')),
+         
+         column(12, tags$hr(width = "50%"), align = "center"),
+         column(12, align = "center", downloadButton(
+           "downloadPhmap", "Download pdf",
+           style = 'padding:5px; font-size:80%')),
+         
+         column(12, tags$br()),
+         column(12, align = "center", uiOutput("cellSelectHmap")), # New
+         
+         column(12, tags$br()),
+         column(12, align = "center",
+                column(6,
+                       radioGroupButtons("selectGrpHmap",
+                                         "Group cells by:", choices = list(Time = "data.set",
+                                          Cluster = "cell.type.ident"), width = "100%"))
+         
+         ),
+         
+         fluidRow(tags$br()),
+         fluidRow(tags$br()),
+         column(12, uiOutput("plot.uiDatFeatPlotV7"), align = "center"),
+         fluidRow(tags$br()),
+         fluidRow(tags$br())
+        ),
+        
+        mainPanel(
+        fluidRow(
+        column(8, tags$br()),
+        column(8, tags$b("Mismatches or genes not present"),
+        "(if applicable)", tags$b(":")),
+        column(8, uiOutput("notInPhmap")),
+        column(8, tags$hr()),
+        
+        fluidRow(tags$br()),
+        column(12, uiOutput("plot.uiPheatmapF"))
+        )
+        )
+        )
+        ),
 
 
-    # # ================ #
+
+    # # ================ # Phmap - omit
     # tabPanel("Heatmap", #fluid = FALSE,
     #   fixedRow(
     #     column(12, tags$br()),

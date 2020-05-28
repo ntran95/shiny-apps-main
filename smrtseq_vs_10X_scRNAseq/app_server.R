@@ -165,13 +165,15 @@ server <- function(input, output) {
     plotOutput("myDatFeatPlotH1", width = "850px", height = "450px")
   })
 
-  n_panels <- 1:6
+  n_panels <- 1:7
 
+  #generates umaps on sidebar of each tab
   lapply(n_panels, function(i) {
     output[[paste0("myDatFeatPlotV", i)]] <- 
       renderPlot({DatFeatPlotF()[[2]]})
   })
 
+  #generates umaps on sidebar of each tab
   lapply(n_panels, function(i) {
     output[[paste0("plot.uiDatFeatPlotV", i)]] <- 
       renderUI({plotOutput(paste0("myDatFeatPlotV", i),
@@ -604,6 +606,7 @@ server <- function(input, output) {
       
       g <- DoHeatmap(seurat_obj, features = markers_clust,
                      group.by = selectGrpHmap) + scale_fill_gradientn(colors = c("red", "yellow", "blue"))
+      #selectGrpHmap: user input b/t cell.type.ident or data.set
       
       g <- g + labs(title = paste("Selected analysis:",
                                   as.character(input$Analysis)), subtitle = "", caption = "") +

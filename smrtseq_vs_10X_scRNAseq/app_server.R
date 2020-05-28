@@ -688,7 +688,7 @@ server <- function(input, output) {
   
   output$plot.uiPheatmapF <- renderUI({input$runPhmap
     isolate({
-      w <- paste0(getWidthPhmap(), "px"); h <- paste0(getHeightPhmap(), "px")
+      w <- paste0(getWidthPhmap()); h <- paste0(getHeightPhmap())
         plotOutput("myPhmapF", width = w, height = h)
     })
   })

@@ -6,6 +6,7 @@ library(shinythemes)
 library(shinyWidgets)
 library(dplyr)
 library(rsconnect)
+library(tidyselect)
 
 # ===================== installing devel version of Seurat to help rsconnect to shin.io 
 

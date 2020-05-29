@@ -627,7 +627,7 @@ server <- function(input, output) {
         print(input$cellIdentsHmap)
         
         g <- DoHeatmap(seurat_obj, features = selected,
-                       group.by = selectGrpHmap) + scale_fill_gradientn(colors = c("red", 
+                       group.by = input$selectGrpHmap) + scale_fill_gradientn(colors = c("red", 
                                                                       "yellow", "blue"))
         
         g <- g + labs(title = paste("Selected analysis:",

@@ -605,7 +605,7 @@ server <- function(input, output) {
       markers_clust <- clust$labels
       
       g <- DoHeatmap(seurat_obj, features = markers_clust,
-                     group.by = input$selectGrpHmap) + scale_fill_gradientn(colors = c("red", "yellow", "blue"))
+                     group.by = input$selectGrpHmap) + scale_fill_gradientn(colors = "RdYlBu")
       #selectGrpHmap: user input b/t cell.type.ident or data.set
       
       g <- g + labs(title = paste("Selected analysis:",
@@ -627,8 +627,7 @@ server <- function(input, output) {
         print(input$cellIdentsHmap)
         
         g <- DoHeatmap(seurat_obj, features = selected,
-                       group.by = input$selectGrpHmap) + scale_fill_gradientn(colors = c("red", 
-                                                                      "yellow", "blue"))
+                       group.by = input$selectGrpHmap) + scale_fill_gradientn(colors = "RdYlBu")
         
         g <- g + labs(title = paste("Selected analysis:",
                                     as.character(input$Analysis)), subtitle = "", caption = "") +

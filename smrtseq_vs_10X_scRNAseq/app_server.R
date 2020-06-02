@@ -471,7 +471,7 @@ server <- function(input, output) {
     filename = "StkdViolin_plot.pdf", content = function(file) {
       pdf(file, onefile = FALSE,
           width = 12,
-          height = 10 * getLenInput(input$vlnStkdGenes))
+          height = 5 * getLenInput(input$vlnStkdGenes))
       print(StkdVlnPlotF())
       dev.off()
     }

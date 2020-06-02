@@ -196,7 +196,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
         sidebarPanel(fluid = FALSE, width = 4,
           column(12, textInput("vlnGenes", width = "100%",
             "Insert gene name or ensembl ID:",
-            value = smpl_genes_sm)),
+            value = smpl_genes_lg)),
           
           column(12, align = "center",
             actionButton("runVlnPlot", "Generate Plots",

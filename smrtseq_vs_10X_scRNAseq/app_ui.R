@@ -248,36 +248,36 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
       sidebarLayout(fluid = TRUE,
 
       sidebarPanel(fluid = FALSE, width = 4,
-        column(12, textInput("vlnGenes", width = "100%",
+        column(12, textInput("vlnStkdGenes", width = "100%",
                         "Insert gene name or ensembl ID:",
                         value = smpl_genes_sm)),
    
         column(12, align = "center",
-          actionButton("runVlnPlot", "Generate Plots",
+          actionButton("runStkdVlnPlot", "Generate Plots",
                        style = 'padding:5px; font-size:80%')),
    
         column(12, tags$hr(width = "50%"), align = "center"),
         column(12, align = "center", downloadButton(
-     "downloadVlnPlot", "Download pdf",
+     "downloadStkdVlnPlot", "Download pdf",
      style = 'padding:5px; font-size:80%')),
    
         column(12, tags$br()),
-        column(12, align = "center", uiOutput("cellSelectVln")), # New
+        column(12, align = "center", uiOutput("cellSelectStkdVln")), # New
    
         column(12, tags$br()),
           column(12, align = "center",
           column(6,
-                 radioGroupButtons("selectGrpVln",
+                 radioGroupButtons("selectGrpStkdVln",
                                    "Group cells by:", choices = list(Time = "data.set",
                                                                      Cluster = "cell.type.ident"), width = "100%")),
           column(6,
-                 numericInput("ptSizeVln", "Input cell size:", value = 0.25,
+                 numericInput("ptSizeStkdVln", "Input cell size:", value = 0.25,
                               min = 0.00, step = 0.75, max = 2.00, width = "80%"))
    ),
    
    fluidRow(tags$br()),
    fluidRow(tags$br()),
-   column(12, uiOutput("plot.uiDatFeatPlotV2"), align = "center"),
+   column(12, uiOutput("plot.uiDatFeatPlotV8"), align = "center"),
    fluidRow(tags$br()),
    fluidRow(tags$br())
   ),
@@ -286,7 +286,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
     fluidRow(
     column(8, tags$br()),
     column(8, tags$b("Gene mismatches"), "(if present)", tags$b(":")),
-    column(8,uiOutput("notInVln")),
+    column(8,uiOutput("notInStkdVln")),
     column(8, tags$hr()),
 # column(8, tags$b(uiOutput("SelectedDataVln"))),
     column(12, uiOutput("plot.uiStkdVlnPlotF")

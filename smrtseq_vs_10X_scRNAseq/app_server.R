@@ -165,7 +165,7 @@ server <- function(input, output) {
     plotOutput("myDatFeatPlotH1", width = "850px", height = "450px")
   })
 
-  n_panels <- 1:7
+  n_panels <- 1:8
 
   #generates umaps on sidebar of each tab
   lapply(n_panels, function(i) {

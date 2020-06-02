@@ -456,7 +456,7 @@ server <- function(input, output) {
     l <- getLenInput(input$vlnStkdGenes)
     if (l == 1) {h <- "600px"
     } else {
-      h <- as.character(ceiling(l) * 600)
+      h <- as.character(ceiling(l) * 100)
       h <- paste0(h, "px")
     }
     return(h)

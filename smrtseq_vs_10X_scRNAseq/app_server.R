@@ -376,8 +376,7 @@ server <- function(input, output) {
                               pt.size = input$ptSizeStkdVln, 
                               plot.margin = unit(c(-0.75, 0, -0.75, 0), "cm"),
                               ...) {
-      p<- VlnPlot(obj, features = feature, pt.size = pt.size,
-                  pt.size = pt.size, group.by = input$selectGrpStkdVln, 
+      p<- VlnPlot(obj, features = feature, pt.size = pt.size, group.by = input$selectGrpStkdVln, 
                   cols = cluster_clrs)  + 
         xlab("") + ylab(feature) + ggtitle("") + 
         theme(legend.position = "none", 

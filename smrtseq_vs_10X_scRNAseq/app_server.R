@@ -369,14 +369,14 @@ server <- function(input, output) {
                   selected <- gene_df[ens_id %in% selected, 3],"")
     )
     
-    seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsStkdVln]
+    #seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsStkdVln]
     
     modify_vlnplot<- function(obj, 
                               feature, 
                               pt.size = input$ptSizeStkdVln, 
                               plot.margin = unit(c(-0.75, 0, -0.75, 0), "cm"),
                               ...) {
-      p<- VlnPlot(obj, features = feature, pt.size = pt.size, selected,
+      p<- VlnPlot(obj, features = feature, pt.size = pt.size,
                   pt.size = pt.size, group.by = input$selectGrpStkdVln, 
                   cols = cluster_clrs)  + 
         xlab("") + ylab(feature) + ggtitle("") + 

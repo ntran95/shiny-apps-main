@@ -356,6 +356,129 @@ server <- function(input, output) {
     }
   )
 
+  # ======== Stacked Violin Plot ======== #
+  
+  StkdVlnPlotF <- reactive({
+    seurat_obj <- SelectDataset()
+    selected <- unlist(strsplit(input$vlnStkdGenes, " "))
+    
+    ifelse(selected %in% com_name,
+           selected <- selected[selected %in% com_name],
+           
+           ifelse(selected %in% ens_id,
+                  selected <- gene_df[ens_id %in% selected, 3],"")
+    )
+    
+    seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsStkdVln]
+    
+    modify_vlnplot<- function(obj, 
+                              feature, 
+                              pt.size = input$ptSizeStkdVln, 
+                              plot.margin = unit(c(-0.75, 0, -0.75, 0), "cm"),
+                              ...) {
+      p<- VlnPlot(obj, features = feature, pt.size = pt.size, selected,
+                  pt.size = pt.size, group.by = input$selectGrpStkdVln, 
+                  cols = cluster_clrs)  + 
+        xlab("") + ylab(feature) + ggtitle("") + 
+        theme(legend.position = "none", 
+              axis.text.x = element_blank(), 
+              axis.ticks.x = element_blank(), 
+              axis.title.y = element_text(size = rel(1), angle = 0), 
+              axis.text.y = element_text(size = rel(1)), 
+              plot.margin = plot.margin ) 
+      return(p)
+    }
+    
+    ## extract the max value of the y axis
+    extract_max<- function(p){
+      ymax<- max(ggplot_build(p)$layout$panel_scales_y[[1]]$range$range)
+      return(ceiling(ymax))
+    }
+    
+    ## main function
+    StackedVlnPlot<- function(obj, features,
+                              pt.size = input$ptSizeStkdVln, 
+                              plot.margin = unit(c(-0.75, 0, -0.75, 0), "cm"),
+                              ...) {
+      
+      plot_list<- purrr::map(features, function(x) modify_vlnplot(obj = obj,feature = x, ...))
+      
+      # Add back x-axis title to bottom plot. patchwork is going to support this?
+      plot_list[[length(plot_list)]]<- plot_list[[length(plot_list)]] +
+        theme(axis.text.x=element_text(), axis.ticks.x = element_line())
+      
+      # change the y-axis tick to only max value 
+      ymaxs<- purrr::map_dbl(plot_list, extract_max)
+      plot_list<- purrr::map2(plot_list, ymaxs, function(x,y) x + 
+                                scale_y_continuous(breaks = c(y)) + 
+                                expand_limits(y = y))
+      
+      p<- patchwork::wrap_plots(plotlist = plot_list, ncol = 1)
+      return(p)
+    }
+    
+    pg <- StackedVlnPlot(obj = seurat_obj, features = selected)
+    
+    
+    return(pg)
+  })
+  
+  output$cellSelectStkdVln <- renderUI({ # New cell type select
+    pickerInput("cellIdentsVln", "Add or remove clusters:",
+                choices = as.character(printIdents()), multiple = TRUE,
+                selected = as.character(printIdents()), options = list(
+                  `actions-box` = TRUE), width = "85%")
+  })
+  
+  mismatchStkdVln <- function() {
+    selected <- unlist(strsplit(input$vlnStkdGenes, " "))
+    
+    mismatch <- ifelse(!selected %in% c(com_name,ens_id),
+                       selected[!selected %in% c(com_name,ens_id)],"")
+    return(mismatch)
+  }
+  
+  output$notInStkdVln <- renderText({input$runStkdVlnPlot
+    isolate({mismatchStkdVln()})
+  })
+  
+  output$SelectedDataStkdVln <- renderText({input$runStkdVlnPlot
+    isolate({input$Analysis})
+  })
+  
+  output$myStkdVlnPlotF <- renderPlot({input$runStkdVlnPlot
+    isolate({withProgress({p <- StkdVlnPlotF(); print(p)},
+                          message = "Rendering plot..",
+                          min = 0, max = 10, value = 10)
+    })
+  })
+  
+  getHeightStkdVln <- function() {
+    l <- getLenInput(input$vlnStkdGenes)
+    if (l == 1) {h <- "600px"
+    } else {
+      h <- as.character(ceiling(l) * 600)
+      h <- paste0(h, "px")
+    }
+    return(h)
+  }
+  
+  output$plot.uiStkdVlnPlotF <- renderUI({input$runStkdVlnPlot
+    isolate({h <- getHeightStkdVln(); plotOutput("myStkdVlnPlotF",
+                                             width = "800px", height = h)})
+  })
+  
+  output$downloadStkdVlnPlot <- downloadHandler(
+    filename = "StkdViolin_plot.pdf", content = function(file) {
+      pdf(file, onefile = FALSE,
+          width = 12,
+          height = 10 * getLenInput(input$vlnStkdGenes))
+      print(StkdVlnPlotF())
+      dev.off()
+    }
+  )
+  
+  
 
   # # ======== Ridge Plot ======== #
   # RdgPlotF <- reactive({

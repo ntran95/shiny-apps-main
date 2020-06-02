@@ -1,6 +1,6 @@
 library(shiny)
 library(cowplot)
-#library(Seurat)
+library(Seurat)
 library(ggplot2)
 library(shinythemes)
 library(shinyWidgets)
@@ -49,7 +49,7 @@ getLenInput <- function(input) {
   return(len)
 }
 
-files <- list.files("./data/seurat_obj_input", pattern = ".RDS", full.names = TRUE)
+files <- list.files("./data/seurat_obj_input", pattern = ".rds", full.names = TRUE)
 file_list <- list()
 
 print("Loading Seurat objects...")
@@ -125,10 +125,10 @@ if (FALSE) { # Not run
    # }
 
   # Deploy from server
-   if(branch == "master") {
-     rsconnect::deployApp(paste0("/home/ntran2/bgmp/shiny-apps-main/", app_name),
-       account = "piotrowskilab")
-   }
+   # if(branch == "master") {
+   #   rsconnect::deployApp(paste0("/home/ntran2/bgmp/shiny-apps-main/", app_name),
+   #     account = "piotrowskilab")
+   # }
 
   #Execute app locally - please define app name first
   # options(shiny.reactlog = TRUE, shiny.fullstacktrace = TRUE)

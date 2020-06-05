@@ -356,7 +356,130 @@ server <- function(input, output) {
     }
   )
 
-  # ======== Stacked Violin Plot ======== #
+  # # ======== Stacked Violin Plot ======== #
+  # 
+  # StkdVlnPlotF <- reactive({
+  #   seurat_obj <- SelectDataset()
+  #   selected <- unlist(strsplit(input$vlnStkdGenes, " "))
+  #   
+  #   ifelse(selected %in% com_name,
+  #          selected <- selected[selected %in% com_name],
+  #          
+  #          ifelse(selected %in% ens_id,
+  #                 selected <- gene_df[ens_id %in% selected, 3],"")
+  #   )
+  #   
+  #   #seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsStkdVln]
+  #   
+  #   modify_vlnplot<- function(obj, 
+  #                             feature, 
+  #                             pt.size = input$ptSizeStkdVln, 
+  #                             plot.margin = unit(c(-0.75, 0, -0.75, 0), "cm"),
+  #                             ...) {
+  #     p<- VlnPlot(obj, features = feature, pt.size = pt.size, group.by = input$selectGrpStkdVln, 
+  #                 cols = cluster_clrs)  + 
+  #       xlab("") + ylab(feature) + ggtitle("") + 
+  #       theme(legend.position = "none", 
+  #             axis.text.x = element_blank(), 
+  #             axis.ticks.x = element_blank(), 
+  #             axis.title.y = element_text(size = rel(1), angle = 0), 
+  #             axis.text.y = element_text(size = rel(1)), 
+  #             plot.margin = plot.margin ) 
+  #     return(p)
+  #   }
+  #   
+  #   ## extract the max value of the y axis
+  #   extract_max<- function(p){
+  #     ymax<- max(ggplot_build(p)$layout$panel_scales_y[[1]]$range$range)
+  #     return(ceiling(ymax))
+  #   }
+  #   
+  #   ## main function
+  #   StackedVlnPlot<- function(obj, features,
+  #                             pt.size = input$ptSizeStkdVln, 
+  #                             plot.margin = unit(c(-0.75, 0, -0.75, 0), "cm"),
+  #                             ...) {
+  #     
+  #     plot_list<- purrr::map(features, function(x) modify_vlnplot(obj = obj,feature = x, ...))
+  #     
+  #     # Add back x-axis title to bottom plot. patchwork is going to support this?
+  #     plot_list[[length(plot_list)]]<- plot_list[[length(plot_list)]] +
+  #       theme(axis.text.x=element_text(), axis.ticks.x = element_line())
+  #     
+  #     # change the y-axis tick to only max value 
+  #     ymaxs<- purrr::map_dbl(plot_list, extract_max)
+  #     plot_list<- purrr::map2(plot_list, ymaxs, function(x,y) x + 
+  #                               scale_y_continuous(breaks = c(y)) + 
+  #                               expand_limits(y = y))
+  #     
+  #     p<- patchwork::wrap_plots(plotlist = plot_list, ncol = 1)
+  #     return(p)
+  #   }
+  #   
+  #   pg <- StackedVlnPlot(obj = seurat_obj, features = selected)
+  #   
+  #   
+  #   return(pg)
+  # })
+  # 
+  # output$cellSelectStkdVln <- renderUI({ # New cell type select
+  #   pickerInput("cellIdentsVln", "Add or remove clusters:",
+  #               choices = as.character(printIdents()), multiple = TRUE,
+  #               selected = as.character(printIdents()), options = list(
+  #                 `actions-box` = TRUE), width = "85%")
+  # })
+  # 
+  # mismatchStkdVln <- function() {
+  #   selected <- unlist(strsplit(input$vlnStkdGenes, " "))
+  #   
+  #   mismatch <- ifelse(!selected %in% c(com_name,ens_id),
+  #                      selected[!selected %in% c(com_name,ens_id)],"")
+  #   return(mismatch)
+  # }
+  # 
+  # output$notInStkdVln <- renderText({input$runStkdVlnPlot
+  #   isolate({mismatchStkdVln()})
+  # })
+  # 
+  # output$SelectedDataStkdVln <- renderText({input$runStkdVlnPlot
+  #   isolate({input$Analysis})
+  # })
+  # 
+  # output$myStkdVlnPlotF <- renderPlot({input$runStkdVlnPlot
+  #   isolate({withProgress({p <- StkdVlnPlotF(); print(p)},
+  #                         message = "Rendering plot..",
+  #                         min = 0, max = 10, value = 10)
+  #   })
+  # })
+  # 
+  # getHeightStkdVln <- function() {
+  #   l <- getLenInput(input$vlnStkdGenes)
+  #   if (l == 1) {h <- "600px"
+  #   } else {
+  #     h <- as.character(ceiling(l) * 100)
+  #     h <- paste0(h, "px")
+  #   }
+  #   return(h)
+  # }
+  # 
+  # output$plot.uiStkdVlnPlotF <- renderUI({input$runStkdVlnPlot
+  #   isolate({h <- getHeightStkdVln(); plotOutput("myStkdVlnPlotF",
+  #                                            width = "800px", height = h)})
+  # })
+  # 
+  # output$downloadStkdVlnPlot <- downloadHandler(
+  #   filename = "StkdViolin_plot.pdf", content = function(file) {
+  #     pdf(file, onefile = FALSE,
+  #         width = 12,
+  #         height = 5 * getLenInput(input$vlnStkdGenes))
+  #     print(StkdVlnPlotF())
+  #     dev.off()
+  #   }
+  # )
+  # 
+  
+  
+  # ======== Corrected Stacked Violin Plot ======== #
   
   StkdVlnPlotF <- reactive({
     seurat_obj <- SelectDataset()
@@ -371,55 +494,48 @@ server <- function(input, output) {
     
     #seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsStkdVln]
     
-    modify_vlnplot<- function(obj, 
-                              feature, 
-                              pt.size = input$ptSizeStkdVln, 
-                              plot.margin = unit(c(-0.75, 0, -0.75, 0), "cm"),
-                              ...) {
-      p<- VlnPlot(obj, features = feature, pt.size = pt.size, group.by = input$selectGrpStkdVln, 
-                  cols = cluster_clrs)  + 
-        xlab("") + ylab(feature) + ggtitle("") + 
-        theme(legend.position = "none", 
-              axis.text.x = element_blank(), 
-              axis.ticks.x = element_blank(), 
-              axis.title.y = element_text(size = rel(1), angle = 0), 
-              axis.text.y = element_text(size = rel(1)), 
-              plot.margin = plot.margin ) 
-      return(p)
-    }
+    ids <- as.list(levels(seurat_obj$data.set))
     
-    ## extract the max value of the y axis
     extract_max<- function(p){
       ymax<- max(ggplot_build(p)$layout$panel_scales_y[[1]]$range$range)
       return(ceiling(ymax))
     }
     
-    ## main function
-    StackedVlnPlot<- function(obj, features,
-                              pt.size = input$ptSizeStkdVln, 
-                              plot.margin = unit(c(-0.75, 0, -0.75, 0), "cm"),
-                              ...) {
-      
-      plot_list<- purrr::map(features, function(x) modify_vlnplot(obj = obj,feature = x, ...))
-      
-      # Add back x-axis title to bottom plot. patchwork is going to support this?
-      plot_list[[length(plot_list)]]<- plot_list[[length(plot_list)]] +
-        theme(axis.text.x=element_text(), axis.ticks.x = element_line())
-      
-      # change the y-axis tick to only max value 
-      ymaxs<- purrr::map_dbl(plot_list, extract_max)
-      plot_list<- purrr::map2(plot_list, ymaxs, function(x,y) x + 
-                                scale_y_continuous(breaks = c(y)) + 
-                                expand_limits(y = y))
-      
-      p<- patchwork::wrap_plots(plotlist = plot_list, ncol = 1)
-      return(p)
+    obj_trt_list <- list()[1:length(ids)]
+    
+    for (i in 1:length(ids)) {
+      print(ids[[i]])
+      obj_trt_list[[i]] <- seurat_obj[,seurat_obj[["data.set"]] == ids[[i]]]
     }
     
-    pg <- StackedVlnPlot(obj = seurat_obj, features = selected)
+    trt_plot_list <- list()[1:length(ids)]
+    names(trt_plot_list) <- ids
+    for (i in 1:length(ids)) {
+      vln_obj <- VlnPlot(
+        obj_trt_list[[i]], features = selected, pt.size = 0) +
+        xlab("") + ylab(ids[i]) + ggtitle("") +
+        theme(legend.position = "none", axis.text.x = element_blank(),
+              axis.ticks.x = element_blank(),
+              axis.title.y = element_text(size = rel(1), angle = 0),
+              axis.text.y = element_text(size = rel(1)),
+              plot.margin = unit(c(-0.75, 0.5, -0.75, 0.5), "cm"))
+      trt_plot_list[[i]] <- vln_obj
+    }
+    
+    trt_plot_list[[length(trt_plot_list)]]<- trt_plot_list[[length(trt_plot_list)]] +
+      theme(axis.text.x=element_text(), axis.ticks.x = element_line())
+    # change the y-axis tick to only max value
+    ymaxs <- purrr::map_dbl(trt_plot_list, extract_max)
+    trt_plot_list <- purrr::map2(trt_plot_list, ymaxs, function(x, y) x +
+                                   scale_y_continuous(breaks = c(y)) + expand_limits(y = y))
+    grid_obj <- cowplot::plot_grid(plotlist = trt_plot_list,
+                                   nrow = length(ids), ncol = 1, axis = "l", align = "hv") +
+      theme(plot.margin = margin(1.0, 1.0, 1.0, 1.0, unit = "in")) +
+      ggtitle(selected) + theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+    
+    return(grid_obj)
     
     
-    return(pg)
   })
   
   output$cellSelectStkdVln <- renderUI({ # New cell type select
@@ -464,7 +580,7 @@ server <- function(input, output) {
   
   output$plot.uiStkdVlnPlotF <- renderUI({input$runStkdVlnPlot
     isolate({h <- getHeightStkdVln(); plotOutput("myStkdVlnPlotF",
-                                             width = "800px", height = h)})
+                                                 width = "800px", height = h)})
   })
   
   output$downloadStkdVlnPlot <- downloadHandler(
@@ -750,7 +866,7 @@ server <- function(input, output) {
         print(input$cellIdentsHmap)
         
         g <- DoHeatmap(seurat_obj, features = selected,
-                       group.by = input$selectGrpHmap) + scale_fill_gradientn(colors = c("red", "yellow", "royalblue1"))
+                       group.by = input$selectGrpHmap) + scale_fill_gradientn(colors = c("royalblue1", "yellow", "red"))
         #+ scale_fill_gradientn(colors = c("red", "yellow", "blue"))
         
         g <- g + labs(title = paste("Selected analysis:",

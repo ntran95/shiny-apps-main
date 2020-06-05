@@ -85,6 +85,7 @@ smpl_genes_sm <- paste0("atoh1a her4.1")
 smpl_genes_lg <- paste0("atoh1a her4.1 hes2.2 dld sox4a*1 myclb gadd45gb.1",
 " insm1a wnt2 sost sfrp1a pcna mki67 isl1 slc1a3a glula lfng cbln20 ebf3a",
 " znf185 si:ch211-229d2.5 si:ch73-261i21.5 spaca4l foxp4 crip1")
+smpl_gene_single <- paste0("atoh1a")
 
 app_title <- "Neuromast scRNA-seq Between Homeo & 1hr Timepoints Containing Smart-Seq2 & 10X Cells"
 

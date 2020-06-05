@@ -243,58 +243,110 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
     ),
 
 
-   # ================ # Stacked Vln Plts
-   tabPanel("Stacked Violin Plots", #fluid = FALSE,
-      sidebarLayout(fluid = TRUE,
+#    # ================ # Stacked Vln Plts
+#    tabPanel("Stacked Violin Plots", #fluid = FALSE,
+#       sidebarLayout(fluid = TRUE,
+# 
+#       sidebarPanel(fluid = FALSE, width = 4,
+#         column(12, textInput("vlnStkdGenes", width = "100%",
+#                         "Insert gene name or ensembl ID:",
+#                         value = smpl_genes_lg)),
+#    
+#         column(12, align = "center",
+#           actionButton("runStkdVlnPlot", "Generate Plots",
+#                        style = 'padding:5px; font-size:80%')),
+#    
+#         column(12, tags$hr(width = "50%"), align = "center"),
+#         column(12, align = "center", downloadButton(
+#      "downloadStkdVlnPlot", "Download pdf",
+#      style = 'padding:5px; font-size:80%')),
+#    
+#         column(12, tags$br()),
+#         column(12, align = "center", uiOutput("cellSelectStkdVln")), # New
+#    
+#         column(12, tags$br()),
+#           column(12, align = "center",
+#           column(6,
+#                  radioGroupButtons("selectGrpStkdVln",
+#                                    "Group cells by:", choices = list(Time = "data.set",
+#                                                                      Cluster = "cell.type.ident"), width = "100%")),
+#           column(6,
+#                  numericInput("ptSizeStkdVln", "Input cell size:", value = 0.25,
+#                               min = 0.00, step = 0.75, max = 2.00, width = "80%"))
+#    ),
+#    
+#    fluidRow(tags$br()),
+#    fluidRow(tags$br()),
+#    column(12, uiOutput("plot.uiDatFeatPlotV8"), align = "center"),
+#    fluidRow(tags$br()),
+#    fluidRow(tags$br())
+#   ),
+# 
+#   mainPanel(
+#     fluidRow(
+#     column(8, tags$br()),
+#     column(8, tags$b("Gene mismatches"), "(if present)", tags$b(":")),
+#     column(8,uiOutput("notInStkdVln")),
+#     column(8, tags$hr()),
+# # column(8, tags$b(uiOutput("SelectedDataVln"))),
+#     column(12, uiOutput("plot.uiStkdVlnPlotF")
+#     )
+#     )
+#     )
+#     )
+#     ),
 
-      sidebarPanel(fluid = FALSE, width = 4,
-        column(12, textInput("vlnStkdGenes", width = "100%",
-                        "Insert gene name or ensembl ID:",
-                        value = smpl_genes_lg)),
-   
-        column(12, align = "center",
-          actionButton("runStkdVlnPlot", "Generate Plots",
-                       style = 'padding:5px; font-size:80%')),
-   
-        column(12, tags$hr(width = "50%"), align = "center"),
-        column(12, align = "center", downloadButton(
-     "downloadStkdVlnPlot", "Download pdf",
-     style = 'padding:5px; font-size:80%')),
-   
-        column(12, tags$br()),
-        column(12, align = "center", uiOutput("cellSelectStkdVln")), # New
-   
-        column(12, tags$br()),
-          column(12, align = "center",
-          column(6,
-                 radioGroupButtons("selectGrpStkdVln",
-                                   "Group cells by:", choices = list(Time = "data.set",
-                                                                     Cluster = "cell.type.ident"), width = "100%")),
-          column(6,
-                 numericInput("ptSizeStkdVln", "Input cell size:", value = 0.25,
-                              min = 0.00, step = 0.75, max = 2.00, width = "80%"))
-   ),
-   
-   fluidRow(tags$br()),
-   fluidRow(tags$br()),
-   column(12, uiOutput("plot.uiDatFeatPlotV8"), align = "center"),
-   fluidRow(tags$br()),
-   fluidRow(tags$br())
-  ),
+# ================ # Stacked Vln Plts
+tabPanel("Stacked Violin Plots", #fluid = FALSE,
+sidebarLayout(fluid = TRUE,
 
-  mainPanel(
-    fluidRow(
-    column(8, tags$br()),
-    column(8, tags$b("Gene mismatches"), "(if present)", tags$b(":")),
-    column(8,uiOutput("notInStkdVln")),
-    column(8, tags$hr()),
-# column(8, tags$b(uiOutput("SelectedDataVln"))),
-    column(12, uiOutput("plot.uiStkdVlnPlotF")
-    )
-    )
-    )
-    )
+sidebarPanel(fluid = FALSE, width = 4,
+    column(12, textInput("vlnStkdGenes", width = "100%",
+                         "Insert gene name or ensembl ID:",
+                         value = smpl_gene_single)),
+    
+    column(12, align = "center",
+           actionButton("runStkdVlnPlot", "Generate Plots",
+                        style = 'padding:5px; font-size:80%')),
+    
+    column(12, tags$hr(width = "50%"), align = "center"),
+    column(12, align = "center", downloadButton(
+      "downloadStkdVlnPlot", "Download pdf",
+      style = 'padding:5px; font-size:80%')),
+    
+    column(12, tags$br()),
+    column(12, align = "center", uiOutput("cellSelectStkdVln")), # New
+    
+    column(12, tags$br()),
+    column(12, align = "center",
+           column(6,
+                  radioGroupButtons("selectGrpStkdVln",
+                "Group cells by:", choices = list(Time = "data.set"), width = "100%")),
+           column(6,
+                  numericInput("ptSizeStkdVln", "Input cell size:", value = 0.25,
+                               min = 0.00, step = 0.75, max = 2.00, width = "80%"))
     ),
+    
+    fluidRow(tags$br()),
+    fluidRow(tags$br()),
+    column(12, uiOutput("plot.uiDatFeatPlotV8"), align = "center"),
+    fluidRow(tags$br()),
+    fluidRow(tags$br())
+),
+
+mainPanel(
+fluidRow(
+column(8, tags$br()),
+column(8, tags$b("Gene mismatches"), "(if present)", tags$b(":")),
+column(8,uiOutput("notInStkdVln")),
+column(8, tags$hr()),
+# column(8, tags$b(uiOutput("SelectedDataVln"))),
+column(12, uiOutput("plot.uiStkdVlnPlotF")
+)
+)
+)
+)
+),
    
     # # ================ #
     # tabPanel("Ridge Plots", #fluid = FALSE,

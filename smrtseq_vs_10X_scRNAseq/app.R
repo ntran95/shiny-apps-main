@@ -49,7 +49,7 @@ getLenInput <- function(input) {
   return(len)
 }
 
-files <- list.files("./data/seurat_obj_input", pattern = ".rds", full.names = TRUE)
+files <- list.files("./data", pattern = ".rds", full.names = TRUE)
 file_list <- list()
 
 print("Loading Seurat objects...")

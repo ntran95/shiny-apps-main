@@ -512,7 +512,7 @@ server <- function(input, output) {
     names(trt_plot_list) <- ids
     for (i in 1:length(ids)) {
       vln_obj <- VlnPlot(
-        obj_trt_list[[i]], features = selected, pt.size = 0) +
+        obj_trt_list[[i]], features = selected, pt.size = input$ptSizeStkdVln) +
         xlab("") + ylab(ids[i]) + ggtitle("") +
         theme(legend.position = "none", axis.text.x = element_blank(),
               axis.ticks.x = element_blank(),

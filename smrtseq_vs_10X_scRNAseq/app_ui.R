@@ -321,10 +321,12 @@ sidebarPanel(fluid = FALSE, width = 4,
     column(12, align = "center",
            column(6,
                   radioGroupButtons("selectGrpStkdVln",
-                "Group cells by:", choices = list(Time = "data.set"), width = "100%")),
+                "Group cells by:", choices = list(Time = "data.set"), 
+                width = "100%")),
            column(6,
-                  numericInput("ptSizeStkdVln", "Input cell size:", value = 0.25,
-                               min = 0.00, step = 0.75, max = 2.00, width = "80%"))
+                  numericInput("ptSizeStkdVln", "Input cell size:", 
+                               value = 0.00, min = 0.00, step = 0.75, 
+                               max = 2.00, width = "80%"))
     ),
     
     fluidRow(tags$br()),
@@ -487,8 +489,10 @@ column(12, uiOutput("plot.uiStkdVlnPlotF")
          column(12, align = "center",
                 column(6,
                        radioGroupButtons("selectGrpHmap",
-                                         "Group cells by:", choices = list(Time = "data.set",
-                                          Cluster = "cell.type.ident"), width = "100%"))
+                                         "Group cells by:", 
+                                         choices = Cluster = "cell.type.ident",
+                                         list(Time = "data.set"), 
+                                         width = "100%"))
          
          ),
          

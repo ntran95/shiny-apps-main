@@ -935,8 +935,8 @@ server <- function(input, output) {
   #download
   output$downloadPhmap <- downloadHandler(
     filename = "heatmap.pdf", content = function(file) {
-      pdf(file, height = (getHeightPhmap() / 90),
-       width = (getWidthPhmap() / 90))
+      pdf(file, height = getHeightPhmap(),
+       width = getWidthPhmap(), units = "px")
       print(pHeatmapF())
       dev.off()
     }

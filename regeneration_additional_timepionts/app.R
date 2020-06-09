@@ -55,7 +55,7 @@ print("done.")
 
 
 # ! =========== items to check/change for project {START}
-file_list <- file_list[c(6,5,1:4)]
+# file_list <- file_list[c(6,5,1:4)]
 # hmap_list <- hmap_list[c(2,1,3)]
 
 names(file_list) <- as.character(c("all she-pos. cells"))

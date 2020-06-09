@@ -587,7 +587,7 @@ server <- function(input, output) {
     filename = "StkdViolin_plot.pdf", content = function(file) {
       pdf(file, onefile = FALSE,
           width = 12,
-          height = 5 * getLenInput(input$vlnStkdGenes))
+          height = 10 * getLenInput(input$vlnStkdGenes))
       print(StkdVlnPlotF())
       dev.off()
     }
@@ -935,8 +935,7 @@ server <- function(input, output) {
   #download
   output$downloadPhmap <- downloadHandler(
     filename = "heatmap.pdf", content = function(file) {
-      pdf(file, width = (getWidthPhmap() / 90),
-          height = (getHeightPhmap() / 90))
+      pdf(file, height = (getHeightPhmap() / 90))
       print(pHeatmapF())
       dev.off()
     }

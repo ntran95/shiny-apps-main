@@ -283,9 +283,15 @@ server <- function(input, output) {
 
     seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsVln]
 
+    if(input$selectGrpVln == "data.set") {
+      clrs <- trt_colors
+    } else {
+      clrs <- cluster_clrs
+    }
+
     g <- VlnPlot(seurat_obj, selected,
       pt.size = input$ptSizeVln, combine = FALSE,
-      group.by = input$selectGrpVln, cols = cluster_clrs)
+      group.by = input$selectGrpVln, cols = clrs)
 
     for(k in 1:length(g)) {
       g[[k]] <- g[[k]] + theme(legend.position = "none")
@@ -355,89 +361,89 @@ server <- function(input, output) {
   )
 
 
-  # ======== Ridge Plot ======== #
-  RdgPlotF <- reactive({
-    seurat_obj <- SelectDataset()
-    selected <- unlist(strsplit(input$rdgGenes, " "))
+  # # ======== Ridge Plot ======== #
+  # RdgPlotF <- reactive({
+  #   seurat_obj <- SelectDataset()
+  #   selected <- unlist(strsplit(input$rdgGenes, " "))
     
-    ifelse(selected %in% com_name,
-      selected <- selected[selected %in% com_name],
+  #   ifelse(selected %in% com_name,
+  #     selected <- selected[selected %in% com_name],
     
-      ifelse(selected %in% ens_id,
-        selected <- gene_df[ens_id %in% selected, 3],"")
-    )
+  #     ifelse(selected %in% ens_id,
+  #       selected <- gene_df[ens_id %in% selected, 3],"")
+  #   )
 
-    seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsRdg]
+  #   seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsRdg]
   
-    g <- RidgePlot(seurat_obj, selected, combine = FALSE,
-      group.by = input$selectGrpRdg, cols = cluster_clrs)
+  #   g <- RidgePlot(seurat_obj, selected, combine = FALSE,
+  #     group.by = input$selectGrpRdg, cols = cluster_clrs)
 
-    for(k in 1:length(g)) {
-      g[[k]] <- g[[k]] + theme(legend.position = "none")
-    }
+  #   for(k in 1:length(g)) {
+  #     g[[k]] <- g[[k]] + theme(legend.position = "none")
+  #   }
 
-    # return(plot_grid(plotlist = g, ncol = 1))
+  #   # return(plot_grid(plotlist = g, ncol = 1))
     
-    pg <- plot_grid(plotlist = g, ncol = 1) +
-      labs(title = paste("Selected analysis:",
-        as.character(input$Analysis)), subtitle = "", caption = "") +
-        theme(plot.title = element_text(face = "bold", size = 15, hjust = 0))
+  #   pg <- plot_grid(plotlist = g, ncol = 1) +
+  #     labs(title = paste("Selected analysis:",
+  #       as.character(input$Analysis)), subtitle = "", caption = "") +
+  #       theme(plot.title = element_text(face = "bold", size = 15, hjust = 0))
     
-    return(pg)
-  })
+  #   return(pg)
+  # })
 
-  output$cellSelectRdg <- renderUI({ # New cell type select
-    pickerInput("cellIdentsRdg", "Add or remove clusters:",
-      choices = as.character(printIdents()), multiple = TRUE,
-      selected = as.character(printIdents()), options = list(
-       `actions-box` = TRUE), width = "85%")
-  })
+  # output$cellSelectRdg <- renderUI({ # New cell type select
+  #   pickerInput("cellIdentsRdg", "Add or remove clusters:",
+  #     choices = as.character(printIdents()), multiple = TRUE,
+  #     selected = as.character(printIdents()), options = list(
+  #      `actions-box` = TRUE), width = "85%")
+  # })
 
-  mismatchRdg <- function() {
-    selected <- unlist(strsplit(input$rdgGenes, " "))
+  # mismatchRdg <- function() {
+  #   selected <- unlist(strsplit(input$rdgGenes, " "))
 
-    mismatch <- ifelse(!selected %in% c(com_name,ens_id),
-      selected[!selected %in% c(com_name,ens_id)],"")
-    return(mismatch)
-  }
+  #   mismatch <- ifelse(!selected %in% c(com_name,ens_id),
+  #     selected[!selected %in% c(com_name,ens_id)],"")
+  #   return(mismatch)
+  # }
 
-  output$notInRdg <- renderText({input$runRdgPlot
-    isolate({mismatchRdg()})
-  })
+  # output$notInRdg <- renderText({input$runRdgPlot
+  #   isolate({mismatchRdg()})
+  # })
 
-  output$SelectedDataRdg <- renderText({input$runRdgPlot
-    isolate({input$Analysis})
-  })
+  # output$SelectedDataRdg <- renderText({input$runRdgPlot
+  #   isolate({input$Analysis})
+  # })
 
-  output$myRdgPlotF <- renderPlot({input$runRdgPlot
-    isolate({withProgress({p <- RdgPlotF(); print(p)},
-      message = "Rendering plot..", min = 0, max = 10, value = 10)})
-  })
+  # output$myRdgPlotF <- renderPlot({input$runRdgPlot
+  #   isolate({withProgress({p <- RdgPlotF(); print(p)},
+  #     message = "Rendering plot..", min = 0, max = 10, value = 10)})
+  # })
 
-  getHeightRdg <- function() {
-    l <- getLenInput(input$rdgGenes)
-    if (l == 1) {h <- "600px"
-    } else {
-      h <- as.character(ceiling(l) * 600)
-      h <- paste0(h, "px")
-    }
-    return(h)
-  }
+  # getHeightRdg <- function() {
+  #   l <- getLenInput(input$rdgGenes)
+  #   if (l == 1) {h <- "600px"
+  #   } else {
+  #     h <- as.character(ceiling(l) * 600)
+  #     h <- paste0(h, "px")
+  #   }
+  #   return(h)
+  # }
 
-  output$plot.uiRdgPlotF <- renderUI({input$runRdgPlot
-    isolate({h <- getHeightRdg(); plotOutput("myRdgPlotF",
-      width = "800px", height = h)})
-  })
+  # output$plot.uiRdgPlotF <- renderUI({input$runRdgPlot
+  #   isolate({h <- getHeightRdg(); plotOutput("myRdgPlotF",
+  #     width = "800px", height = h)})
+  # })
 
-  output$downloadRdgPlot <- downloadHandler(
-    filename = "Ridge_plot.pdf", content = function(file) {
-      pdf(file, onefile = FALSE,
-        width = 12,
-        height = 10 * getLenInput(input$rdgGenes))
-      print(RdgPlotF())
-      dev.off()
-    }
-  )
+  # output$downloadRdgPlot <- downloadHandler(
+  #   filename = "Ridge_plot.pdf", content = function(file) {
+  #     pdf(file, onefile = FALSE,
+  #       width = 12,
+  #       height = 10 * getLenInput(input$rdgGenes))
+  #     print(RdgPlotF())
+  #     dev.off()
+  #   }
+  # )
 
 
   # ======== Dot Plot ======== #

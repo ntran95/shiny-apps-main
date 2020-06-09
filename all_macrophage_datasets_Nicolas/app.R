@@ -69,7 +69,7 @@ avg_mtx <- readRDS(paste0("./data/mtx_CLR_nrml",
   "_scld_tmpts_in_cell_type_mphg_regen_14k_cells_seurat3_v1.0_.RDS"))
 
 # rearrange hmap to Tatjana's order
-colnames(avg_mtx) <- sub(" ", "",colnames(avg_mtx))
+colnames(avg_mtx) <- sub(" ", "", colnames(avg_mtx))
 to_match <- c("kng1", "actn3b", "gata3", "rbp4", "cldnh",
   "spock3", "eomesa", "mpx", "pcna", "fabp3", "f13a1b", "mcamb", "tspan10",
   "runx3", "irg1", "stat1b")

@@ -490,8 +490,8 @@ column(12, uiOutput("plot.uiStkdVlnPlotF")
                 column(6,
                        radioGroupButtons("selectGrpHmap",
                                          "Group cells by:", 
-                                         choices = Cluster = "cell.type.ident",
-                                         list(Time = "data.set"), 
+                                         choices = list(Cluster = "cell.type.ident",
+                                         Time = "data.set"), 
                                          width = "100%"))
          
          ),

@@ -373,7 +373,7 @@ server <- function(input, output) {
 
 
 
-  ids <- as.list(levels(obj_integrated$data.set))
+  ids <- as.list(levels(seurat_obj$data.set))
   
   
   gg_color_hue <- function(n) {
@@ -391,7 +391,7 @@ server <- function(input, output) {
   obj_trt_list <- list()[1:length(ids)]
   for (i in 1:length(ids)) {
     print(ids[[i]])
-    obj_trt_list[[i]] <- obj_integrated[,obj_integrated[["data.set"]] == ids[[i]]]
+    obj_trt_list[[i]] <- seurat_obj[,seurat_obj[["data.set"]] == ids[[i]]]
   }
   
   stacked_violin_plot <- function(goi, obj_trt_list){

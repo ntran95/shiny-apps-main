@@ -6,6 +6,7 @@ library(shinythemes)
 library(shinyWidgets)
 library(dplyr)
 library(rsconnect)
+library(profvis)
 
 # ===================== installing devel version of Seurat to help rsconnect to shin.io 
 
@@ -48,6 +49,7 @@ getLenInput <- function(input) {
   len <- length(selected)
   return(len)
 }
+
 
 files <- list.files("./data", pattern = ".rds", full.names = TRUE)
 file_list <- list()
@@ -143,3 +145,8 @@ if (FALSE) { # Not run
 
 # =========== # Execute app
 shinyApp(ui = ui, server = server) # MUST be at last line of app.R
+
+
+profvis({
+  runApp("../../../shiny-apps-main/smrtseq_vs_10X_scRNAseq/")
+},prof_output = "./data")

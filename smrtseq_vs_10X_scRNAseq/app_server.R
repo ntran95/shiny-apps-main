@@ -423,8 +423,8 @@ server <- function(input, output) {
     
   }
   grid_obj <- list()[1:length(selected)]
-  for (i in 1:length(goi)){
-    print(goi[[i]])
+  for (i in 1:length(selected)){
+    print(selected[[i]])
     grid_obj[[i]] <- stacked_violin_plot(goi = selected[[i]], obj_trt_list = obj_trt_list)
     
   }

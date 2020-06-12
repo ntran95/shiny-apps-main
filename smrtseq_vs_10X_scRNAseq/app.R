@@ -147,6 +147,6 @@ if (FALSE) { # Not run
 shinyApp(ui = ui, server = server) # MUST be at last line of app.R
 
 
-profvis({
-  runApp("../../../shiny-apps-main/smrtseq_vs_10X_scRNAseq/")
-},prof_output = "./data")
+# profvis({
+#   runApp("../../../shiny-apps-main/smrtseq_vs_10X_scRNAseq/")
+# },prof_output = "./data")

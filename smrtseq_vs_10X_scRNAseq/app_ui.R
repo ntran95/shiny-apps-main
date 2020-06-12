@@ -303,7 +303,7 @@ sidebarLayout(fluid = TRUE,
 sidebarPanel(fluid = FALSE, width = 4,
     column(12, textInput("vlnStkdGenes", width = "100%",
                          "Insert gene name or ensembl ID:",
-                         value = smpl_genes_lg)),
+                         value = smpl_genes_sm)),
     
     column(12, align = "center",
            actionButton("runStkdVlnPlot", "Generate Plots",

@@ -7,6 +7,8 @@ library(shinyWidgets)
 library(dplyr)
 library(rsconnect)
 library(profvis)
+library(stringr)
+
 
 # ===================== installing devel version of Seurat to help rsconnect to shin.io 
 
@@ -994,6 +996,7 @@ server <- function(input, output) {
       seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsHmap]
       print(input$cellIdentsHmap)
       
+    
       g <- DoHeatmap(seurat_obj, features = selected,
                      group.by = input$selectGrpHmap) + scale_fill_gradientn(colors = c("royalblue1", "yellow", "red"))
       #+ scale_fill_gradientn(colors = c("red", "yellow", "blue"))
@@ -1001,6 +1004,46 @@ server <- function(input, output) {
       g <- g + labs(title = paste("Selected analysis:",
                                   as.character(input$Analysis)), subtitle = "", caption = "") +
         theme(plot.title = element_text(face = "plain", size = 14))
+      
+      if (input$selectGrpHmap == "data.set") {
+        smartseq_tomatch <- c("1hr-smrtseq", "homeo-smrtseq")
+        
+        tenX_tomatch <- c("homeo-10X-isl1", "homeo-10X-2047", "homeo-10X-2410-7", "homeo-10X-2410-8")
+        
+        split_heatmap <- function(seurat_obj, method, tomatch){
+          split_obj <- subset(seurat_obj, subset = seq.method == method)
+          meta <- split_obj@meta.data
+          
+          adj.data.set <- as.vector(split_obj@meta.data$data.set)
+          
+          for (i in 1:length(tomatch)) {
+            print(tomatch[[i]])
+            meta <- meta%>% mutate(adj.data.set =case_when(str_detect(data.set, 
+                                                                      paste(tomatch[[i]])) ~ tomatch[[i]],
+                                                           TRUE ~ as.vector(split_obj@meta.data$data.set)))
+          }
+          split_obj@meta.data$adj.data.set <- meta$adj.data.set
+          
+          return(split_obj)
+        }
+        
+        smartseq <- split_heatmap(obj_integrated, method = "smartseq2", tomatch = smartseq_tomatch)
+        
+        s <- DoHeatmap(smartseq, features = selected, group.by = "adj.data.set") + 
+          scale_fill_gradientn(colors = c("royalblue1", "yellow", "red")) + NoLegend()
+        
+        tenX <- split_heatmap(obj_integrated, method = "10X", tomatch = tenX_tomatch)
+        
+        t <- DoHeatmap(tenX, features = selected, group.by = "adj.data.set") + 
+          scale_fill_gradientn(colors = c("royalblue1", "yellow", "red"))
+        
+        g <-s + t
+        
+        g <- g + labs(title = paste("Selected analysis:",
+                                    as.character(input$Analysis)), subtitle = "", caption = "") +
+          theme(plot.title = element_text(face = "plain", size = 14))
+        
+      }
       
     }
     
@@ -1042,13 +1085,13 @@ server <- function(input, output) {
   
   getHeightPhmap <- reactive({
     l <- getLenInput(input$PhmapGenes)
-    h <- paste0(as.character(l * 35), "px")
+    h <- paste0(as.integer(l * 35), "px")
     return(h)
   })
   
   getWidthPhmap <- function () {
     if(input$selectGrpHmap == "data.set") {
-      w <- "500px"
+      w <- "1000px"
     } else {
       w <- "800px"
     }

@@ -51,15 +51,19 @@ getLenInput <- function(input) {
 }
 
 
-files <- list.files("./data", pattern = ".rds", full.names = TRUE)
+files <- list.files("./data", pattern = ".RDS", full.names = TRUE)
 file_list <- list()
 
 print("Loading Seurat objects...")
 for (i in 1:length(files)) {
   file_list[[i]] <- readRDS(files[i])
-  #DefaultAssay(file_list[[i]]) <- "RNA"
+  DefaultAssay(file_list[[i]]) <- "RNA"
+  #change early-HC to young-HCs
+  file_list[[i]]@meta.data$cell.type.ident <- plyr::revalue(
+    file_list[[i]]@meta.data$cell.type.ident, c("early-HCs" = "young-HCs"))
+  print("checking cells per data.set")
+  print(addmargins(table(Idents(file_list[[i]]),file_list[[i]]$data.set)))
 }
-DefaultAssay(file_list[[1]]) <- "RNA"
 print("done.")
 
 #hmap_files <- list.files("./data", pattern = "mtx", full.names = TRUE)

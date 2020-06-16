@@ -193,7 +193,7 @@ server <- function(input, output) {
     
     if ("cell.type.ident" %in% colnames(seurat_obj@meta.data)) {
       umap_clusters <- DimPlot(seurat_obj, reduction = "umap", pt.size = 0.10,
-                               label = TRUE, label.size = 0, group.by = "cell.type.ident",
+                               label = TRUE, label.size = 0,
                                cols = cluster_clrs)
     } else {
       umap_clusters <- DimPlot(seurat_obj, reduction = "umap", pt.size = 0.10,
@@ -238,7 +238,7 @@ server <- function(input, output) {
     
     if ("cell.type.ident" %in% colnames(seurat_obj@meta.data)) {
       umap_clusters <- DimPlot(seurat_obj, reduction = "umap", pt.size = 0.10,
-                               label = TRUE, label.size = 0, group.by = "cell.type.ident",
+                               label = TRUE, label.size = 0,
                                cols = cluster_clrs)
     } else {
       umap_clusters <- DimPlot(seurat_obj, reduction = "umap", pt.size = 0.10,

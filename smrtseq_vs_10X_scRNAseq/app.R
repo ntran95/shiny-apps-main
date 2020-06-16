@@ -1030,7 +1030,7 @@ server <- function(input, output) {
         smartseq <- split_heatmap(obj_integrated, method = "smartseq2", tomatch = smartseq_tomatch)
         
         s <- DoHeatmap(smartseq, features = selected, group.by = "adj.data.set") + 
-          scale_fill_gradientn(colors = c("royalblue1", "yellow", "red")) + NoLegend()
+          scale_fill_gradientn(colors = c("royalblue1", "yellow", "red")) 
         
         tenX <- split_heatmap(obj_integrated, method = "10X", tomatch = tenX_tomatch)
         
@@ -1085,30 +1085,30 @@ server <- function(input, output) {
   
   getHeightPhmap <- reactive({
     l <- getLenInput(input$PhmapGenes)
-    h <- paste0(as.integer(l * 35), "px")
+    h <- as.numeric(l * 35)
     return(h)
   })
   
   getWidthPhmap <- function () {
     if(input$selectGrpHmap == "data.set") {
-      w <- "1000px"
+      w <- "1000"
     } else {
-      w <- "800px"
+      w <- "800"
     }
   }
   
   output$plot.uiPheatmapF <- renderUI({input$runPhmap
     isolate({
       w <- paste0(getWidthPhmap()); h <- paste0(getHeightPhmap())
-      plotOutput("myPhmapF", width = w, height = h)
+      plotOutput("myPhmapF", width = paste0(w, "px"), height = paste0(h, "px"))
     })
   })
   
   #download
-  output$downloadPhmap <- downloadHandler(
+  output$downloadhmap <- downloadHandler(
     filename = "heatmap.pdf", content = function(file) {
-      pdf(file, height = getHeightPhmap(),
-          width = getWidthPhmap())
+      png(file, height = getHeightPhmap(),
+          width = 1000, units = "px")
       print(pHeatmapF())
       dev.off()
     }
@@ -1787,7 +1787,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                                       
                                                       column(12, tags$hr(width = "50%"), align = "center"),
                                                       column(12, align = "center", downloadButton(
-                                                        "downloadPhmap", "Download pdf",
+                                                        "downloadhmap", "Download pdf",
                                                         style = 'padding:5px; font-size:80%')),
                                                       
                                                       column(12, tags$br()),
@@ -1987,10 +1987,10 @@ if (FALSE) { # Not run
 # =========== # Execute app
 shinyApp(ui = ui, server = server) # MUST be at last line of app.R
 
-
 # profvis({
 #   runApp("../../../shiny-apps-main/smrtseq_vs_10X_scRNAseq/")
 # },prof_output = "./data")
+
 
 
 

@@ -53,7 +53,7 @@ getLenInput <- function(input) {
 }
 
 
-files <- list.files("./data", pattern = ".RDS", full.names = TRUE)
+files <- list.files("./data", pattern = "Imn_homeo", full.names = TRUE)
 file_list <- list()
 
 print("Loading Seurat objects...")
@@ -95,7 +95,7 @@ smpl_genes_lg <- paste0("atoh1a her4.1 hes2.2 dld sox4a*1 myclb gadd45gb.1",
                         " znf185 si:ch211-229d2.5 si:ch73-261i21.5 spaca4l foxp4 crip1")
 smpl_gene_single <- paste0("atoh1a")
 
-app_title <- "Neuromast scRNA-seq Between Homeo & 1hr Timepoints Containing Smart-Seq2 & 10X Cells"
+app_title <- "Interneuromast Homeo scRNA-seq Analysis"
 
 gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
                       sep = "\t", header = TRUE, stringsAsFactors = FALSE)
@@ -1004,46 +1004,46 @@ server <- function(input, output) {
       g <- g + labs(title = paste("Selected analysis:",
                                   as.character(input$Analysis)), subtitle = "", caption = "") +
         theme(plot.title = element_text(face = "plain", size = 14))
-      
-      if (input$selectGrpHmap == "data.set") {
-        smartseq_tomatch <- c("1hr-smrtseq", "homeo-smrtseq")
-        
-        tenX_tomatch <- c("homeo-10X-isl1", "homeo-10X-2047", "homeo-10X-2410-7", "homeo-10X-2410-8")
-        
-        split_heatmap <- function(seurat_obj, method, tomatch){
-          split_obj <- subset(seurat_obj, subset = seq.method == method)
-          meta <- split_obj@meta.data
-          
-          adj.data.set <- as.vector(split_obj@meta.data$data.set)
-          
-          for (i in 1:length(tomatch)) {
-            print(tomatch[[i]])
-            meta <- meta%>% mutate(adj.data.set =case_when(str_detect(data.set, 
-                                                                      paste(tomatch[[i]])) ~ tomatch[[i]],
-                                                           TRUE ~ as.vector(split_obj@meta.data$data.set)))
-          }
-          split_obj@meta.data$adj.data.set <- meta$adj.data.set
-          
-          return(split_obj)
-        }
-        
-        smartseq <- split_heatmap(obj_integrated, method = "smartseq2", tomatch = smartseq_tomatch)
-        
-        s <- DoHeatmap(smartseq, features = selected, group.by = "adj.data.set") + 
-          scale_fill_gradientn(colors = c("royalblue1", "yellow", "red")) 
-        
-        tenX <- split_heatmap(obj_integrated, method = "10X", tomatch = tenX_tomatch)
-        
-        t <- DoHeatmap(tenX, features = selected, group.by = "adj.data.set") + 
-          scale_fill_gradientn(colors = c("royalblue1", "yellow", "red"))
-        
-        g <-s + t
-        
-        g <- g + labs(title = paste("Selected analysis:",
-                                    as.character(input$Analysis)), subtitle = "", caption = "") +
-          theme(plot.title = element_text(face = "plain", size = 14))
-        
-      }
+      # 
+      # if (input$selectGrpHmap == "data.set") {
+      #   smartseq_tomatch <- c("1hr-smrtseq", "homeo-smrtseq")
+      #   
+      #   tenX_tomatch <- c("homeo-10X-isl1", "homeo-10X-2047", "homeo-10X-2410-7", "homeo-10X-2410-8")
+      #   
+      #   split_heatmap <- function(seurat_obj, method, tomatch){
+      #     split_obj <- subset(seurat_obj, subset = seq.method == method)
+      #     meta <- split_obj@meta.data
+      #     
+      #     adj.data.set <- as.vector(split_obj@meta.data$data.set)
+      #     
+      #     for (i in 1:length(tomatch)) {
+      #       print(tomatch[[i]])
+      #       meta <- meta%>% mutate(adj.data.set =case_when(str_detect(data.set, 
+      #                                                                 paste(tomatch[[i]])) ~ tomatch[[i]],
+      #                                                      TRUE ~ as.vector(split_obj@meta.data$data.set)))
+      #     }
+      #     split_obj@meta.data$adj.data.set <- meta$adj.data.set
+      #     
+      #     return(split_obj)
+      #   }
+      #   
+      #   smartseq <- split_heatmap(obj_integrated, method = "smartseq2", tomatch = smartseq_tomatch)
+      #   
+      #   s <- DoHeatmap(smartseq, features = selected, group.by = "adj.data.set") + 
+      #     scale_fill_gradientn(colors = c("royalblue1", "yellow", "red")) 
+      #   
+      #   tenX <- split_heatmap(obj_integrated, method = "10X", tomatch = tenX_tomatch)
+      #   
+      #   t <- DoHeatmap(tenX, features = selected, group.by = "adj.data.set") + 
+      #     scale_fill_gradientn(colors = c("royalblue1", "yellow", "red"))
+      #   
+      #   g <-s + t
+      #   
+      #   g <- g + labs(title = paste("Selected analysis:",
+      #                               as.character(input$Analysis)), subtitle = "", caption = "") +
+      #     theme(plot.title = element_text(face = "plain", size = 14))
+      #   
+      # }
       
     }
     

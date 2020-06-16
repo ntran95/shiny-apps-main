@@ -5,7 +5,7 @@ setwd("/home/ntran2/bgmp/shiny-apps-main/interneuromast_homeo_scRNAseq/data/")
 
 obj_integrated <- readRDS("./scaled.filtered_adj_fpkm_1828_smartseq_integ.RDS")
 
-files <- list.files(".", pattern = ".RDS", full.names = TRUE)
+files <- list.files(".", pattern = "scaled", full.names = TRUE)
 
 file_list <- list()
 
@@ -21,12 +21,16 @@ for (i in 1:length(files)) {
   file_list[[i]] <- FindNeighbors(file_list[[i]], dims = 1:10)
   file_list[[i]] <- FindClusters(file_list[[i]], resolution = 0.6)
   file_list[[i]] <- RunUMAP(file_list[[i]], dims = 1:10)
+  file_list[[i]]$data.set <- droplevels(file_list[[i]]$data.set) #drop unused data.sets
+  file_list[[i]]$cell.type.ident <- droplevels(file_list[[i]]$cell.type.ident) #drop unused cell type idents
   print(object.size(file_list[[i]]), units = "MB")
   
 }
 
-DimPlot(file_list[[1]])
+DimPlot(file_list[[1]], reduction = "umap")
 
-head(file_list[[1]][["RNA"]]@counts)
+head(file_list[[1]][["RNA"]]@var.features)
 
-DoHeatmap(file_list[[1]], features = "wnt2")
+ElbowPlot(file_list[[1]])
+
+saveRDS(file_list[[1]], "./Imn_homeo.RDS")

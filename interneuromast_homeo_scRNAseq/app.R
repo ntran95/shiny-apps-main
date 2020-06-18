@@ -124,12 +124,12 @@ server <- function(input, output) {
   # Asks if multiple conditions are present
   whichDataset <- function() {
     seurat_obj <- SelectDataset()
-    if ("data.set" %in% colnames(seurat_obj@meta.data)) {
-      "data.set"
+    if ("seurat_clusters" %in% colnames(seurat_obj@meta.data)) {
+      "seurat_clusters"
     } else if ("cell.type.ident" %in% colnames(seurat_obj@meta.data)) {
       "cell.type.ident"
-    } else {
-      "tree.ident"}
+    } else if ("data.set" %in% colnames(seurat_obj@meta.data)){
+      "data.set"}
   }
   
   printTreats <- reactive({
@@ -137,6 +137,16 @@ server <- function(input, output) {
     print(seurat_obj)
     if (whichDataset() == "data.set") {
       sort(unique(seurat_obj@meta.data$data.set))
+    } else {
+      NULL # single data set
+    }
+  })
+  
+  printSubClusters <- reactive({
+    seurat_obj <- SelectDataset()
+    print(seurat_obj)
+    if (whichDataset() == "seurat_clusters") {
+      sort(unique(seurat_obj@meta.data$seurat_clusters))
     } else {
       NULL # single data set
     }
@@ -282,7 +292,7 @@ server <- function(input, output) {
   
   output$myDatFeatPlotH1 <- renderPlot({DatFeatPlotF()[[1]]})
   output$plot.uiDatFeatPlotH1 <- renderUI({
-    plotOutput("myDatFeatPlotH1", width = "850px", height = "450px")
+    plotOutput("myDatFeatPlotH1", width = "950px", height = "450px")
   })
   
   n_panels <- 1:8
@@ -1265,15 +1275,15 @@ server <- function(input, output) {
   
   output$diffOut1 <- renderUI({
     pickerInput("identText1", tags$b("Group 1 - positive FC"),
-                choices = as.character(printTreats()), multiple = TRUE,
-                selected = as.character(printTreats())[1], options = list(
+                choices = as.character(printSubClusters()), multiple = TRUE,
+                selected = as.character(printSubClusters())[1], options = list(
                   `actions-box` = TRUE), width = "80%")
   })
   
   output$diffOut2 <- renderUI({
     pickerInput("identText2", tags$b("Group 2 - negative FC"),
-                choices = as.character(printTreats()), multiple = TRUE,
-                selected = as.character(printTreats())[2],options = list(
+                choices = as.character(printSubClusters()), multiple = TRUE,
+                selected = as.character(printSubClusters())[2],options = list(
                   `actions-box` = TRUE), width = "80%")
   })
   

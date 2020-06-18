@@ -14,7 +14,7 @@ for (i in 1:length(files)) {
   file_list[[i]] <- readRDS(files[i])
   print(object.size(file_list[[i]]), units = "MB")
   
-  DefaultAssay(file_list[[i]]) <- "RNA"
+  DefaultAssay(file_list[[i]]) <- "integrated"
   file_list[[i]] <- subset(file_list[[i]], idents = c("Inm", "mantle-cells") , subset = seq.method == "10X")
   file_list[[i]] <- ScaleData(file_list[[i]], features = rownames(file_list[[i]]))
   file_list[[i]] <- RunPCA(file_list[[i]])

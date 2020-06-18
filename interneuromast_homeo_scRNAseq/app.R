@@ -53,7 +53,7 @@ getLenInput <- function(input) {
 }
 
 
-files <- list.files("./data", pattern = "Imn_homeo", full.names = TRUE)
+files <- list.files("./data", pattern = "Imn_mantle_homeo.RDS", full.names = TRUE)
 file_list <- list()
 
 print("Loading Seurat objects...")
@@ -194,10 +194,10 @@ server <- function(input, output) {
     if ("cell.type.ident" %in% colnames(seurat_obj@meta.data)) {
       umap_clusters <- DimPlot(seurat_obj, reduction = "umap", pt.size = 0.10,
                                label = TRUE, label.size = 0,
-                               cols = cluster_clrs)
+                               cols = cluster_clrs, group.by = "cell.type.ident")
     } else {
       umap_clusters <- DimPlot(seurat_obj, reduction = "umap", pt.size = 0.10,
-                               label = TRUE, label.size = 0)
+                               label = TRUE, label.size = 0, group.by = "cell.type.ident")
     }
     
     umap_clusters <- umap_clusters + labs(x = "UMAP 1", y = "UMAP 2") + 
@@ -239,10 +239,10 @@ server <- function(input, output) {
     if ("cell.type.ident" %in% colnames(seurat_obj@meta.data)) {
       umap_clusters <- DimPlot(seurat_obj, reduction = "umap", pt.size = 0.10,
                                label = TRUE, label.size = 0,
-                               cols = cluster_clrs)
+                               cols = cluster_clrs, group.by = "cell.type.ident")
     } else {
       umap_clusters <- DimPlot(seurat_obj, reduction = "umap", pt.size = 0.10,
-                               label = TRUE, label.size = 0)
+                               label = TRUE, label.size = 0, group.by = "cell.type.ident")
     }
     
     umap_clusters <- umap_clusters + labs(x = "UMAP 1", y = "UMAP 2") + 
@@ -260,8 +260,17 @@ server <- function(input, output) {
             axis.ticks.y = element_blank(), axis.line.y = element_blank(),
             axis.title = element_text(size = 12), legend.position = "bottom")
     
-    datfeat_list <- list(umap_clusters, umap_dataset)
-    plot_h <- plot_grid(plotlist = datfeat_list, ncol = 2)
+    umap_subclusters <- DimPlot(seurat_obj, reduction = "umap", pt.size = 0.10,
+                                label = TRUE, label.size = 0)
+    
+    umap_subclusters <- umap_subclusters + labs(x = "UMAP 1", y = "UMAP 2") + 
+      theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+            axis.line.x = element_blank(), axis.text.y = element_blank(),
+            axis.ticks.y = element_blank(), axis.line.y = element_blank(),
+            axis.title = element_text(size = 12), legend.position = "bottom")
+    
+    datfeat_list <- list(umap_subclusters, umap_clusters, umap_dataset)
+    plot_h <- plot_grid(plotlist = datfeat_list, ncol = 3)
     
     plot_v <- plot_grid(plotlist = datfeat_list, ncol = 1)
     plot_v <- plot_grid(plot_v) + theme(

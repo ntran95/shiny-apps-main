@@ -129,13 +129,22 @@ server <- function(input, output) {
     } else if ("cell.type.ident" %in% colnames(seurat_obj@meta.data)) {
       "cell.type.ident"
     } else if ("data.set" %in% colnames(seurat_obj@meta.data)){
-      "data.set"}
+      "data.set"
+    #}
+    }else{
+      "tree.ident"}
+  }
+  
+  whichTreat <- function(){
+   if ("data.set" %in% colnames(seurat_obj@meta.data)){
+      "data.set"
+   }
   }
   
   printTreats <- reactive({
     seurat_obj <- SelectDataset()
     print(seurat_obj)
-    if (whichDataset() == "data.set") {
+    if (whichTreat() == "data.set") {
       sort(unique(seurat_obj@meta.data$data.set))
     } else {
       NULL # single data set
@@ -145,6 +154,7 @@ server <- function(input, output) {
   printSubClusters <- reactive({
     seurat_obj <- SelectDataset()
     print(seurat_obj)
+    print("hi")
     if (whichDataset() == "seurat_clusters") {
       sort(unique(seurat_obj@meta.data$seurat_clusters))
     } else {
@@ -1245,8 +1255,9 @@ server <- function(input, output) {
     subset2 <- as.character(input$identText2)
     
     if ("data.set" %in% colnames(meta)) {
-      group1 <- rownames(meta[meta$data.set %in% subset1,])
-      group2 <- rownames(meta[meta$data.set %in% subset2,])
+      print("hello")
+      group1 <- rownames(meta[meta$seurat_clusters %in% subset1,])
+      group2 <- rownames(meta[meta$seurat_clusters %in% subset2,])
     } else {
       group1 <- rownames(meta[meta$cell.type.ident %in% subset1,])
       group2 <- rownames(meta[meta$cell.type.ident %in% subset2,])

@@ -53,7 +53,7 @@ getLenInput <- function(input) {
 }
 
 
-files <- list.files("./data", pattern = ".RDS", full.names = TRUE)
+files <- list.files("./data", pattern = "subsampled", full.names = TRUE)
 file_list <- list()
 
 print("Loading Seurat objects...")
@@ -61,8 +61,9 @@ for (i in 1:length(files)) {
   file_list[[i]] <- readRDS(files[i])
   DefaultAssay(file_list[[i]]) <- "RNA"
   #change early-HC to young-HCs
-  file_list[[i]]@meta.data$cell.type.ident <- plyr::revalue(
-    file_list[[i]]@meta.data$cell.type.ident, c("early-HCs" = "young-HCs"))
+  # file_list[[i]]@meta.data$cell.type.ident <- plyr::revalue(
+  #   file_list[[i]]@meta.data$cell.type.ident, c("early-HCs" = "young-HCs"))
+  Idents(file_list[[i]]) <- "cell.type.ident"
   print("checking cells per data.set")
   print(addmargins(table(Idents(file_list[[i]]),file_list[[i]]$data.set)))
 }
@@ -193,7 +194,8 @@ server <- function(input, output) {
     
     if ("cell.type.ident" %in% colnames(seurat_obj@meta.data)) {
       umap_clusters <- DimPlot(seurat_obj, reduction = "umap", pt.size = 0.10,
-                               label = TRUE, label.size = 0, group.by = "cell.type.ident",
+                               label = TRUE, label.size = 0, 
+                               group.by = "cell.type.ident",
                                cols = cluster_clrs)
     } else {
       umap_clusters <- DimPlot(seurat_obj, reduction = "umap", pt.size = 0.10,
@@ -210,13 +212,14 @@ server <- function(input, output) {
   
   output$myClusterPlotF <- renderPlot({ClusterPlotF()})
   output$plot.uiClusterPlotF <- renderUI({plotOutput("myClusterPlotF",
-                                                     width = "600px", height = "500px")})
+                                width = "600px", height = "500px")})
   
   DatasetPlotF <- function() {
     seurat_obj <- SelectDataset()
     
     umap_dataset <- DimPlot(seurat_obj, reduction = "umap", pt.size = 0.10,
-                            label = TRUE, label.size = 0, group.by = "data.set", cols = trt_colors)
+                            label = TRUE, label.size = 0, 
+                            group.by = "data.set", cols = trt_colors)
     
     umap_dataset <- umap_dataset + labs(x = "UMAP 1", y = "UMAP 2") + 
       theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
@@ -228,7 +231,7 @@ server <- function(input, output) {
   
   output$myDatasetPlotF <- renderPlot({DatasetPlotF()})
   output$plot.uiDatasetPlotF <- renderUI({plotOutput("myDatasetPlotF",
-                                                     width = "600px", height = "500px")})
+                                width = "600px", height = "500px")})
   
   
   # ======== Cluster/Data UMAP ======== #
@@ -238,7 +241,8 @@ server <- function(input, output) {
     
     if ("cell.type.ident" %in% colnames(seurat_obj@meta.data)) {
       umap_clusters <- DimPlot(seurat_obj, reduction = "umap", pt.size = 0.10,
-                               label = TRUE, label.size = 0, group.by = "cell.type.ident",
+                               label = TRUE, label.size = 0, 
+                               group.by = "cell.type.ident",
                                cols = cluster_clrs)
     } else {
       umap_clusters <- DimPlot(seurat_obj, reduction = "umap", pt.size = 0.10,
@@ -252,7 +256,8 @@ server <- function(input, output) {
             axis.title = element_text(size = 12), legend.position="bottom")
     
     umap_dataset <- DimPlot(seurat_obj, reduction = "umap", pt.size = 0.10,
-                            label = TRUE, label.size = 0, group.by = "data.set", cols = trt_colors)
+                            label = TRUE, label.size = 0, 
+                            group.by = "data.set", cols = trt_colors)
     
     umap_dataset <- umap_dataset + labs(x = "UMAP 1", y = "UMAP 2") + 
       theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
@@ -308,7 +313,8 @@ server <- function(input, output) {
       seurat_obj@meta.data$data.set %in% input$cellIdentsFeat,])
     
     feat <- FeaturePlot(seurat_obj[,cells_to_plt], selected,
-                        reduction = "umap", cols = c(input$CellBackCol, input$CellForeCol),
+                        reduction = "umap", 
+                        cols = c(input$CellBackCol, input$CellForeCol),
                         combine = FALSE, pt.size = input$ptSizeFeature)
     
     for(k in 1:length(feat)) {
@@ -323,7 +329,8 @@ server <- function(input, output) {
     
     pg <- plot_grid(plotlist = feat, ncol = 1) +
       labs(title = paste("Selected analysis:",
-                         as.character(input$Analysis)), subtitle = "", caption = "") +
+                         as.character(input$Analysis)), subtitle = "", 
+           caption = "") +
       theme(plot.title = element_text(face = "bold", size = 15, hjust = 0))
     
     return(pg)
@@ -354,7 +361,8 @@ server <- function(input, output) {
   
   output$myFeaturePlotF <- renderPlot({input$runFeatPlot
     isolate({withProgress({p <- FeaturePlotF(); print(p)},
-                          message = "Rendering plot..", min = 0, max = 10, value = 10)})
+                          message = "Rendering plot..", min = 0, 
+                          max = 10, value = 10)})
   })
   
   getHeightFeat <- function() {
@@ -406,7 +414,8 @@ server <- function(input, output) {
     
     pg <- plot_grid(plotlist = g, ncol = 1) +
       labs(title = paste("Selected analysis:",
-                         as.character(input$Analysis)), subtitle = "", caption = "") +
+                         as.character(input$Analysis)), subtitle = "", 
+           caption = "") +
       theme(plot.title = element_text(face = "bold", size = 15, hjust = 0))
     
     return(pg)
@@ -1027,12 +1036,12 @@ server <- function(input, output) {
           return(split_obj)
         }
         
-        smartseq <- split_heatmap(obj_integrated, method = "smartseq2", tomatch = smartseq_tomatch)
+        smartseq <- split_heatmap(seurat_obj, method = "smartseq2", tomatch = smartseq_tomatch)
         
         s <- DoHeatmap(smartseq, features = selected, group.by = "adj.data.set") + 
           scale_fill_gradientn(colors = c("royalblue1", "yellow", "red")) 
         
-        tenX <- split_heatmap(obj_integrated, method = "10X", tomatch = tenX_tomatch)
+        tenX <- split_heatmap(seurat_obj, method = "10X", tomatch = tenX_tomatch)
         
         t <- DoHeatmap(tenX, features = selected, group.by = "adj.data.set") + 
           scale_fill_gradientn(colors = c("royalblue1", "yellow", "red"))
@@ -1612,6 +1621,9 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                                       column(12, textInput("vlnStkdGenes", width = "100%",
                                                                            "Insert gene name or ensembl ID:",
                                                                            value = smpl_genes_sm)),
+                                                      #column(12, tags$br()),
+                                                      column(12, em("Please select no more than 3 genes at a time for computational efficiency")),
+                                                      column(12, tags$br()),
                                                       
                                                       column(12, align = "center",
                                                              actionButton("runStkdVlnPlot", "Generate Plots",

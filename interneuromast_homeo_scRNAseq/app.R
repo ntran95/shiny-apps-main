@@ -136,6 +136,7 @@ server <- function(input, output) {
   }
   
   whichTreat <- function(){
+    seurat_obj <- SelectDataset()
    if ("data.set" %in% colnames(seurat_obj@meta.data)){
       "data.set"
    }
@@ -513,7 +514,7 @@ server <- function(input, output) {
     
     
     
-    ids <- as.list(levels(seurat_obj$data.set))
+    ids <- as.list(levels(seurat_obj$cell.type.ident))
     
     
     gg_color_hue <- function(n) {
@@ -532,7 +533,7 @@ server <- function(input, output) {
     
     for (i in 1:length(ids)) {
       print(ids[[i]])
-      obj_trt_list[[i]] <- seurat_obj[,seurat_obj[["data.set"]] == ids[[i]]]
+      obj_trt_list[[i]] <- seurat_obj[,seurat_obj[["cell.type.ident"]] == ids[[i]]]
     }
     
     stacked_violin_plot <- function(goi, obj_trt_list){
@@ -552,8 +553,10 @@ server <- function(input, output) {
       
       trt_plot_list[[length(trt_plot_list)]]<- trt_plot_list[[length(trt_plot_list)]] +
         theme(axis.text.x=element_text(), axis.ticks.x = element_line())
-      # change the y-axis tick to only max value
+      # change the y-axis tick to only max value, treats ymax from each obj_trt_list independently
       ymaxs <- purrr::map_dbl(trt_plot_list, extract_max)
+      #finds highest ymax, normalize
+      ymaxs<- max(sapply(ymaxs, max))
       trt_plot_list <- purrr::map2(trt_plot_list, ymaxs, function(x, y) x +
                                      scale_y_continuous(breaks = c(y)) + expand_limits(y = y))
       grid_obj <- cowplot::plot_grid(plotlist = trt_plot_list,
@@ -1552,8 +1555,9 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                                       column(12, align = "center",
                                                              column(6,
                                                                     radioGroupButtons("selectGrpVln",
-                                                                                      "Group cells by:", choices = list(Time = "data.set",
-                                                                                                                        Cluster = "cell.type.ident"), width = "100%")),
+                                                                                      "Group cells by:", choices = list(Cluster = "cell.type.ident",
+                                                                                                                        Subcluster = "seurat_clusters"
+                                                                                                                        ), width = "100%")),
                                                              column(6,
                                                                     numericInput("ptSizeVln", "Input cell size:", value = 0.25,
                                                                                  min = 0.00, step = 0.75, max = 2.00, width = "80%"))
@@ -1659,7 +1663,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                                       column(12, align = "center",
                                                              column(6,
                                                                     radioGroupButtons("selectGrpStkdVln",
-                                                                                      "Group cells by:", choices = list(data.set = "data.set"), 
+                                                                                      "Group cells by:", choices = list(Cluster = "cell.type.ident"), 
                                                                                       width = "100%")),
                                                              column(6,
                                                                     numericInput("ptSizeStkdVln", "Input cell size:", 
@@ -1770,8 +1774,8 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                                       column(12, align = "center",
                                                              column(6,
                                                                     radioGroupButtons("selectGrpDot",
-                                                                                      "Group cells by:", choices = list(Time = "data.set",
-                                                                                                                        Cluster = "cell.type.ident"), width = "100%")),
+                                                                                      "Group cells by:", choices = list(Cluster = "cell.type.ident",
+                                                                                                                        Subcluster = "seurat_clusters"), width = "100%")),
                                                              column(6,
                                                                     numericInput("dotScale", "Dot diameter:", value = 10, min = 4,
                                                                                  step = 1, max = 20, width = "80%"), align = "center")
@@ -1829,7 +1833,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                                                     radioGroupButtons("selectGrpHmap",
                                                                                       "Group cells by:", 
                                                                                       choices = list(Cluster = "cell.type.ident",
-                                                                                                     Time = "data.set"), 
+                                                                                                     Subcluster = "seurat_clusters"), 
                                                                                       width = "100%"))
                                                              
                                                       ),

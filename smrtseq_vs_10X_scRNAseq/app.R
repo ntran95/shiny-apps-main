@@ -53,7 +53,7 @@ getLenInput <- function(input) {
 }
 
 
-files <- list.files("./data", pattern = "subsampled", full.names = TRUE)
+files <- list.files("./data", pattern = ".RDS", full.names = TRUE)
 file_list <- list()
 
 print("Loading Seurat objects...")
@@ -87,8 +87,8 @@ names(file_list) <- as.character(c(
   "all she-pos. cells"))
 #names(hmap_list) <- as.character(c("LOG", "CLR", "RC"))
 
-trt_colors <- c("green3", "gold", "darkorange",
-                "deeppink", "mediumorchid1", "deepskyblue", "blue")
+trt_colors <- c("green3", "blue","gold", "darkorange",
+                "deeppink", "mediumorchid1", "deepskyblue")
 
 smpl_genes_sm <- paste0("atoh1a her4.1")
 smpl_genes_lg <- paste0("atoh1a her4.1 hes2.2 dld sox4a*1 myclb gadd45gb.1",
@@ -532,8 +532,10 @@ server <- function(input, output) {
       
       trt_plot_list[[length(trt_plot_list)]]<- trt_plot_list[[length(trt_plot_list)]] +
         theme(axis.text.x=element_text(), axis.ticks.x = element_line())
-      # change the y-axis tick to only max value
+      # change the y-axis tick to only max value, treats ymax from each obj_trt_list independently
       ymaxs <- purrr::map_dbl(trt_plot_list, extract_max)
+      #finds highest ymax, normalize
+      ymaxs<- max(sapply(ymaxs, max))
       trt_plot_list <- purrr::map2(trt_plot_list, ymaxs, function(x, y) x +
                                      scale_y_continuous(breaks = c(y)) + expand_limits(y = y))
       grid_obj <- cowplot::plot_grid(plotlist = trt_plot_list,
@@ -1531,7 +1533,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                                       column(12, align = "center",
                                                              column(6,
                                                                     radioGroupButtons("selectGrpVln",
-                                                                                      "Group cells by:", choices = list(Time = "data.set",
+                                                                                      "Group cells by:", choices = list(Dataset = "data.set",
                                                                                                                         Cluster = "cell.type.ident"), width = "100%")),
                                                              column(6,
                                                                     numericInput("ptSizeVln", "Input cell size:", value = 0.25,
@@ -1752,7 +1754,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                                       column(12, align = "center",
                                                              column(6,
                                                                     radioGroupButtons("selectGrpDot",
-                                                                                      "Group cells by:", choices = list(Time = "data.set",
+                                                                                      "Group cells by:", choices = list(Dataset = "data.set",
                                                                                                                         Cluster = "cell.type.ident"), width = "100%")),
                                                              column(6,
                                                                     numericInput("dotScale", "Dot diameter:", value = 10, min = 4,
@@ -1811,7 +1813,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                                                     radioGroupButtons("selectGrpHmap",
                                                                                       "Group cells by:", 
                                                                                       choices = list(Cluster = "cell.type.ident",
-                                                                                                     Time = "data.set"), 
+                                                                                                     Dataset = "data.set"), 
                                                                                       width = "100%"))
                                                              
                                                       ),

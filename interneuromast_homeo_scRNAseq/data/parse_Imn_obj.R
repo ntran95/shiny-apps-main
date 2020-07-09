@@ -1,7 +1,7 @@
 library(Seurat)
 library(ggplot2)
 
-setwd("/home/ntran2/bgmp/shiny-apps-main/interneuromast_homeo_scRNAseq/data/")
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 obj_integrated <- readRDS("./scaled.filtered_adj_fpkm_1828_smartseq_integ.RDS")
 
@@ -36,3 +36,6 @@ head(file_list[[1]][["RNA"]]@var.features)
 ElbowPlot(file_list[[1]])
 
 saveRDS(file_list[[1]], "./Imn_mantle_homeo.RDS")
+
+
+

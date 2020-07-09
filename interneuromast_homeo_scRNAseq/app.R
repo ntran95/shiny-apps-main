@@ -1646,6 +1646,9 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                                       column(12, textInput("vlnStkdGenes", width = "100%",
                                                                            "Insert gene name or ensembl ID:",
                                                                            value = smpl_genes_sm)),
+                                                      #column(12, tags$br()),
+                                                      column(12, em("Please select no more than 3 genes at a time for computational efficiency")),
+                                                      column(12, tags$br()),
                                                       
                                                       column(12, align = "center",
                                                              actionButton("runStkdVlnPlot", "Generate Plots",

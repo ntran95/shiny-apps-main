@@ -843,7 +843,7 @@ server <- function(input, output) {
   
   #download
   output$downloadhmap <- downloadHandler(
-    filename = "heatmap.pdf", content = function(file) {
+    filename = "heatmap.png", content = function(file) {
       png(file, height = getHeightPhmap(),
           width = 1000, units = "px")
       print(pHeatmapF())

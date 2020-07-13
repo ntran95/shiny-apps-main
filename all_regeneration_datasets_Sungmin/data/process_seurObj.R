@@ -8,6 +8,8 @@ library(pheatmap)
 library(hrbrthemes)
 library(tidyr)
 
+save_envir <- "TRUE"
+load_envir <- "FALSE"
 if (TRUE) {
   setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
   
@@ -20,10 +22,21 @@ if (TRUE) {
   if (exists("seurat_obj") == "FALSE"){
     seurat_obj <- readRDS("./TRIMMED_SeurObj_all_LL_cells_regen_v1.2_.RDS")
   }
-  
-  load(file = "./saved_env_2020-07-10.RData")
-  
-}
+  if (load_envir ==TRUE){
+  load(list.files(path = ".", pattern = "saved_env"))
+  }
+  if (save_envir == TRUE && file.exists(list.files(path = ".", pattern = ".RData")) == "TRUE"){
+    #if (file.exists(list.files(path = ".", pattern = ".RData")) == "TRUE"){
+      print("This file exists already:")
+      print(list.files(path = ".", pattern = ".RData"))
+      system("rm *.RData")
+      print("saving updated RData env")
+      save.image(file = paste0("saved_env_", date, ".RData"))
+    }else{
+      print("saving updated RData env")
+      save.image(file = paste0("saved_env_", date, ".RData"))
+    }
+  }
 
 files <- list.files(".", pattern = "TRIMMED", full.names = TRUE)
 file_list <- list()

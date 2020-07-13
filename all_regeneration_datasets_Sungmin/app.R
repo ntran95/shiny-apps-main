@@ -8,7 +8,6 @@ library(dplyr)
 library(rsconnect)
 library(hrbrthemes)
 
-
 multiGrep2 <- function(toMatch, toSearch, ...) {
   toMatch <- ifelse(grepl("*", toMatch),
                     gsub("\\*","\\\\*", toMatch), toMatch <- toMatch)
@@ -57,15 +56,12 @@ print("done.")
 
 
 # ! =========== items to check/change for project {START}
-# file_list <- file_list[c(6,5,1:4)]
+file_list <- file_list[c(6,5,1:4)]
 # hmap_list <- hmap_list[c(2,1,3)]
 
 names(file_list) <- as.character(c(
-  "all she-pos. cells"))
-
-# names(file_list) <- as.character(c(
-#   "all she-pos. cells", "neuromast cells","AP cells",
-#   "central cells", "HC progenitors", "mantle cells"))
+  "all she-pos. cells", "neuromast cells","AP cells",
+  "central cells", "HC progenitors", "mantle cells"))
 
 
 #names(hmap_list) <- as.character(c("LOG", "CLR", "RC"))
@@ -1425,7 +1421,8 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                                              column(12,
                                                                     radioGroupButtons("selectGrpHmap",
                                                                                       "Group cells by:", 
-                                                                                      choices = list(Time = "data.set", 
+                                                                                      choices = list(Combined = "cell.type.ident.by.data.set",
+                                                                                      Time = "data.set", 
                                                                                       Cluster = "cell.type.ident"),
                                                                                       width = "100%"))
                                                              

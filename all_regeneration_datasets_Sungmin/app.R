@@ -768,12 +768,14 @@ server <- function(input, output) {
       dotplot <- DotPlot(seurat_obj, features = selected,
                      group.by = input$selectGrpHmap)
       
-      g <- ggplot(dotplot$data, aes(id, features.plot,fill= avg.exp.scaled)) + 
+      g <- ggplot(dotplot$data, aes(id, features.plot,fill= avg.exp.scaled, width = 1, height = 1)) + 
         geom_tile() +
         scale_fill_distiller(
           palette = "RdYlBu") +
         theme_ipsum()+
-        theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1)) 
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 13),
+              axis.title.y.right = element_text(size=13))  + scale_y_discrete(position = "right") +
+        scale_y_discrete(position = "left")
       
       g <- g + labs(title = paste("Selected analysis:",
                                   as.character(input$Analysis)), subtitle = "", caption = "") +
@@ -823,12 +825,13 @@ server <- function(input, output) {
     return(h)
   })
   
-  getWidthPhmap <- function () {
-    if(input$selectGrpHmap == "data.set") {
-      w <- "1000"
+  getWidthPhmap <- function() {
+    if(input$selectGrpHmap == "cell.type.ident.by.data.set") {
+      w <- "1200"
     } else {
       w <- "800"
     }
+    return(w)
   }
   
   output$plot.uiPheatmapF <- renderUI({input$runPhmap
@@ -842,7 +845,7 @@ server <- function(input, output) {
   output$downloadhmap <- downloadHandler(
     filename = "heatmap.png", content = function(file) {
       png(file, height = getHeightPhmap(),
-          width = 1000, units = "px")
+          width = 1200, units = "px")
       print(pHeatmapF())
       dev.off()
     }

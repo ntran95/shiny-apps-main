@@ -42,6 +42,7 @@ print("Loading Seurat objects...")
 for (i in 1:length(files)) {
   file_list[[i]] <- readRDS(files[i])
   DefaultAssay(file_list[[i]]) <- "RNA"
+  #Idents(file_list[[i]]) <- "cell.type.ident"
 }
 print("done.")
 

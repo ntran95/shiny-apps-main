@@ -687,11 +687,12 @@ server <- function(input, output) {
   # ! check/change for project
   # TODO create formula for n clusters/treats and dplot width
   dplotWidth <- function () {
-    if(input$selectGrpDot == "data.set") {
-      w <- "500px"
+    if(input$selectGrpDot == "cell.type.ident.by.data.set") {
+      w <- "2400px"
     } else {
       w <- "800px"
     }
+    return(w)
   }
   
   output$plot.uiDotPlotF <- renderUI({input$runDotPlot
@@ -708,7 +709,7 @@ server <- function(input, output) {
   
   output$downloadDotPlot <- downloadHandler(
     filename = "dot_plot.pdf", content = function(file) {
-      pdf(file, onefile = FALSE, width = 12, height = dotHeight() * 0.5)
+      pdf(file, onefile = FALSE, width = 28, height = dotHeight() * 0.5)
       print(DotPlotF())
       dev.off()
     }
@@ -1368,11 +1369,12 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                                       column(12, align = "center",
                                                              column(6,
                                                                     radioGroupButtons("selectGrpDot",
-                                                                                      "Group cells by:", choices = list(Time = "data.set",
-                                                                                                                        Cluster = "cell.type.ident"), width = "100%")),
+                                                                                      "Group cells by:", choices = list(
+                                                                                        Combined = "cell.type.ident.by.data.set",
+                                                                                        Time = "data.set",Cluster = "cell.type.ident"), width = "100%",size = "xs")),
                                                              column(6,
                                                                     numericInput("dotScale", "Dot diameter:", value = 10, min = 4,
-                                                                                 step = 1, max = 20, width = "80%"), align = "center")
+                                                                                 step = 1, max = 20, width = "60%"), align = "center")
                                                       ),
                                                       
                                                       fluidRow(tags$br()),

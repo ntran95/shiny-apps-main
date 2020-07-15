@@ -53,7 +53,7 @@ getLenInput <- function(input) {
 }
 
 
-files <- list.files("./data", pattern = "Imn_mantle_homeo.RDS", full.names = TRUE)
+files <- list.files("./data", pattern = "TRIMMED", full.names = TRUE)
 file_list <- list()
 
 print("Loading Seurat objects...")
@@ -83,7 +83,7 @@ print("done.")
 #hmap_list <- hmap_list[c(2,1,3)]
 
 names(file_list) <- as.character(c(
-  "all she-pos. cells"))
+  "interneuromast"))
 #names(hmap_list) <- as.character(c("LOG", "CLR", "RC"))
 
 trt_colors <- c("green3", "gold", "darkorange",
@@ -101,7 +101,7 @@ gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
                       sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
 branch <- "master" # CHECK BEFORE DEPLOYMENT!
-app_name <- "smrtseq_vs_10X_scRNAseq"
+app_name <- "interneuromast_homeo_scRNAseq"
 # ! =========== {END}
 
 
@@ -984,8 +984,7 @@ server <- function(input, output) {
     }
   )
   
-  ## ========== DoHeatMap ======= ##
-  
+  # # ======== ggplot Heatmap ======== #
   pHeatmapF <- reactive({
     clustering <- input$pHmapClust  #enable row clustering
     if (clustering == TRUE){
@@ -1001,14 +1000,21 @@ server <- function(input, output) {
       
       seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsHmap]
       
+      seurat_obj_sub <- seurat_obj[rownames(seurat_obj) %in% selected,]
       dist_mat <- dist(seurat_obj_sub@assays$RNA@data)
       clust <- hclust(dist_mat)   #reorder genes
       markers_clust <- clust$labels
       
-      g <- DoHeatmap(seurat_obj, features = markers_clust,
-                     group.by = input$selectGrpHmap) + scale_fill_gradientn(colors = c("red", "yellow", "royalblue1"))
-      #+ scale_fill_gradientn(colors = c("red", "yellow", "blue"))
-      #selectGrpHmap: user input b/t cell.type.ident or data.set
+      dotplot <- DotPlot(seurat_obj, features = markers_clust,
+                         group.by = input$selectGrpHmap)
+      
+      g <- ggplot(dotplot$data, aes(id, features.plot, fill= avg.exp.scaled)) + 
+        geom_tile() +
+        scale_fill_distiller(
+          palette = "RdYlBu") +
+        theme_ipsum() +
+        theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1)) 
+      
       
       g <- g + labs(title = paste("Selected analysis:",
                                   as.character(input$Analysis)), subtitle = "", caption = "") +
@@ -1028,54 +1034,22 @@ server <- function(input, output) {
       seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsHmap]
       print(input$cellIdentsHmap)
       
-    
-      g <- DoHeatmap(seurat_obj, features = selected,
-                     group.by = input$selectGrpHmap) + scale_fill_gradientn(colors = c("royalblue1", "yellow", "red"))
-      #+ scale_fill_gradientn(colors = c("red", "yellow", "blue"))
+      
+      dotplot <- DotPlot(seurat_obj, features = selected,
+                         group.by = input$selectGrpHmap)
+      
+      g <- ggplot(dotplot$data, aes(id, features.plot,fill= avg.exp.scaled, width = 1, height = 1)) + 
+        geom_tile() +
+        scale_fill_distiller(
+          palette = "RdYlBu") +
+        theme_ipsum()+
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 13),
+              axis.title.y.right = element_text(size=13))  + scale_y_discrete(position = "right") +
+        scale_y_discrete(position = "left")
       
       g <- g + labs(title = paste("Selected analysis:",
                                   as.character(input$Analysis)), subtitle = "", caption = "") +
         theme(plot.title = element_text(face = "plain", size = 14))
-      # 
-      # if (input$selectGrpHmap == "data.set") {
-      #   smartseq_tomatch <- c("1hr-smrtseq", "homeo-smrtseq")
-      #   
-      #   tenX_tomatch <- c("homeo-10X-isl1", "homeo-10X-2047", "homeo-10X-2410-7", "homeo-10X-2410-8")
-      #   
-      #   split_heatmap <- function(seurat_obj, method, tomatch){
-      #     split_obj <- subset(seurat_obj, subset = seq.method == method)
-      #     meta <- split_obj@meta.data
-      #     
-      #     adj.data.set <- as.vector(split_obj@meta.data$data.set)
-      #     
-      #     for (i in 1:length(tomatch)) {
-      #       print(tomatch[[i]])
-      #       meta <- meta%>% mutate(adj.data.set =case_when(str_detect(data.set, 
-      #                                                                 paste(tomatch[[i]])) ~ tomatch[[i]],
-      #                                                      TRUE ~ as.vector(split_obj@meta.data$data.set)))
-      #     }
-      #     split_obj@meta.data$adj.data.set <- meta$adj.data.set
-      #     
-      #     return(split_obj)
-      #   }
-      #   
-      #   smartseq <- split_heatmap(obj_integrated, method = "smartseq2", tomatch = smartseq_tomatch)
-      #   
-      #   s <- DoHeatmap(smartseq, features = selected, group.by = "adj.data.set") + 
-      #     scale_fill_gradientn(colors = c("royalblue1", "yellow", "red")) 
-      #   
-      #   tenX <- split_heatmap(obj_integrated, method = "10X", tomatch = tenX_tomatch)
-      #   
-      #   t <- DoHeatmap(tenX, features = selected, group.by = "adj.data.set") + 
-      #     scale_fill_gradientn(colors = c("royalblue1", "yellow", "red"))
-      #   
-      #   g <-s + t
-      #   
-      #   g <- g + labs(title = paste("Selected analysis:",
-      #                               as.character(input$Analysis)), subtitle = "", caption = "") +
-      #     theme(plot.title = element_text(face = "plain", size = 14))
-      #   
-      # }
       
     }
     
@@ -1121,12 +1095,13 @@ server <- function(input, output) {
     return(h)
   })
   
-  getWidthPhmap <- function () {
-    if(input$selectGrpHmap == "data.set") {
-      w <- "1000"
+  getWidthPhmap <- function() {
+    if(input$selectGrpHmap == "cell.type.ident.by.data.set") {
+      w <- "1200"
     } else {
       w <- "800"
     }
+    return(w)
   }
   
   output$plot.uiPheatmapF <- renderUI({input$runPhmap
@@ -1138,15 +1113,13 @@ server <- function(input, output) {
   
   #download
   output$downloadhmap <- downloadHandler(
-    filename = "heatmap.pdf", content = function(file) {
+    filename = "heatmap.png", content = function(file) {
       png(file, height = getHeightPhmap(),
-          width = 1000, units = "px")
+          width = 1200, units = "px")
       print(pHeatmapF())
       dev.off()
     }
   )
-  
-  
   # # ======== pHeatmap ======== # -omit heatmap for this app
   # selectedCellsHmap <- reactive({
   #   multiGrep2(input$cellIdentsHmap, colnames(hmap_list[[1]]))
@@ -1832,7 +1805,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                                       
                                                       column(12, tags$br()),
                                                       column(12, align = "center",
-                                                             column(6,
+                                                             column(12,
                                                                     radioGroupButtons("selectGrpHmap",
                                                                                       "Group cells by:", 
                                                                                       choices = list(Cluster = "cell.type.ident",

@@ -2,3 +2,5 @@
 *.RDS
 *.dcf
 .smb*
+*.Rmd
+*.html

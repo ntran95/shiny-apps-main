@@ -3,6 +3,8 @@ library(ggplot2)
 
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
+app_name <- "interneuromast_homeo_scRNAseq"
+
 obj_integrated <- readRDS("./scaled.filtered_adj_fpkm_1828_smartseq_integ.RDS")
 
 files <- list.files(".", pattern = "scaled", full.names = TRUE)
@@ -35,7 +37,20 @@ head(file_list[[1]][["RNA"]]@var.features)
 
 ElbowPlot(file_list[[1]])
 
-saveRDS(file_list[[1]], "./Imn_mantle_homeo.RDS")
+saveRDS(file_list[[1]], paste0(app_name, ".RDS"))
+
+# ===================================== Trim Obj ====================================
+
+# Processing for individual data set that is recently added
 
 
+files <- list.files(".", pattern = "*.RDS", full.names = TRUE)
+new_obj <- readRDS(files[1])
+print(format(object.size(new_obj), units = "Mb"))
 
+
+new_obj@assays$RNA@counts <- matrix()
+new_obj@assays$RNA@scale.data <- matrix()
+new_obj@assays$integrated@counts <- matrix()
+new_obj@assays$integrated@scale.data <- matrix()
+saveRDS(new_obj, paste0("TRIMMED_", app_name, ".RDS"))

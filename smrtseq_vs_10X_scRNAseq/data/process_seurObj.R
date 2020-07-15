@@ -9,11 +9,12 @@ if (TRUE) {
   setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
   
   script_name <- "process_seurObj"
+  app_name <- "smrtseq_vs_10X_scRNAseq"
   
   figurePath <- function(filename, format){paste0(script_name, "_figures/", filename)}
 }
 
-files <- list.files("./seurat_obj_input/", pattern = "*scaled", full.names = TRUE)
+files <- list.files("./seurat_obj_input", pattern = "*scaled", full.names = TRUE)
 
 seurat_obj <- readRDS(file = files[1])
 
@@ -36,10 +37,17 @@ Idents(seurat_obj) <- "data.set"
 my_levels <- c("1hr-smrtseq", "homeo-smrtseq", "homeo-10X-isl1", "homeo-10X-2047", "homeo-10X-2410-7", "homeo-10X-2410-8")
 seurat_obj$data.set <- factor(Idents(seurat_obj), levels= my_levels)
 
-
+seurat_obj@assays$RNA@counts <- matrix()
+seurat_obj@assays$RNA@scale.data <- matrix()
 seurat_obj[["integrated"]]@scale.data <- matrix() 
 
+print(object.size(seurat_obj), units = "MB")
+
+saveRDS(seurat_obj, paste0("TRIMMED_", app_name, ".RDS"))
+
 # =======================================Downsample ===========================
+downsample <- FALSE
+if (downsample){
 Idents(seurat_obj) <- "seq.method"
 smartseq <- WhichCells(seurat_obj, idents = "smartseq2")
 tenX <- WhichCells(seurat_obj, idents = "10X", downsample = round(length(colnames(seurat_obj)) * .30))
@@ -58,7 +66,7 @@ seurat_obj <- readRDS("./subsampled_30_smrtseq_10X.RDS")
 seurat_obj
 library(kableExtra)
 kable(table(seurat_obj$data.set),col.names = c("data.set", "freq")) %>%kable_styling(font_size = 10) %>% row_spec(1:2, color = "red")
-
+}
 # ======================================= Generate Figures ===========================
 
 diff_results <- FindAllMarkers(seurat_obj)

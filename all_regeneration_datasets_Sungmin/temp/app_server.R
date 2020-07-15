@@ -632,7 +632,7 @@ server <- function(input, output) {
   avg_mtx_names <- unique(unlist(lapply(seq_along(colnames(hmap_list[[1]])),
     function(i){strsplit(colnames(hmap_list[[1]]), "_")[[i]][1]})))
 
-  output$cellSelectHmap <- renderUI({ # New cell type select
+  output$cellSelectHmap <- renderUI({ # New cell type selected
   pickerInput("cellIdentsHmap", "Add or remove clusters:",
     choices = avg_mtx_names, multiple = TRUE,
     selected = avg_mtx_names, options = list(

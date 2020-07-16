@@ -775,13 +775,35 @@ server <- function(input, output) {
           palette = "RdYlBu") +
         theme_ipsum()+
         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 13),
-              axis.title.y.right = element_text(size=13))  + scale_y_discrete(position = "right") +
-        scale_y_discrete(position = "left")
+              axis.title.y.right = element_text(size=13)) 
       
       g <- g + labs(title = paste("Selected analysis:",
                                   as.character(input$Analysis)), subtitle = "", caption = "") +
         theme(plot.title = element_text(face = "plain", size = 14))
    
+    }
+    
+    if (input$selectGrpHmap == "cell.type.ident.by.data.set"){
+   
+      dotplot <- DotPlot(seurat_obj, features = selected,
+                         group.by = input$selectGrpHmap)
+      
+      dotplot$data$groupIdent <- gsub("(.+?)(\\_.*)", "\\1",dotplot$data$id)
+      dotplot$data$groupIdent <- factor(dotplot$data$groupIdent,levels=cell.type)
+      
+      g <- ggplot(dotplot$data, aes(id, features.plot,fill= avg.exp.scaled, width = 1, height = 1)) + 
+        geom_tile() +
+        scale_fill_distiller(
+          palette = "RdYlBu") +
+        theme_ipsum()+
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 13),
+              axis.title.y.right = element_text(size=13),panel.spacing = unit(.35, "lines")) + 
+        facet_grid( ~ groupIdent, scales='free_x')
+      
+      
+      g <- g + labs(title = paste("Selected analysis:",
+                                  as.character(input$Analysis)), subtitle = "", caption = "") +
+        theme(plot.title = element_text(face = "plain", size = 14))
     }
     
     return(g)
@@ -851,102 +873,6 @@ server <- function(input, output) {
       dev.off()
     }
   )
-  
-  # # ======== pHeatmap ======== #
-  # selectedCellsHmap <- reactive({
-  #   multiGrep2(input$cellIdentsHmap, colnames(hmap_list[[1]]))
-  # })
-  # 
-  # pHeatmapF <- reactive({
-  #   selected <- unlist(strsplit(input$PhmapGenes, " "))
-  #   
-  #   ifelse(selected %in% com_name,
-  #          selected <- selected[selected %in% com_name],
-  #          
-  #          ifelse(selected %in% ens_id,
-  #                 selected <- gene_df[ens_id %in% selected, 3],"")
-  #   )
-  #   
-  #   avg_mtx <- hmap_list[[input$mtxSelectHmap]]
-  #   goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected, selectedCellsHmap()]
-  #   goi_mat <- goi_mat[match(selected, rownames(goi_mat)),]
-  #   
-  #   n_trt <- length(unique(file_list[[1]]@meta.data$data.set))
-  #   mtx_cols <- ncol(goi_mat) - n_trt
-  #   
-  #   hmapColors <- colorRampPalette(
-  #     rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu")))(100)
-  #   
-  #   pheatmap::pheatmap(goi_mat, cluster_rows = input$pHmapClust,
-  #                      cluster_cols = FALSE, color = hmapColors, annotation_col = NULL,
-  #                      legend = FALSE, annotation_colors = anno_cols,
-  #                      gaps_col = seq(n_trt, mtx_cols, by = n_trt),
-  #                      annotation_names_col = FALSE, annotation_legend = FALSE)
-  # })
-  # 
-  # mismatchPhmap <- function() {
-  #   selected <- unlist(strsplit(input$PhmapGenes, " "))
-  #   
-  #   mismatch <- ifelse(!selected %in% c(com_name, ens_id),
-  #                      selected[!selected %in% c(com_name, ens_id)],"")
-  #   return(mismatch)
-  # }
-  # 
-  # output$notInPhmap <- renderText({input$runPhmap
-  #   isolate({mismatchPhmap()})
-  # })
-  # 
-  # output$SelectedDataPhmap <- renderText({input$runPhmap
-  #   isolate({input$Analysis})
-  # })
-  # 
-  # avg_mtx_names <- unique(unlist(lapply(seq_along(colnames(hmap_list[[1]])),
-  #                                       function(i){strsplit(colnames(hmap_list[[1]]), "_")[[i]][1]})))
-  # 
-  # output$cellSelectHmap <- renderUI({ # New cell type select
-  #   pickerInput("cellIdentsHmap", "Add or remove clusters:",
-  #               choices = avg_mtx_names, multiple = TRUE,
-  #               selected = avg_mtx_names, options = list(
-  #                 `actions-box` = TRUE), width = "80%")
-  # })
-  # 
-  # output$myPhmapF <- renderPlot({input$runPhmap
-  #   isolate({withProgress({p <- pHeatmapF(); print(p)},
-  #                         message = "Rendering plot..", min = 0, max = 10, value = 10)
-  #   })
-  # })
-  # 
-  # getWidthPhmap <- reactive({
-  #   if(input$pHmapClust == TRUE ) {
-  #     w <- (length(selectedCellsHmap()) * 14) + 150
-  #     return(w)
-  #   } else {
-  #     w <- (length(selectedCellsHmap()) * 14) + 90
-  #     return(w)
-  #   }
-  # })
-  # 
-  # getHeightPhmap <- reactive({
-  #   l <- getLenInput(input$PhmapGenes)
-  #   h <- (l * 13) + 85
-  #   return(h)
-  # })
-  # 
-  # output$plot.uiPheatmapF <- renderUI({input$runPhmap
-  #   isolate({
-  #     w <- paste0(getWidthPhmap(), "px"); h <- paste0(getHeightPhmap(), "px")
-  #     plotOutput("myPhmapF", width = w, height = h)
-  #   })
-  # })
-  # 
-  # output$downloadPhmap <- downloadHandler(
-  #   filename = "heatmap.pdf", content = function(file) {
-  #     pdf(file, width = (getWidthPhmap() / 90),
-  #         height = (getHeightPhmap() / 90))
-  #     print(pHeatmapF())
-  #     dev.off()
-  #   }
-  # )
   
   
   # ======== Differential Expression ======== #

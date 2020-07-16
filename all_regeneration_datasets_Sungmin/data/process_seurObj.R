@@ -8,9 +8,6 @@ library(pheatmap)
 library(hrbrthemes)
 library(tidyr)
 
-save_envir <- "FALSE"
-load_envir <- TRUE
-
 if (TRUE) {
   setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
   
@@ -30,14 +27,15 @@ cell.type <- c("mature-HCs","young-HCs","HC-prog" ,"central-cells", "DV-cells","
 treatments <- c("homeo" ,"0min" , "30min", "1hr", "3hr","5hr", "10hr")
 
 readSeuratObj <- TRUE
-modifySeuratObj <-TRUE
-print("Loading Seurat objects...")
+modifySeuratObj <-FALSE
+
 for (i in 1:length(files)) {
-  if (readSeuratObj == TRUE){
+  if (readSeuratObj){
+  print("Loading Seurat objects...")
   file_list[[i]] <- readRDS(files[i])
   DefaultAssay(file_list[[i]]) <- "RNA"
   }
-  if (modifySeuratObj ==TRUE){
+  if (modifySeuratObj){
   #create new column in meta.data 
     #applied to all-she-pos and neuromast analysis
   if ("cell.type.ident" %in% colnames(file_list[[i]])){
@@ -76,11 +74,35 @@ for (i in 6:5){
   
   
 }
-DotPlot(file_list[[6]], features = features, group.by = "cell.type.ident.by.data.set")
 
-
+# ================== test new heatmap ======================
 features <- c("atoh1a", "her4.1", "hes2.2", "dld", "sox4a*1", "myclb", "gadd45gb.1",
               "insm1a", "wnt2", "sost", "sfrp1a", "pcna", "mki67", "isl1", "slc1a3a", "glula", "lfng", "cbln20", "ebf3a",
               "znf185", "si:ch211-229d2.5", "si:ch73-261i21.5", "spaca4l", "foxp4", "crip1")
-DotPlot(temp, features = features)
-Idents(file_list[[4]])
+
+seurat_Obj <- file_list[[6]]
+
+dotplot <- DotPlot(seurat_Obj, features = features,
+                   group.by = "cell.type.ident.by.data.set")
+
+dotplot$data$groupIdent <- gsub("(.+?)(\\_.*)", "\\1",dotplot$data$id)
+dotplot$data$groupIdent <- factor(dotplot$data$groupIdent,levels=cell.type)
+
+g <- ggplot(dotplot$data, aes(id, features.plot,fill= avg.exp.scaled, width = 1, height = 1)) + 
+  geom_tile() +
+  scale_fill_distiller(
+    palette = "RdYlBu") +
+  theme_ipsum()+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 13),
+        axis.title.y.right = element_text(size=13),panel.spacing = unit(.35, "lines")) + facet_grid( ~ groupIdent, scales='free_x')
+
+
+
+g <- g + labs(title = paste("Selected analysis:",
+                            as.character(input$Analysis)), subtitle = "", caption = "") +
+  theme(plot.title = element_text(face = "plain", size = 14))
+
+
+
+
+

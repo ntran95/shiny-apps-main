@@ -4,3 +4,5 @@
 .smb*
 *.Rmd
 *.html
+._*
+*.RData

@@ -996,30 +996,6 @@ server <- function(input, output) {
       
       
     }
-    
-    if (input$selectGrpHmap == "cell.type.ident.by.data.set"){
-      
-      dotplot <- DotPlot(seurat_obj, features = selected,
-                         group.by = input$selectGrpHmap)
-      
-      dotplot$data$groupIdent <- gsub("(.+?)(\\_.*)", "\\1",dotplot$data$id)
-      dotplot$data$groupIdent <- factor(dotplot$data$groupIdent,levels=cell.type)
-      
-      g <- ggplot(dotplot$data, aes(id, features.plot,fill= avg.exp.scaled, width = 1, height = 1)) + 
-        geom_tile() +
-        scale_fill_distiller(
-          palette = "RdYlBu") +
-        theme_ipsum()+
-        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 13),
-              axis.title.y.right = element_text(size=13),panel.spacing = unit(.35, "lines")) + 
-        facet_grid( ~ groupIdent, scales='free_x')
-      
-      
-      g <- g + labs(title = paste("Selected analysis:",
-                                  as.character(input$Analysis)), subtitle = "", caption = "") +
-        theme(plot.title = element_text(face = "plain", size = 14))
-    }
-    
     return(g)
     
   })

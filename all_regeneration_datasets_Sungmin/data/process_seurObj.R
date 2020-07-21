@@ -105,7 +105,7 @@ g
 
 "%||%" <- devtools:::`%||%`
 
-group.by <- "cell.type.ident.by.data.set"
+group.by <- "cell.type.ident"
 cells <- NULL
 col.min = -2.5
 col.max = 2.5
@@ -136,7 +136,15 @@ data <- melt(data, variable.name  = "Feature")
 data$groupIdent <- gsub("(.+?)(\\_.*)", "\\1",data$id)
 data$groupIdent <- factor(data$groupIdent,levels=cell.type)
 #preserve identity order
+#group.by.f <- factor(group.by)
+if (group.by == "cell.type.ident.by.data.set"){
+  print('hi')
 data$id <- factor(data$id, levels = levels(seurat_obj$cell.type.ident.by.data.set))
+}else if (group.by == "data.set"){
+  data$id <- factor(data$id, levels = levels(seurat_obj$data.set))
+}else{
+  data$id <- factor(data$id, levels = levels(seurat_obj$cell.type.ident))
+}
 
 indv.hmap <- ggplot(data, aes(Cell, Feature,fill= value, width = 1, height = 1)) + 
   geom_tile() +
@@ -146,7 +154,7 @@ indv.hmap <- ggplot(data, aes(Cell, Feature,fill= value, width = 1, height = 1))
   theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         axis.title.y.right = element_text(size=13),panel.spacing = unit(.25, "lines"),
-        strip.text.x  = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 8)) + facet_grid( ~ id, scales='free_x')
+        strip.text.x  = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 8)) + facet_grid( ~ id, space = 'free_x')
 
 
 View(data)

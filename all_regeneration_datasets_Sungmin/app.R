@@ -177,6 +177,11 @@ server <- function(input, output) {
     }
   })
   
+  printDownSampleOptions <- reactive({
+    percentage <- as.numeric(c(.75,.50,.25))
+    percentage
+  })
+  
   # returns the correct ID class for cell subset
   IDtype <- function() {
     seurat_obj <- SelectDataset()
@@ -892,7 +897,11 @@ server <- function(input, output) {
       )
 
       seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsIndvHmap]
-
+      
+      seurat_obj <- seurat_obj[, sample(Cells(seurat_obj), size = round(as.numeric(input$cellDownSampleIndvHmap)*length(colnames(seurat_obj))), replace=F)]
+      
+      print(seurat_obj$cell.type.ident) #check
+      
       seurat_obj_sub <- seurat_obj[rownames(seurat_obj) %in% selected,]
       dist_mat <- dist(seurat_obj_sub@assays$RNA@data)
       clust <- hclust(dist_mat)   #reorder genes
@@ -943,7 +952,8 @@ server <- function(input, output) {
         theme(axis.text.x=element_blank(),
               axis.ticks.x=element_blank(),
               axis.title.y.right = element_text(size=13),panel.spacing = unit(.25, "lines"),
-              strip.text.x  = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 8)) + facet_grid( ~ id, scales='free_x')
+              strip.text.x  = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 8)) + 
+              facet_grid( ~ id, space = 'free', scales = 'free')
 
     } else {
       seurat_obj <- SelectDataset()
@@ -958,7 +968,12 @@ server <- function(input, output) {
 
       seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsIndvHmap]
       print(input$cellIdentsIndvHmap)
-
+      
+      print(seurat_obj$cell.type.ident) #check
+      
+      
+      seurat_obj <- seurat_obj[, sample(Cells(seurat_obj), size = round(as.numeric(input$cellDownSampleIndvHmap)*length(colnames(seurat_obj))), replace=F)]
+      
       group.by <- input$selectGrpIndvHmap #choose group.by parameter
       cells <- NULL
       col.min = -2.5
@@ -988,7 +1003,6 @@ server <- function(input, output) {
      
       #preserve identity order
       if (group.by == "cell.type.ident.by.data.set"){
-        print('hi')
         data$id <- factor(data$id, levels = levels(seurat_obj$cell.type.ident.by.data.set))
       }else if (group.by == "data.set"){
         data$id <- factor(data$id, levels = levels(seurat_obj$data.set))
@@ -1004,7 +1018,8 @@ server <- function(input, output) {
         theme(axis.text.x=element_blank(),
               axis.ticks.x=element_blank(),
               axis.title.y.right = element_text(size=13),panel.spacing = unit(.25, "lines"),
-              strip.text.x  = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 8)) + facet_grid( ~ id, scales='free_x')
+              strip.text.x  = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 8)) + 
+              facet_grid( ~ id, space = 'free', scales = 'free')
 
 
     }
@@ -1019,6 +1034,15 @@ server <- function(input, output) {
                 selected = as.character(printIdents()), options = list(
                   `actions-box` = TRUE), width = "85%")
   })
+  
+  #renders the drop-down box w/ downsample choices
+  output$SelectDownSamplePropIndvHmap <- renderUI({ # New cell type select
+    pickerInput("cellDownSampleIndvHmap", "Choose downsample proportion:",
+                choices = as.character(printDownSampleOptions()), multiple = FALSE,
+                selected = as.character(printDownSampleOptions()[1]), options = list(
+                  `actions-box` = TRUE), width = "85%")
+  })
+  
 
   mismatchIndvPhmap <- function() {
     selected <- unlist(strsplit(input$IndvPhmapGenes, " "))
@@ -1052,7 +1076,7 @@ server <- function(input, output) {
 
   getWidthIndvPhmap <- function() {
     if(input$selectGrpIndvHmap == "cell.type.ident.by.data.set") {
-      w <- "1200"
+      w <- "1400"
     } else {
       w <- "800"
     }
@@ -1605,6 +1629,9 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
 
                                                       column(12, tags$br()),
                                                       column(12, align = "center", uiOutput("cellSelectIndvHmap")), # New
+                                                      
+                                                      column(12, tags$br()),
+                                                      column(12, align = "center", uiOutput("SelectDownSamplePropIndvHmap")), #downsample drop down
 
                                                       column(12, tags$br()),
                                                       column(12, align = "center",

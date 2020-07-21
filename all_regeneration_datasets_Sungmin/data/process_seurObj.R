@@ -105,7 +105,7 @@ g
 
 "%||%" <- devtools:::`%||%`
 
-group.by <- "cell.type.ident"
+group.by <- "cell.type.ident.by.data.set"
 cells <- NULL
 col.min = -2.5
 col.max = 2.5
@@ -133,8 +133,8 @@ data$id <- as.vector(x = data$id)
 
 data$Cell <- rownames(data)
 data <- melt(data, variable.name  = "Feature")
-data$groupIdent <- gsub("(.+?)(\\_.*)", "\\1",data$id)
-data$groupIdent <- factor(data$groupIdent,levels=cell.type)
+# data$groupIdent <- gsub("(.+?)(\\_.*)", "\\1",data$id)
+# data$groupIdent <- factor(data$groupIdent,levels=cell.type)
 #preserve identity order
 #group.by.f <- factor(group.by)
 if (group.by == "cell.type.ident.by.data.set"){
@@ -154,8 +154,12 @@ indv.hmap <- ggplot(data, aes(Cell, Feature,fill= value, width = 1, height = 1))
   theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         axis.title.y.right = element_text(size=13),panel.spacing = unit(.25, "lines"),
-        strip.text.x  = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 8)) + facet_grid( ~ id, space = 'free_x')
+        strip.text.x  = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 8)) + facet_grid( ~ id, space = 'free', scales = 'free')
 
+png("IndvHeatmap.png"
+    ,width = 30, height = 10, units = "in", res = 300)
+print(indv.hmap)
+dev.off()
 
 View(data)
 
@@ -163,6 +167,9 @@ View(data)
 percentage <- as.numeric(c(.75,.50,.25))
 object_list <- list()[1:length(percentage)]
 for(i in 1:length(object_list)){
-object_list[[i]] = subset(seurat_obj, cells = sample(Cells(seurat_obj), round(percentage[i]*length(colnames(seurat_obj)))))
+  object_list[[i]] = subset(seurat_obj, cells = sample(Cells(seurat_obj), round(percentage[i]*length(colnames(seurat_obj)))))
+  #object_list[[i]] <- seurat_obj[, sample(Cells(seurat_obj), size = round(percentage[i]*length(colnames(seurat_obj))), replace=F)]
+  
 }
-
+table(seurat_obj$cell.type.ident)
+table(object_list[[1]]$cell.type.ident)

@@ -306,7 +306,7 @@ server <- function(input, output) {
     plotOutput("myDatFeatPlotH1", width = "850px", height = "450px")
   })
   
-  n_panels <- 1:6
+  n_panels <- 1:8
   
   lapply(n_panels, function(i) {
     output[[paste0("myDatFeatPlotV", i)]] <- 
@@ -724,163 +724,163 @@ server <- function(input, output) {
   )
   
   # # ======== ggplot Heatmap ======== #
-  # pHeatmapF <- reactive({
-  #   clustering <- input$pHmapClust  #enable row clustering
-  #   if (clustering == TRUE){
-  #     seurat_obj <- SelectDataset()
-  #     selected <- unlist(strsplit(input$PhmapGenes, " "))
-  #     
-  #     ifelse(selected %in% com_name,
-  #            selected <- selected[selected %in% com_name],
-  #            
-  #            ifelse(selected %in% ens_id,
-  #                   selected <- gene_df[ens_id %in% selected, 3],"")
-  #     )
-  #     
-  #     seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsHmap]
-  #     
-  #     seurat_obj_sub <- seurat_obj[rownames(seurat_obj) %in% selected,]
-  #     dist_mat <- dist(seurat_obj_sub@assays$RNA@data)
-  #     clust <- hclust(dist_mat)   #reorder genes
-  #     markers_clust <- clust$labels
-  #     
-  #     dotplot <- DotPlot(seurat_obj, features = markers_clust,
-  #                        group.by = input$selectGrpHmap)
-  #     
-  #     g <- ggplot(dotplot$data, aes(id, features.plot, fill= avg.exp.scaled)) + 
-  #       geom_tile() +
-  #       scale_fill_distiller(
-  #         palette = "RdYlBu") +
-  #       theme_ipsum() +
-  #       theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1)) 
-  #     
-  #     
-  #     g <- g + labs(title = paste("Selected analysis:",
-  #                                 as.character(input$Analysis)), subtitle = "", caption = "") +
-  #       theme(plot.title = element_text(face = "plain", size = 14))
-  #     
-  #   } else {
-  #     seurat_obj <- SelectDataset()
-  #     selected <- unlist(strsplit(input$PhmapGenes, " "))
-  #     
-  #     ifelse(selected %in% com_name,
-  #            selected <- selected[selected %in% com_name],
-  #            
-  #            ifelse(selected %in% ens_id,
-  #                   selected <- gene_df[ens_id %in% selected, 3],"")
-  #     )
-  #     
-  #     seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsHmap]
-  #     print(input$cellIdentsHmap)
-  #     
-  #     
-  #     dotplot <- DotPlot(seurat_obj, features = selected,
-  #                        group.by = input$selectGrpHmap)
-  #     
-  #     g <- ggplot(dotplot$data, aes(id, features.plot,fill= avg.exp.scaled, width = 1, height = 1)) + 
-  #       geom_tile() +
-  #       scale_fill_distiller(
-  #         palette = "RdYlBu") +
-  #       theme_ipsum()+
-  #       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 13),
-  #             axis.title.y.right = element_text(size=13)) 
-  #     
-  #     g <- g + labs(title = paste("Selected analysis:",
-  #                                 as.character(input$Analysis)), subtitle = "", caption = "") +
-  #       theme(plot.title = element_text(face = "plain", size = 14))
-  #     
-  #   }
-  #   
-  #   if (input$selectGrpHmap == "cell.type.ident.by.data.set"){
-  #     
-  #     dotplot <- DotPlot(seurat_obj, features = selected,
-  #                        group.by = input$selectGrpHmap)
-  #     
-  #     dotplot$data$groupIdent <- gsub("(.+?)(\\_.*)", "\\1",dotplot$data$id)
-  #     dotplot$data$groupIdent <- factor(dotplot$data$groupIdent,levels=levels(seurat_obj$cell.type.ident))
-  #     
-  #     g <- ggplot(dotplot$data, aes(id, features.plot,fill= avg.exp.scaled, width = 1, height = 1)) + 
-  #       geom_tile() +
-  #       scale_fill_distiller(
-  #         palette = "RdYlBu") +
-  #       theme_ipsum()+
-  #       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 13),
-  #             axis.title.y.right = element_text(size=13),panel.spacing = unit(.35, "lines")) + 
-  #       facet_grid( ~ groupIdent, scales='free_x')
-  #     
-  #     
-  #     g <- g + labs(title = paste("Selected analysis:",
-  #                                 as.character(input$Analysis)), subtitle = "", caption = "") +
-  #       theme(plot.title = element_text(face = "plain", size = 14))
-  #   }
-  #   
-  #   return(g)
-  #   
-  # })
-  # 
-  # #renders the drop-down box w/ Ident choices
-  # output$cellSelectHmap <- renderUI({ # New cell type select
-  #   pickerInput("cellIdentsHmap", "Add or remove clusters:",
-  #               choices = as.character(printIdents()), multiple = TRUE,
-  #               selected = as.character(printIdents()), options = list(
-  #                 `actions-box` = TRUE), width = "85%")
-  # })
-  # 
-  # mismatchPhmap <- function() {
-  #   selected <- unlist(strsplit(input$PhmapGenes, " "))
-  #   
-  #   mismatch <- ifelse(!selected %in% c(com_name, ens_id),
-  #                      selected[!selected %in% c(com_name, ens_id)],"")
-  #   return(mismatch)
-  # }
-  # 
-  # #prints the mismatches or genes not present (for ui.R)
-  # output$notInPhmap <- renderText({input$runPhmap
-  #   isolate({mismatchPhmap()})
-  # })
-  # 
-  # output$SelectedDataPhmap <- renderText({input$runPhmap
-  #   isolate({input$Analysis})
-  # })
-  # 
-  # #renders plot w/ progress bar
-  # output$myPhmapF <- renderPlot({input$runPhmap
-  #   isolate({withProgress({p <- pHeatmapF(); print(p)},
-  #                         message = "Rendering plot..", min = 0, max = 10, value = 10)
-  #   })
-  # })
-  # 
-  # getHeightPhmap <- reactive({
-  #   l <- getLenInput(input$PhmapGenes)
-  #   h <- as.numeric(l * 35)
-  #   return(h)
-  # })
-  # 
-  # getWidthPhmap <- function() {
-  #   if(input$selectGrpHmap == "cell.type.ident.by.data.set") {
-  #     w <- "1200"
-  #   } else {
-  #     w <- "800"
-  #   }
-  #   return(w)
-  # }
-  # 
-  # output$plot.uiPheatmapF <- renderUI({input$runPhmap
-  #   isolate({
-  #     w <- paste0(getWidthPhmap()); h <- paste0(getHeightPhmap())
-  #     plotOutput("myPhmapF", width = paste0(w, "px"), height = paste0(h, "px"))
-  #   })
-  # })
-  # 
-  # #download
-  # output$downloadhmap <- downloadHandler(
-  #   filename = "heatmap.png", content = function(file) {
-  #     png(file, height = getHeightPhmap(),
-  #         width = 1200, units = "px")
-  #     print(pHeatmapF())
-  #     dev.off()
-  #   }
-  # )
+  pHeatmapF <- reactive({
+    clustering <- input$pHmapClust  #enable row clustering
+    if (clustering == TRUE){
+      seurat_obj <- SelectDataset()
+      selected <- unlist(strsplit(input$PhmapGenes, " "))
+      
+      ifelse(selected %in% com_name,
+             selected <- selected[selected %in% com_name],
+             
+             ifelse(selected %in% ens_id,
+                    selected <- gene_df[ens_id %in% selected, 3],"")
+      )
+      
+      seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsHmap]
+      
+      seurat_obj_sub <- seurat_obj[rownames(seurat_obj) %in% selected,]
+      dist_mat <- dist(seurat_obj_sub@assays$RNA@data)
+      clust <- hclust(dist_mat)   #reorder genes
+      markers_clust <- clust$labels
+      
+      dotplot <- DotPlot(seurat_obj, features = markers_clust,
+                         group.by = input$selectGrpHmap)
+      
+      g <- ggplot(dotplot$data, aes(id, features.plot, fill= avg.exp.scaled)) +
+        geom_tile() +
+        scale_fill_distiller(
+          palette = "RdYlBu") +
+        theme_ipsum() +
+        theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1))
+      
+      
+      g <- g + labs(title = paste("Selected analysis:",
+                                  as.character(input$Analysis)), subtitle = "", caption = "") +
+        theme(plot.title = element_text(face = "plain", size = 14))
+      
+    } else {
+      seurat_obj <- SelectDataset()
+      selected <- unlist(strsplit(input$PhmapGenes, " "))
+      
+      ifelse(selected %in% com_name,
+             selected <- selected[selected %in% com_name],
+             
+             ifelse(selected %in% ens_id,
+                    selected <- gene_df[ens_id %in% selected, 3],"")
+      )
+      
+      seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsHmap]
+      print(input$cellIdentsHmap)
+      
+      
+      dotplot <- DotPlot(seurat_obj, features = selected,
+                         group.by = input$selectGrpHmap)
+      
+      g <- ggplot(dotplot$data, aes(id, features.plot,fill= avg.exp.scaled, width = 1, height = 1)) +
+        geom_tile() +
+        scale_fill_distiller(
+          palette = "RdYlBu") +
+        theme_ipsum()+
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 13),
+              axis.title.y.right = element_text(size=13))
+      
+      g <- g + labs(title = paste("Selected analysis:",
+                                  as.character(input$Analysis)), subtitle = "", caption = "") +
+        theme(plot.title = element_text(face = "plain", size = 14))
+      
+    }
+    
+    if (input$selectGrpHmap == "cell.type.ident.by.data.set"){
+      
+      dotplot <- DotPlot(seurat_obj, features = selected,
+                         group.by = input$selectGrpHmap)
+      
+      dotplot$data$groupIdent <- gsub("(.+?)(\\_.*)", "\\1",dotplot$data$id)
+      dotplot$data$groupIdent <- factor(dotplot$data$groupIdent,levels=levels(seurat_obj$cell.type.ident))
+      
+      g <- ggplot(dotplot$data, aes(id, features.plot,fill= avg.exp.scaled, width = 1, height = 1)) +
+        geom_tile() +
+        scale_fill_distiller(
+          palette = "RdYlBu") +
+        theme_ipsum()+
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 13),
+              axis.title.y.right = element_text(size=13),panel.spacing = unit(.35, "lines")) +
+        facet_grid( ~ groupIdent, scales='free_x')
+      
+      
+      g <- g + labs(title = paste("Selected analysis:",
+                                  as.character(input$Analysis)), subtitle = "", caption = "") +
+        theme(plot.title = element_text(face = "plain", size = 14))
+    }
+    
+    return(g)
+    
+  })
+  
+  #renders the drop-down box w/ Ident choices
+  output$cellSelectHmap <- renderUI({ # New cell type select
+    pickerInput("cellIdentsHmap", "Add or remove clusters:",
+                choices = as.character(printIdents()), multiple = TRUE,
+                selected = as.character(printIdents()), options = list(
+                  `actions-box` = TRUE), width = "85%")
+  })
+  
+  mismatchPhmap <- function() {
+    selected <- unlist(strsplit(input$PhmapGenes, " "))
+    
+    mismatch <- ifelse(!selected %in% c(com_name, ens_id),
+                       selected[!selected %in% c(com_name, ens_id)],"")
+    return(mismatch)
+  }
+  
+  #prints the mismatches or genes not present (for ui.R)
+  output$notInPhmap <- renderText({input$runPhmap
+    isolate({mismatchPhmap()})
+  })
+  
+  output$SelectedDataPhmap <- renderText({input$runPhmap
+    isolate({input$Analysis})
+  })
+  
+  #renders plot w/ progress bar
+  output$myPhmapF <- renderPlot({input$runPhmap
+    isolate({withProgress({p <- pHeatmapF(); print(p)},
+                          message = "Rendering plot..", min = 0, max = 10, value = 10)
+    })
+  })
+  
+  getHeightPhmap <- reactive({
+    l <- getLenInput(input$PhmapGenes)
+    h <- as.numeric(l * 35)
+    return(h)
+  })
+  
+  getWidthPhmap <- function() {
+    if(input$selectGrpHmap == "cell.type.ident.by.data.set") {
+      w <- "1200"
+    } else {
+      w <- "800"
+    }
+    return(w)
+  }
+  
+  output$plot.uiPheatmapF <- renderUI({input$runPhmap
+    isolate({
+      w <- paste0(getWidthPhmap()); h <- paste0(getHeightPhmap())
+      plotOutput("myPhmapF", width = paste0(w, "px"), height = paste0(h, "px"))
+    })
+  })
+  
+  #download
+  output$downloadhmap <- downloadHandler(
+    filename = "heatmap.png", content = function(file) {
+      png(file, height = getHeightPhmap(),
+          width = 1200, units = "px")
+      print(pHeatmapF())
+      dev.off()
+    }
+  )
   
   # # # ======== Individual Cell ggplot Heatmap ======== #
   IndvpHeatmapF <- reactive({
@@ -888,39 +888,39 @@ server <- function(input, output) {
     if (clustering == TRUE){
       seurat_obj <- SelectDataset()
       selected <- unlist(strsplit(input$IndvPhmapGenes, " "))
-
+      
       ifelse(selected %in% com_name,
              selected <- selected[selected %in% com_name],
-
+             
              ifelse(selected %in% ens_id,
                     selected <- gene_df[ens_id %in% selected, 3],"")
       )
-
+      
       seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsIndvHmap]
       
       seurat_obj <- seurat_obj[, sample(Cells(seurat_obj), size = round(as.numeric(input$cellDownSampleIndvHmap)*length(colnames(seurat_obj))), replace=F)]
       
-      print(seurat_obj$cell.type.ident) #check
+      print(addmargins(table(seurat_obj$cell.type.ident))) #check
       
       seurat_obj_sub <- seurat_obj[rownames(seurat_obj) %in% selected,]
       dist_mat <- dist(seurat_obj_sub@assays$RNA@data)
       clust <- hclust(dist_mat)   #reorder genes
       markers_clust <- clust$labels
-
+      
       group.by <- input$selectGrpIndvHmap #choose group.by parameter
       cells <- NULL
       col.min = -2.5
       col.max = 2.5
-
+      
       cells <- cells %||% colnames(x = seurat_obj)
-
+      
       data <- as.data.frame(x = t(x = as.matrix(x = GetAssayData(
         object = seurat_obj, slot = "data")[markers_clust, cells, drop = FALSE])))
-
-
+      
+      
       data <- scale(data)
       data <- as.data.frame(MinMax(data = data, min = col.min, max = col.max))
-
+      
       data$id <- if (is.null(x = group.by)) {
         Idents(object = seurat_obj)[cells, drop = TRUE]
       } else {
@@ -930,7 +930,7 @@ server <- function(input, output) {
         data$id <- factor(x = data$id)
       }
       data$id <- as.vector(x = data$id)
-
+      
       data$Cell <- rownames(data)
       data <- melt(data, variable.name  = "Feature")
       
@@ -953,41 +953,42 @@ server <- function(input, output) {
               axis.ticks.x=element_blank(),
               axis.title.y.right = element_text(size=13),panel.spacing = unit(.25, "lines"),
               strip.text.x  = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 8)) + 
-              facet_grid( ~ id, space = 'free', scales = 'free')
-
+        facet_grid( ~ id, space = 'free', scales = 'free')
+      
     } else {
       seurat_obj <- SelectDataset()
       selected <- unlist(strsplit(input$IndvPhmapGenes, " "))
-
+      
       ifelse(selected %in% com_name,
              selected <- selected[selected %in% com_name],
-
+             
              ifelse(selected %in% ens_id,
                     selected <- gene_df[ens_id %in% selected, 3],"")
       )
-
+      
       seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsIndvHmap]
       print(input$cellIdentsIndvHmap)
       
-      print(seurat_obj$cell.type.ident) #check
-      
-      
       seurat_obj <- seurat_obj[, sample(Cells(seurat_obj), size = round(as.numeric(input$cellDownSampleIndvHmap)*length(colnames(seurat_obj))), replace=F)]
+      
+      print(input$cellDownSampleIndvHmap)
+      print(addmargins(table(seurat_obj$cell.type.ident))) #check
+      
       
       group.by <- input$selectGrpIndvHmap #choose group.by parameter
       cells <- NULL
       col.min = -2.5
       col.max = 2.5
-
+      
       cells <- cells %||% colnames(x = seurat_obj)
-
+      
       data <- as.data.frame(x = t(x = as.matrix(x = GetAssayData(
         object = seurat_obj, slot = "data")[selected, cells, drop = FALSE])))
-
-
+      
+      
       data <- scale(data)
       data <- as.data.frame(MinMax(data = data, min = col.min, max = col.max))
-
+      
       data$id <- if (is.null(x = group.by)) {
         Idents(object = seurat_obj)[cells, drop = TRUE]
       } else {
@@ -997,10 +998,10 @@ server <- function(input, output) {
         data$id <- factor(x = data$id)
       }
       data$id <- as.vector(x = data$id)
-
+      
       data$Cell <- rownames(data)
       data <- melt(data, variable.name  = "Feature")
-     
+      
       #preserve identity order
       if (group.by == "cell.type.ident.by.data.set"){
         data$id <- factor(data$id, levels = levels(seurat_obj$cell.type.ident.by.data.set))
@@ -1019,14 +1020,14 @@ server <- function(input, output) {
               axis.ticks.x=element_blank(),
               axis.title.y.right = element_text(size=13),panel.spacing = unit(.25, "lines"),
               strip.text.x  = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 8)) + 
-              facet_grid( ~ id, space = 'free', scales = 'free')
-
-
+        facet_grid( ~ id, space = 'free', scales = 'free')
+      
+      
     }
     return(g)
-
+    
   })
-
+  
   #renders the drop-down box w/ Ident choices
   output$cellSelectIndvHmap <- renderUI({ # New cell type select
     pickerInput("cellIdentsIndvHmap", "Add or remove clusters:",
@@ -1043,37 +1044,37 @@ server <- function(input, output) {
                   `actions-box` = TRUE), width = "85%")
   })
   
-
+  
   mismatchIndvPhmap <- function() {
     selected <- unlist(strsplit(input$IndvPhmapGenes, " "))
-
+    
     mismatch <- ifelse(!selected %in% c(com_name, ens_id),
                        selected[!selected %in% c(com_name, ens_id)],"")
     return(mismatch)
   }
-
+  
   #prints the mismatches or genes not present (for ui.R)
   output$notInIndvPhmap <- renderText({input$runIndvPhmap
     isolate({mismatchIndvPhmap()})
   })
-
+  
   output$SelectedDataIndvPhmap <- renderText({input$runIndvPhmap
     isolate({input$Analysis})
   })
-
+  
   #renders plot w/ progress bar
   output$myIndvPhmapF <- renderPlot({input$runIndvPhmap
     isolate({withProgress({p <- IndvpHeatmapF(); print(p)},
                           message = "Rendering plot..", min = 0, max = 10, value = 10)
     })
   })
-
+  
   getHeightIndvPhmap <- reactive({
     l <- getLenInput(input$IndvPhmapGenes)
     h <- as.numeric(l * 35)
     return(h)
   })
-
+  
   getWidthIndvPhmap <- function() {
     if(input$selectGrpIndvHmap == "cell.type.ident.by.data.set") {
       w <- "1400"
@@ -1082,14 +1083,14 @@ server <- function(input, output) {
     }
     return(w)
   }
-
+  
   output$plot.uiIndvpHeatmapF <- renderUI({input$runIndvPhmap
     isolate({
       w <- paste0(getWidthIndvPhmap()); h <- paste0(getHeightIndvPhmap())
       plotOutput("myIndvPhmapF", width = paste0(w, "px"), height = paste0(h, "px"))
     })
   })
-
+  
   #download
   output$downloadIndvhmap <- downloadHandler(
     filename = "heatmap.png", content = function(file) {
@@ -1099,7 +1100,7 @@ server <- function(input, output) {
       dev.off()
     }
   )
-
+  
   # ======== Differential Expression ======== #
   diffExp <- reactive({
     seurat_obj <- SelectDataset()
@@ -1230,16 +1231,16 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                             column(12, align = "left", tags$b("Instructions")),
                                             column(12, align = "left",
                                                    'All genes available for plotting can be downloaded in the
-              Excel spreadsheet below labeled "genes in dataset", using either
-              Ensembl IDs or common names from the',
+                                                   Excel spreadsheet below labeled "genes in dataset", using either
+                                                   Ensembl IDs or common names from the',
                                                    tags$b("Gene.name.unique"),'column as input. You cannot, however,
-              mix common names with Ensembl IDs in the same query. Groups of
-              genes can be directly copied/pasted from the spreadsheet into 
-              the app input field and will have the necessary spacing 
-              by default. Please note that this data set was produced with the
-              Ensembl 91 gene annotation in zebrafish (genome version 10).
-              We therefore recommend using Ensembl gene IDs as input, 
-              as common gene names can change with annotation updates.',
+                                                   mix common names with Ensembl IDs in the same query. Groups of
+                                                   genes can be directly copied/pasted from the spreadsheet into 
+                                                   the app input field and will have the necessary spacing 
+                                                   by default. Please note that this data set was produced with the
+                                                   Ensembl 91 gene annotation in zebrafish (genome version 10).
+                                                   We therefore recommend using Ensembl gene IDs as input, 
+                                                   as common gene names can change with annotation updates.',
                                                    'Cluster markers and related figures can be downloaded in',
                                                    tags$a(href = "http://bioinfo/n/projects/ddiaz/Analysis/Scripts/sb2191-regen/regen-summary/site/IntegratedData/",
                                                           tags$b("this notebook")),
@@ -1258,47 +1259,47 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                             column(12, align = "left", tags$b("An important note on ambiguous gene names")),
                                             column(12, align = "left",
                                                    'Gene expression in this data set is quantfied by the number of
-              deduplicated UMIs (unique molecular index) that map to Ensembl 
-              gene IDs, which are identify unique coding sequences (CDS) in the 
-              zebrafish genome. In some cases different Ensembl IDs
-              will have the same common gene name. This may occur
-              when there is no consensus over which CDS represents
-              the common name, or because the product of a particular
-              CDS has not been characterized in detail. These repeated
-              common names are denoted by an asterisk followed by an
-              integer value (e.g. sox4a*1). The asterisk is not a part of the
-              common name by default; it was added to signify that the name
-              is repeated in this data set and needs further clarification.
-              The integer after the asterisk highlights which occurrence
-              of the repeat you are viewing, but does not carry any
-              functional significance. For example, sox4a has two
-              different Ensembl IDs in version 91 of the annotation,
-              ENSDARG00000096389 - sox4, and ENSDARG00000004588 - sox4a*1, but
-              only ENSDARG00000004588 - sox4a*1 is expressed in this data set.',
+                                                   deduplicated UMIs (unique molecular index) that map to Ensembl 
+                                                   gene IDs, which are identify unique coding sequences (CDS) in the 
+                                                   zebrafish genome. In some cases different Ensembl IDs
+                                                   will have the same common gene name. This may occur
+                                                   when there is no consensus over which CDS represents
+                                                   the common name, or because the product of a particular
+                                                   CDS has not been characterized in detail. These repeated
+                                                   common names are denoted by an asterisk followed by an
+                                                   integer value (e.g. sox4a*1). The asterisk is not a part of the
+                                                   common name by default; it was added to signify that the name
+                                                   is repeated in this data set and needs further clarification.
+                                                   The integer after the asterisk highlights which occurrence
+                                                   of the repeat you are viewing, but does not carry any
+                                                   functional significance. For example, sox4a has two
+                                                   different Ensembl IDs in version 91 of the annotation,
+                                                   ENSDARG00000096389 - sox4, and ENSDARG00000004588 - sox4a*1, but
+                                                   only ENSDARG00000004588 - sox4a*1 is expressed in this data set.',
                                                    
                                                    fluidRow(tags$br()),
                                                    fluidRow(tags$br()),
                                                    
                                                    'The most important item to consider when referencing the
-              nucleotide sequence of a gene is',
+                                                   nucleotide sequence of a gene is',
                                                    tags$b("which Ensembl ID corresponds to 
-                your expression pattern of interest."),
+                                                          your expression pattern of interest."),
                                                    'This ensures that you are targeting the same CDS that reads 
-              are mapping to for this particular data set. You can easily 
-              check if a gene name is ambiguous by copying any portion
-              of the common name into the Gene Database section of the app
-              (sox4a is shown as an example by default). Details on
-              how Ensembl IDs are curated can be found at the folowing link:',
+                                                   are mapping to for this particular data set. You can easily 
+                                                   check if a gene name is ambiguous by copying any portion
+                                                   of the common name into the Gene Database section of the app
+                                                   (sox4a is shown as an example by default). Details on
+                                                   how Ensembl IDs are curated can be found at the folowing link:',
                                                    tags$a(
                                                      href = "http://www.ensembl.org/info/genome/genebuild/genome_annotation.html",
                                                      "http://www.ensembl.org/info/genome/genebuild/genome_annotation.html"),
                                                    '. Additionally, there are two spreadsheets below with all
-              of the repeated common names in both this data set, and the
-              Ensembl 91 zebrafish annotation.')),
+                                                   of the repeated common names in both this data set, and the
+                                                   Ensembl 91 zebrafish annotation.')),
                                      fluidRow(tags$br()),
                                      fluidRow(tags$br())
-                           )
-                  ),
+                                                   )
+                           ),
                   
                   
                   # ================ #
@@ -1550,66 +1551,66 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                            )
                   ),
                   # ================ # ggplot heatmap
-                  # tabPanel("Heat Map", #fluid = FALSE,
-                  #          sidebarLayout(fluid = TRUE,
-                  #                        
-                  #                        sidebarPanel(fluid = FALSE, width = 4,
-                  #                                     column(12, align = "left  ",
-                  #                                            textInput("PhmapGenes",
-                  #                                                      "Insert gene name or ensembl ID:",
-                  #                                                      value = smpl_genes_lg),
-                  #                                            checkboxInput("pHmapClust",
-                  #                                                          label = "Check box to enable row clustering.", value = FALSE)),
-                  #                                     
-                  #                                     column(12, align = "center",
-                  #                                            actionButton("runPhmap", "Generate Plots",
-                  #                                                         style = 'padding:5px; font-size:80%')),
-                  #                                     
-                  #                                     column(12, tags$hr(width = "50%"), align = "center"),
-                  #                                     column(12, align = "center", downloadButton(
-                  #                                       "downloadhmap", "Download pdf",
-                  #                                       style = 'padding:5px; font-size:80%')),
-                  #                                     
-                  #                                     column(12, tags$br()),
-                  #                                     column(12, align = "center", uiOutput("cellSelectHmap")), # New
-                  #                                     
-                  #                                     column(12, tags$br()),
-                  #                                     column(12, align = "center",
-                  #                                            column(12,
-                  #                                                   radioGroupButtons("selectGrpHmap",
-                  #                                                                     "Group cells by:", 
-                  #                                                                     choices = list(Combined = "cell.type.ident.by.data.set",
-                  #                                                                     Time = "data.set", 
-                  #                                                                     Cluster = "cell.type.ident"),
-                  #                                                                     width = "100%"))
-                  #                                            
-                  #                                     ),
-                  #                                     
-                  #                                     fluidRow(tags$br()),
-                  #                                     fluidRow(tags$br()),
-                  #                                     column(12, uiOutput("plot.uiDatFeatPlotV7"), align = "center"),
-                  #                                     fluidRow(tags$br()),
-                  #                                     fluidRow(tags$br())
-                  #                        ),
-                  #                        
-                  #                        mainPanel(
-                  #                          fluidRow(
-                  #                            column(8, tags$br()),
-                  #                            column(8, tags$b("Mismatches or genes not present"),
-                  #                                   "(if applicable)", tags$b(":")),
-                  #                            column(8, uiOutput("notInPhmap")),
-                  #                            column(8, tags$hr()),
-                  #                            
-                  #                            fluidRow(tags$br()),
-                  #                            column(12, uiOutput("plot.uiPheatmapF"))
-                  #                          )
-                  #                        )
-                  #          )
-                  # ),
+                  tabPanel("Heat Map", #fluid = FALSE,
+                           sidebarLayout(fluid = TRUE,
+                                         
+                                         sidebarPanel(fluid = FALSE, width = 4,
+                                                      column(12, align = "left  ",
+                                                             textInput("PhmapGenes",
+                                                                       "Insert gene name or ensembl ID:",
+                                                                       value = smpl_genes_lg),
+                                                             checkboxInput("pHmapClust",
+                                                                           label = "Check box to enable row clustering.", value = FALSE)),
+                                                      
+                                                      column(12, align = "center",
+                                                             actionButton("runPhmap", "Generate Plots",
+                                                                          style = 'padding:5px; font-size:80%')),
+                                                      
+                                                      column(12, tags$hr(width = "50%"), align = "center"),
+                                                      column(12, align = "center", downloadButton(
+                                                        "downloadhmap", "Download pdf",
+                                                        style = 'padding:5px; font-size:80%')),
+                                                      
+                                                      column(12, tags$br()),
+                                                      column(12, align = "center", uiOutput("cellSelectHmap")), # New
+                                                      
+                                                      column(12, tags$br()),
+                                                      column(12, align = "center",
+                                                             column(12,
+                                                                    radioGroupButtons("selectGrpHmap",
+                                                                                      "Group cells by:",
+                                                                                      choices = list(Combined = "cell.type.ident.by.data.set",
+                                                                                                     Time = "data.set",
+                                                                                                     Cluster = "cell.type.ident"),
+                                                                                      width = "100%"))
+                                                             
+                                                      ),
+                                                      
+                                                      fluidRow(tags$br()),
+                                                      fluidRow(tags$br()),
+                                                      column(12, uiOutput("plot.uiDatFeatPlotV7"), align = "center"),
+                                                      fluidRow(tags$br()),
+                                                      fluidRow(tags$br())
+                                         ),
+                                         
+                                         mainPanel(
+                                           fluidRow(
+                                             column(8, tags$br()),
+                                             column(8, tags$b("Mismatches or genes not present"),
+                                                    "(if applicable)", tags$b(":")),
+                                             column(8, uiOutput("notInPhmap")),
+                                             column(8, tags$hr()),
+                                             
+                                             fluidRow(tags$br()),
+                                             column(12, uiOutput("plot.uiPheatmapF"))
+                                           )
+                                         )
+                           )
+                  ),
                   #================ # ggplot single tile heatmap
                   tabPanel("Single Cell Heatmap", #fluid = FALSE,
                            sidebarLayout(fluid = TRUE,
-
+                                         
                                          sidebarPanel(fluid = FALSE, width = 4,
                                                       column(12, align = "left  ",
                                                              textInput("IndvPhmapGenes",
@@ -1617,22 +1618,22 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                                                        value = smpl_genes_lg),
                                                              checkboxInput("IndvpHmapClust",
                                                                            label = "Check box to enable row clustering.", value = FALSE)),
-
+                                                      
                                                       column(12, align = "center",
                                                              actionButton("runIndvPhmap", "Generate Plots",
                                                                           style = 'padding:5px; font-size:80%')),
-
+                                                      
                                                       column(12, tags$hr(width = "50%"), align = "center"),
                                                       column(12, align = "center", downloadButton(
                                                         "downloadIndvhmap", "Download pdf",
                                                         style = 'padding:5px; font-size:80%')),
-
+                                                      
                                                       column(12, tags$br()),
                                                       column(12, align = "center", uiOutput("cellSelectIndvHmap")), # New
                                                       
                                                       column(12, tags$br()),
                                                       column(12, align = "center", uiOutput("SelectDownSamplePropIndvHmap")), #downsample drop down
-
+                                                      
                                                       column(12, tags$br()),
                                                       column(12, align = "center",
                                                              column(12,
@@ -1642,16 +1643,16 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                                                                                      Time = "data.set",
                                                                                                      Cluster = "cell.type.ident"),
                                                                                       width = "100%"))
-
+                                                             
                                                       ),
-
+                                                      
                                                       fluidRow(tags$br()),
                                                       fluidRow(tags$br()),
-                                                      column(12, uiOutput("plot.uiDatFeatPlotV7"), align = "center"),
+                                                      column(12, uiOutput("plot.uiDatFeatPlotV8"), align = "center"),
                                                       fluidRow(tags$br()),
                                                       fluidRow(tags$br())
                                          ),
-
+                                         
                                          mainPanel(
                                            fluidRow(
                                              column(8, tags$br()),
@@ -1659,14 +1660,14 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                                     "(if applicable)", tags$b(":")),
                                              column(8, uiOutput("notInIndvPhmap")),
                                              column(8, tags$hr()),
-
+                                             
                                              fluidRow(tags$br()),
                                              column(12, uiOutput("plot.uiIndvpHeatmapF"))
                                            )
                                          )
                            )
                   ),
-
+                  
                   # ================ #
                   tabPanel("Differential Expression", fluid = TRUE,
                            sidebarLayout(
@@ -1729,9 +1730,9 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                              )
                            )
                   )
-                ), style = 'width:1500px;')#,
-                # shinyDebuggingPanel::withDebuggingPanel()
-)
+), style = 'width:1500px;')#,
+# shinyDebuggingPanel::withDebuggingPanel()
+                )
 
 
 

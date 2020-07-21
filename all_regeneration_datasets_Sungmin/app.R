@@ -1513,7 +1513,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                          )
                            )
                   ),
-                  # ================ # DoHeatmap
+                  # ================ # ggplot single tile heatmap
                   tabPanel("Heat Map", #fluid = FALSE,
                            sidebarLayout(fluid = TRUE,
                                          
@@ -1570,7 +1570,63 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                          )
                            )
                   ),
-                  
+                  # ================ # ggplot single tile heatmap
+                  tabPanel("Single Cell Heatmap", #fluid = FALSE,
+                           sidebarLayout(fluid = TRUE,
+                                         
+                                         sidebarPanel(fluid = FALSE, width = 4,
+                                                      column(12, align = "left  ",
+                                                             textInput("PhmapGenes",
+                                                                       "Insert gene name or ensembl ID:",
+                                                                       value = smpl_genes_lg),
+                                                             checkboxInput("pHmapClust",
+                                                                           label = "Check box to enable row clustering.", value = FALSE)),
+                                                      
+                                                      column(12, align = "center",
+                                                             actionButton("runPhmap", "Generate Plots",
+                                                                          style = 'padding:5px; font-size:80%')),
+                                                      
+                                                      column(12, tags$hr(width = "50%"), align = "center"),
+                                                      column(12, align = "center", downloadButton(
+                                                        "downloadhmap", "Download pdf",
+                                                        style = 'padding:5px; font-size:80%')),
+                                                      
+                                                      column(12, tags$br()),
+                                                      column(12, align = "center", uiOutput("cellSelectHmap")), # New
+                                                      
+                                                      column(12, tags$br()),
+                                                      column(12, align = "center",
+                                                             column(12,
+                                                                    radioGroupButtons("selectGrpHmap",
+                                                                                      "Group cells by:", 
+                                                                                      choices = list(Combined = "cell.type.ident.by.data.set",
+                                                                                                     Time = "data.set", 
+                                                                                                     Cluster = "cell.type.ident"),
+                                                                                      width = "100%"))
+                                                             
+                                                      ),
+                                                      
+                                                      fluidRow(tags$br()),
+                                                      fluidRow(tags$br()),
+                                                      column(12, uiOutput("plot.uiDatFeatPlotV7"), align = "center"),
+                                                      fluidRow(tags$br()),
+                                                      fluidRow(tags$br())
+                                         ),
+                                         
+                                         mainPanel(
+                                           fluidRow(
+                                             column(8, tags$br()),
+                                             column(8, tags$b("Mismatches or genes not present"),
+                                                    "(if applicable)", tags$b(":")),
+                                             column(8, uiOutput("notInPhmap")),
+                                             column(8, tags$hr()),
+                                             
+                                             fluidRow(tags$br()),
+                                             column(12, uiOutput("plot.uiPheatmapF"))
+                                           )
+                                         )
+                           )
+                  ),
           #         # ================ #
           #         tabPanel("Heatmap", #fluid = FALSE,
           #                  fixedRow(

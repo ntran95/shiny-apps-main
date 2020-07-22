@@ -723,7 +723,7 @@ server <- function(input, output) {
     }
   )
   
-  # # ======== ggplot Heatmap ======== #
+  # # ======== ggplot Grouped Heatmap ======== #
   pHeatmapF <- reactive({
     clustering <- input$pHmapClust  #enable row clustering
     if (clustering == TRUE){
@@ -944,8 +944,8 @@ server <- function(input, output) {
         data$id <- factor(data$id, levels = levels(seurat_obj$cell.type.ident))
       }
       
-      g <- ggplot(data, aes(Cell, Feature,fill= value, width = 1, height = 1)) +
-        geom_tile() +
+      g <- ggplot(data, aes(Cell, Feature,fill= value)) +
+        geom_tile(height = .95, width = 2) +
         scale_fill_distiller(
           palette = "RdYlBu") +
         theme_ipsum()+
@@ -1011,8 +1011,8 @@ server <- function(input, output) {
         data$id <- factor(data$id, levels = levels(seurat_obj$cell.type.ident))
       }
       
-      g <- ggplot(data, aes(Cell, Feature,fill= value, width = 1, height = 1)) +
-        geom_tile() +
+      g <- ggplot(data, aes(Cell, Feature,fill= value)) +
+        geom_tile(height = .95, width = 2) +
         scale_fill_distiller(
           palette = "RdYlBu") +
         theme_ipsum()+
@@ -1077,7 +1077,7 @@ server <- function(input, output) {
   
   getWidthIndvPhmap <- function() {
     if(input$selectGrpIndvHmap == "cell.type.ident.by.data.set") {
-      w <- "1400"
+      w <- "1600"
     } else {
       w <- "800"
     }
@@ -1095,7 +1095,7 @@ server <- function(input, output) {
   output$downloadIndvhmap <- downloadHandler(
     filename = "heatmap.png", content = function(file) {
       png(file, height = getHeightIndvPhmap(),
-          width = 1200, units = "px")
+          width = 1600, units = "px")
       print(IndvpHeatmapF())
       dev.off()
     }
@@ -1550,7 +1550,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                          )
                            )
                   ),
-                  # ================ # ggplot heatmap
+                  # ================ # ggplot groupedheatmap
                   tabPanel("Heat Map", #fluid = FALSE,
                            sidebarLayout(fluid = TRUE,
                                          
@@ -1607,8 +1607,8 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                          )
                            )
                   ),
-                  #================ # ggplot single tile heatmap
-                  tabPanel("Single Cell Heatmap", #fluid = FALSE,
+                  #================ # ggplot Indv. Cell heatmap
+                  tabPanel("Indv. Cell Heatmap", #fluid = FALSE,
                            sidebarLayout(fluid = TRUE,
                                          
                                          sidebarPanel(fluid = FALSE, width = 4,
@@ -1662,7 +1662,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                              column(8, tags$hr()),
                                              
                                              fluidRow(tags$br()),
-                                             column(12, uiOutput("plot.uiIndvpHeatmapF"))
+                                             column(12, uiOutput("plot.uiIndvpHeatmapF"),style = "overflow-y: scroll;overflow-x: scroll;")
                                            )
                                          )
                            )

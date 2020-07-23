@@ -359,8 +359,6 @@ server <- function(input, output) {
     }
   )
   
-<<<<<<< HEAD
-=======
   
   # ======== Ridge Plot ======== #
   RdgPlotF <- reactive({
@@ -447,7 +445,6 @@ server <- function(input, output) {
   )
   
   
->>>>>>> upstream/master
   # ======== Dot Plot ======== #
   DotPlotF <- reactive({
     clustering <- input$dPlotClust

@@ -1,15 +1,15 @@
 server <- function(input, output) {
 
-  # ======== Dataset selection ======== #
+# ======== Dataset selection ======== #
   SelectDataset <- reactive({
     seurat_obj <- file_list[[input$Analysis]]
     print(names(file_list[input$Analysis]))
-
+    
     cluster_clrs <<- gg_color_hue(
       length(levels(seurat_obj@active.ident)))
     return(seurat_obj)
   })
-
+  
   # Asks if multiple conditions are present
   whichDataset <- function() {
     seurat_obj <- SelectDataset()
@@ -20,17 +20,17 @@ server <- function(input, output) {
     } else {
       "tree.ident"}
   }
-
+  
   printTreats <- reactive({
     seurat_obj <- SelectDataset()
     print(seurat_obj)
-      if (whichDataset() == "data.set") {
-        sort(unique(seurat_obj@meta.data$data.set))
-      } else {
-        NULL # single data set
+    if (whichDataset() == "data.set") {
+      sort(unique(seurat_obj@meta.data$data.set))
+    } else {
+      NULL # single data set
     }
   })
-
+  
   printIdents <- reactive({
     seurat_obj <- SelectDataset()
     print(seurat_obj)
@@ -40,7 +40,12 @@ server <- function(input, output) {
       sort(unique(seurat_obj@meta.data$tree.ident))
     }
   })
-
+  
+  printDownSampleOptions <- reactive({
+    percentage <- as.numeric(c(1.00,.75,.50,.25))
+    percentage
+  })
+  
   # returns the correct ID class for cell subset
   IDtype <- function() {
     seurat_obj <- SelectDataset()
@@ -439,96 +444,98 @@ server <- function(input, output) {
     }
   )
 
-
+  
   # ======== Dot Plot ======== #
   DotPlotF <- reactive({
     clustering <- input$dPlotClust
     if (clustering == TRUE) {
-          seurat_obj <- SelectDataset()
+      seurat_obj <- SelectDataset()
       selected <- unlist(strsplit(input$dotGenes, " "))
-        
-      ifelse(selected %in% com_name,
-        selected <- selected[selected %in% com_name],
       
-        ifelse(selected %in% ens_id,
-          selected <- gene_df[ens_id %in% selected, 3],"")
+      ifelse(selected %in% com_name,
+             selected <- selected[selected %in% com_name],
+             
+             ifelse(selected %in% ens_id,
+                    selected <- gene_df[ens_id %in% selected, 3],"")
       )
       
       seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsDot]
-
+      
       seurat_obj_sub <- seurat_obj[rownames(seurat_obj) %in% selected,]
       dist_mat <- dist(seurat_obj_sub@assays$RNA@data)
       clust <- hclust(dist_mat)
       markers_clust <- clust$labels
       
+      
       g <- DotPlot(seurat_obj, features = markers_clust,
-        cols = "RdYlBu", dot.scale = input$dotScale,
-        group.by = input$selectGrpDot)
-        
+                   cols = "RdYlBu", dot.scale = input$dotScale,
+                   group.by = input$selectGrpDot)
+      
       g <- g + labs(title = paste("Selected analysis:",
-        as.character(input$Analysis)), subtitle = "", caption = "") +
+                                  as.character(input$Analysis)), subtitle = "", caption = "") +
         theme(plot.title = element_text(face = "plain", size = 14))
-
+      
       g <- g + coord_flip() + theme(
         axis.text.x = element_text(angle = 90, hjust = 1))
-
+      
     } else {
       seurat_obj <- SelectDataset()
       selected <- unlist(strsplit(input$dotGenes, " "))
       
       ifelse(selected %in% com_name,
-        selected <- selected[selected %in% com_name],
+             selected <- selected[selected %in% com_name],
+             
+             ifelse(selected %in% ens_id,
+                    selected <- gene_df[ens_id %in% selected, 3],"")
+      )
       
-        ifelse(selected %in% ens_id,
-          selected <- gene_df[ens_id %in% selected, 3],"")
-        )
-
       seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsDot]
       print(input$cellIdentsDot)
-
+      
+      
       g <- DotPlot(seurat_obj, features = selected,
-        cols = "RdYlBu", dot.scale = input$dotScale,
-        group.by = input$selectGrpDot)
-
+                   cols = "RdYlBu", dot.scale = input$dotScale,
+                   group.by = input$selectGrpDot)
+      
       g <- g + labs(title = paste("Selected analysis:",
-        as.character(input$Analysis)), subtitle = "", caption = "") +
+                                  as.character(input$Analysis)), subtitle = "", caption = "") +
         theme(plot.title = element_text(face = "plain", size = 14))
-
+      
       g <- g + coord_flip() + theme(
         axis.text.x = element_text(angle = 90, hjust = 1))
     }
     return(g)
   })
-
+  
   output$cellSelectDot <- renderUI({ # New cell type select
     pickerInput("cellIdentsDot", "Add or remove clusters:",
-      choices = as.character(printIdents()), multiple = TRUE,
-      selected = as.character(printIdents()), options = list(
-       `actions-box` = TRUE), width = "85%")
+                choices = as.character(printIdents()), multiple = TRUE,
+                selected = as.character(printIdents()), options = list(
+                  `actions-box` = TRUE), width = "85%")
   })
-
+  
   mismatchDot <- function() {
     selected <- unlist(strsplit(input$dotGenes, " "))
-
+    
     mismatch <- ifelse(!selected %in% c(com_name,ens_id),
-      selected[!selected %in% c(com_name,ens_id)],"")
+                       selected[!selected %in% c(com_name,ens_id)],"")
     return(mismatch)
   }
-
+  
   output$notInDot <- renderText({input$runDotPlot
     isolate({mismatchDot()})
   })
-
+  
   output$SelectedDataDot <- renderText({input$runDotPlot
-      isolate({input$Analysis})
+    isolate({input$Analysis})
   })
-
+  
   output$myDotPlotF <- renderPlot({input$runDotPlot
     isolate({withProgress({p <- DotPlotF(); print(p)},
-      message = "Rendering plot..", min = 0, max = 10, value = 10)
+                          message = "Rendering plot..", min = 0, max = 10, value = 10)
     })
   })
-
+  
   getHeightDot <- function() {
     l <- getLenInput(input$dotGenes)
     h <- paste0(as.character(l * 35), "px")
@@ -538,79 +545,147 @@ server <- function(input, output) {
   # ! check/change for project
   # TODO create formula for n clusters/treats and dplot width
   dplotWidth <- function () {
-    if(input$selectGrpDot == "data.set") {
-      w <- "500px"
+    if(input$selectGrpDot == "cell.type.ident.by.data.set") {
+      w <- "2400px"
     } else {
       w <- "800px"
     }
+    return(w)
   }
-
+  
+  output$plot.uiDotPlotF <- renderUI({input$runDotPlot
+    isolate({h <- getHeightDot(); plotOutput("myDotPlotF",
+                                             width = dplotWidth(), height = h)
+    })
+  })
+  
   dotHeight <- function() {
     l <- getLenInput(input$dotGenes)
     l <- as.numeric(l)
     return(l)
   }
-
-  # output$plot.uiDotPlotF <- renderUI({input$runDotPlot
-  #   isolate({h <- getHeightDot(); plotOutput("myDotPlotF",
-  #     width = dplotWidth(), height = h)
-  #   })
-  # })
-
-  output$plot.uiDotPlotF <- renderUI({input$runDotPlot
-  isolate({h <- getHeightDot(); plotOutput("myDotPlotF",
-    width = paste0(input$manAdjustDotW, "px"),
-    height = paste0(input$manAdjustDotH, "px"))})
-  })
   
   output$downloadDotPlot <- downloadHandler(
     filename = "dot_plot.pdf", content = function(file) {
-      pdf(file, onefile = FALSE, width = 12, height = dotHeight() * 0.5)
+      pdf(file, onefile = FALSE, width = 28, height = dotHeight() * 0.5)
       print(DotPlotF())
       dev.off()
     }
   )
 
-  # ======== pHeatmap ======== #
-  selectedCellsHmap <- reactive({
-    multiGrep2(input$cellIdentsHmap, colnames(hmap_list[[1]]))
+
+  # # ======== ggplot Heatmap ======== #
+  pHeatmapF <- reactive({
+    clustering <- input$pHmapClust  #enable row clustering
+    if (clustering == TRUE){
+      seurat_obj <- SelectDataset()
+      selected <- unlist(strsplit(input$PhmapGenes, " "))
+
+      ifelse(selected %in% com_name,
+             selected <- selected[selected %in% com_name],
+
+             ifelse(selected %in% ens_id,
+                    selected <- gene_df[ens_id %in% selected, 3],"")
+      )
+
+      seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsHmap]
+
+      seurat_obj_sub <- seurat_obj[rownames(seurat_obj) %in% selected,]
+      dist_mat <- dist(seurat_obj_sub@assays$RNA@data)
+      clust <- hclust(dist_mat)   #reorder genes
+      markers_clust <- clust$labels
+
+      dotplot <- DotPlot(seurat_obj, features = markers_clust,
+                         group.by = input$selectGrpHmap)
+
+      g <- ggplot(dotplot$data, aes(id, features.plot, fill= avg.exp.scaled)) +
+        geom_tile() +
+        scale_fill_distiller(
+          palette = "RdYlBu") +
+        theme_ipsum() +
+        theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1))
+
+
+      g <- g + labs(title = paste("Selected analysis:",
+                                  as.character(input$Analysis)), subtitle = "", caption = "") +
+        theme(plot.title = element_text(face = "plain", size = 14))
+
+    } else {
+      seurat_obj <- SelectDataset()
+      selected <- unlist(strsplit(input$PhmapGenes, " "))
+
+      ifelse(selected %in% com_name,
+             selected <- selected[selected %in% com_name],
+
+             ifelse(selected %in% ens_id,
+                    selected <- gene_df[ens_id %in% selected, 3],"")
+      )
+
+      seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsHmap]
+      print(input$cellIdentsHmap)
+
+
+      dotplot <- DotPlot(seurat_obj, features = selected,
+                         group.by = input$selectGrpHmap)
+
+      g <- ggplot(dotplot$data, aes(id, features.plot,fill= avg.exp.scaled, width = 1, height = 1)) +
+        geom_tile() +
+        scale_fill_distiller(
+          palette = "RdYlBu") +
+        theme_ipsum()+
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 13),
+              axis.title.y.right = element_text(size=13))
+
+      g <- g + labs(title = paste("Selected analysis:",
+                                  as.character(input$Analysis)), subtitle = "", caption = "") +
+        theme(plot.title = element_text(face = "plain", size = 14))
+
+    }
+
+    if (input$selectGrpHmap == "cell.type.ident.by.data.set"){
+
+      dotplot <- DotPlot(seurat_obj, features = selected,
+                         group.by = input$selectGrpHmap)
+
+      dotplot$data$groupIdent <- gsub("(.+?)(\\_.*)", "\\1",dotplot$data$id)
+      dotplot$data$groupIdent <- factor(dotplot$data$groupIdent,levels=levels(seurat_obj$cell.type.ident))
+
+      g <- ggplot(dotplot$data, aes(id, features.plot,fill= avg.exp.scaled, width = 1, height = 1)) +
+        geom_tile() +
+        scale_fill_distiller(
+          palette = "RdYlBu") +
+        theme_ipsum()+
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 13),
+              axis.title.y.right = element_text(size=13),panel.spacing = unit(.35, "lines")) +
+        facet_grid( ~ groupIdent, scales='free_x')
+
+
+      g <- g + labs(title = paste("Selected analysis:",
+                                  as.character(input$Analysis)), subtitle = "", caption = "") +
+        theme(plot.title = element_text(face = "plain", size = 14))
+    }
+
+    return(g)
+
   })
 
-  pHeatmapF <- reactive({
-    selected <- unlist(strsplit(input$PhmapGenes, " "))
-
-    ifelse(selected %in% com_name,
-      selected <- selected[selected %in% com_name],
-    
-      ifelse(selected %in% ens_id,
-        selected <- gene_df[ens_id %in% selected, 3],"")
-    )
-
-    avg_mtx <- hmap_list[[input$mtxSelectHmap]]
-    goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected, selectedCellsHmap()]
-    goi_mat <- goi_mat[match(selected, rownames(goi_mat)),]
-
-    n_trt <- length(unique(file_list[[1]]@meta.data$data.set))
-    mtx_cols <- ncol(goi_mat) - n_trt
-
-    hmapColors <- colorRampPalette(
-      rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu")))(100)
-
-    pheatmap::pheatmap(goi_mat, cluster_rows = input$pHmapClust,
-      cluster_cols = FALSE, color = hmapColors, annotation_col = NULL,
-      legend = FALSE, annotation_colors = anno_cols,
-      gaps_col = seq(n_trt, mtx_cols, by = n_trt),
-      annotation_names_col = FALSE, annotation_legend = FALSE)
+  #renders the drop-down box w/ Ident choices
+  output$cellSelectHmap <- renderUI({ # New cell type select
+    pickerInput("cellIdentsHmap", "Add or remove clusters:",
+                choices = as.character(printIdents()), multiple = TRUE,
+                selected = as.character(printIdents()), options = list(
+                  `actions-box` = TRUE), width = "85%")
   })
 
   mismatchPhmap <- function() {
     selected <- unlist(strsplit(input$PhmapGenes, " "))
 
     mismatch <- ifelse(!selected %in% c(com_name, ens_id),
-      selected[!selected %in% c(com_name, ens_id)],"")
+                       selected[!selected %in% c(com_name, ens_id)],"")
     return(mismatch)
   }
 
+  #prints the mismatches or genes not present (for ui.R)
   output$notInPhmap <- renderText({input$runPhmap
     isolate({mismatchPhmap()})
   })
@@ -619,50 +694,261 @@ server <- function(input, output) {
     isolate({input$Analysis})
   })
 
-  avg_mtx_names <- unique(unlist(lapply(seq_along(colnames(hmap_list[[1]])),
-    function(i){strsplit(colnames(hmap_list[[1]]), "_")[[i]][1]})))
-
-  output$cellSelectHmap <- renderUI({ # New cell type selected
-  pickerInput("cellIdentsHmap", "Add or remove clusters:",
-    choices = avg_mtx_names, multiple = TRUE,
-    selected = avg_mtx_names, options = list(
-      `actions-box` = TRUE), width = "80%")
-  })
-
+  #renders plot w/ progress bar
   output$myPhmapF <- renderPlot({input$runPhmap
     isolate({withProgress({p <- pHeatmapF(); print(p)},
-      message = "Rendering plot..", min = 0, max = 10, value = 10)
+                          message = "Rendering plot..", min = 0, max = 10, value = 10)
     })
-  })
-
-  getWidthPhmap <- reactive({
-    if(input$pHmapClust == TRUE ) {
-      w <- (length(selectedCellsHmap()) * 14) + 150
-      return(w)
-    } else {
-      w <- (length(selectedCellsHmap()) * 14) + 90
-      return(w)
-    }
   })
 
   getHeightPhmap <- reactive({
     l <- getLenInput(input$PhmapGenes)
-    h <- (l * 13) + 85
+    h <- as.numeric(l * 35)
     return(h)
   })
 
+  getWidthPhmap <- function() {
+    if(input$selectGrpHmap == "cell.type.ident.by.data.set") {
+      w <- "1200"
+    } else {
+      w <- "800"
+    }
+    return(w)
+  }
+
   output$plot.uiPheatmapF <- renderUI({input$runPhmap
     isolate({
-      w <- paste0(getWidthPhmap(), "px"); h <- paste0(getHeightPhmap(), "px")
-        plotOutput("myPhmapF", width = w, height = h)
+      w <- paste0(getWidthPhmap()); h <- paste0(getHeightPhmap())
+      plotOutput("myPhmapF", width = paste0(w, "px"), height = paste0(h, "px"))
     })
   })
 
-  output$downloadPhmap <- downloadHandler(
-    filename = "heatmap.pdf", content = function(file) {
-      pdf(file, width = (getWidthPhmap() / 90),
-          height = (getHeightPhmap() / 90))
+  #download
+  output$downloadhmap <- downloadHandler(
+    filename = "heatmap.png", content = function(file) {
+      png(file, height = getHeightPhmap(),
+          width = 1200, units = "px")
       print(pHeatmapF())
+      dev.off()
+    }
+  )
+
+
+# # # ======== Individual Cell ggplot Heatmap ======== #
+  IndvpHeatmapF <- reactive({
+    clustering <- input$IndvpHmapClust  #enable row clustering
+    if (clustering == TRUE){
+      seurat_obj <- SelectDataset()
+      selected <- unlist(strsplit(input$IndvPhmapGenes, " "))
+      
+      ifelse(selected %in% com_name,
+             selected <- selected[selected %in% com_name],
+             
+             ifelse(selected %in% ens_id,
+                    selected <- gene_df[ens_id %in% selected, 3],"")
+      )
+      
+      seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsIndvHmap]
+      
+      seurat_obj <- seurat_obj[, sample(Cells(seurat_obj), size = round(as.numeric(input$cellDownSampleIndvHmap)*length(colnames(seurat_obj))), replace=F)]
+      
+      print(addmargins(table(seurat_obj$cell.type.ident))) #check
+      
+      seurat_obj_sub <- seurat_obj[rownames(seurat_obj) %in% selected,]
+      dist_mat <- dist(seurat_obj_sub@assays$RNA@data)
+      clust <- hclust(dist_mat)   #reorder genes
+      markers_clust <- clust$labels
+      
+      group.by <- input$selectGrpIndvHmap #choose group.by parameter
+      cells <- NULL
+      col.min = -2.5
+      col.max = 2.5
+      
+      cells <- cells %||% colnames(x = seurat_obj)
+      
+      data <- as.data.frame(x = t(x = as.matrix(x = GetAssayData(
+        object = seurat_obj, slot = "data")[markers_clust, cells, drop = FALSE])))
+      
+      
+      data <- scale(data)
+      data <- as.data.frame(MinMax(data = data, min = col.min, max = col.max))
+      
+      data$id <- if (is.null(x = group.by)) {
+        Idents(object = seurat_obj)[cells, drop = TRUE]
+      } else {
+        seurat_obj[[group.by, drop = TRUE]][cells, drop = TRUE]
+      }
+      if (!is.factor(x = data$id)) {
+        data$id <- factor(x = data$id)
+      }
+      data$id <- as.vector(x = data$id)
+      
+      data$Cell <- rownames(data)
+      data <- melt(data, variable.name  = "Feature")
+      
+      #preserve identity order
+      if (group.by == "cell.type.ident.by.data.set"){
+        print('hi')
+        data$id <- factor(data$id, levels = levels(seurat_obj$cell.type.ident.by.data.set))
+      }else if (group.by == "data.set"){
+        data$id <- factor(data$id, levels = levels(seurat_obj$data.set))
+      }else{
+        data$id <- factor(data$id, levels = levels(seurat_obj$cell.type.ident))
+      }
+      
+      g <- ggplot(data, aes(Cell, Feature,fill= value)) +
+        geom_tile(height = .95, width = 2) +
+        scale_fill_distiller(
+          palette = "RdYlBu") +
+        theme_ipsum()+
+        theme(axis.text.x=element_blank(),
+              axis.ticks.x=element_blank(),
+              axis.title.y.right = element_text(size=13),panel.spacing = unit(.25, "lines"),
+              strip.text.x  = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 8)) + 
+        facet_grid( ~ id, space = 'free', scales = 'free')
+      
+    } else {
+      seurat_obj <- SelectDataset()
+      selected <- unlist(strsplit(input$IndvPhmapGenes, " "))
+      
+      ifelse(selected %in% com_name,
+             selected <- selected[selected %in% com_name],
+             
+             ifelse(selected %in% ens_id,
+                    selected <- gene_df[ens_id %in% selected, 3],"")
+      )
+      
+      seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsIndvHmap]
+      print(input$cellIdentsIndvHmap)
+      
+      seurat_obj <- seurat_obj[, sample(Cells(seurat_obj), size = round(as.numeric(input$cellDownSampleIndvHmap)*length(colnames(seurat_obj))), replace=F)]
+      
+      print(input$cellDownSampleIndvHmap)
+      print(addmargins(table(seurat_obj$cell.type.ident))) #check
+      
+      
+      group.by <- input$selectGrpIndvHmap #choose group.by parameter
+      cells <- NULL
+      col.min = -2.5
+      col.max = 2.5
+      
+      cells <- cells %||% colnames(x = seurat_obj)
+      
+      data <- as.data.frame(x = t(x = as.matrix(x = GetAssayData(
+        object = seurat_obj, slot = "data")[selected, cells, drop = FALSE])))
+      
+      
+      data <- scale(data)
+      data <- as.data.frame(MinMax(data = data, min = col.min, max = col.max))
+      
+      data$id <- if (is.null(x = group.by)) {
+        Idents(object = seurat_obj)[cells, drop = TRUE]
+      } else {
+        seurat_obj[[group.by, drop = TRUE]][cells, drop = TRUE]
+      }
+      if (!is.factor(x = data$id)) {
+        data$id <- factor(x = data$id)
+      }
+      data$id <- as.vector(x = data$id)
+      
+      data$Cell <- rownames(data)
+      data <- melt(data, variable.name  = "Feature")
+      
+      #preserve identity order
+      if (group.by == "cell.type.ident.by.data.set"){
+        data$id <- factor(data$id, levels = levels(seurat_obj$cell.type.ident.by.data.set))
+      }else if (group.by == "data.set"){
+        data$id <- factor(data$id, levels = levels(seurat_obj$data.set))
+      }else{
+        data$id <- factor(data$id, levels = levels(seurat_obj$cell.type.ident))
+      }
+      
+      g <- ggplot(data, aes(Cell, Feature,fill= value)) +
+        geom_tile(height = .95, width = 2) +
+        scale_fill_distiller(
+          palette = "RdYlBu") +
+        theme_ipsum()+
+        theme(axis.text.x=element_blank(),
+              axis.ticks.x=element_blank(),
+              axis.title.y.right = element_text(size=13),panel.spacing = unit(.25, "lines"),
+              strip.text.x  = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 8)) + 
+        facet_grid( ~ id, space = 'free', scales = 'free')
+      
+      
+    }
+    return(g)
+    
+  })
+  
+  #renders the drop-down box w/ Ident choices
+  output$cellSelectIndvHmap <- renderUI({ # New cell type select
+    pickerInput("cellIdentsIndvHmap", "Add or remove clusters:",
+                choices = as.character(printIdents()), multiple = TRUE,
+                selected = as.character(printIdents()), options = list(
+                  `actions-box` = TRUE), width = "85%")
+  })
+  
+  #renders the drop-down box w/ downsample choices
+  output$SelectDownSamplePropIndvHmap <- renderUI({ # New cell type select
+    pickerInput("cellDownSampleIndvHmap", "Choose downsample proportion:",
+                choices = as.character(printDownSampleOptions()), multiple = FALSE,
+                selected = as.character(printDownSampleOptions()[1]), options = list(
+                  `actions-box` = TRUE), width = "85%")
+  })
+  
+  
+  mismatchIndvPhmap <- function() {
+    selected <- unlist(strsplit(input$IndvPhmapGenes, " "))
+    
+    mismatch <- ifelse(!selected %in% c(com_name, ens_id),
+                       selected[!selected %in% c(com_name, ens_id)],"")
+    return(mismatch)
+  }
+  
+  #prints the mismatches or genes not present (for ui.R)
+  output$notInIndvPhmap <- renderText({input$runIndvPhmap
+    isolate({mismatchIndvPhmap()})
+  })
+  
+  output$SelectedDataIndvPhmap <- renderText({input$runIndvPhmap
+    isolate({input$Analysis})
+  })
+  
+  #renders plot w/ progress bar
+  output$myIndvPhmapF <- renderPlot({input$runIndvPhmap
+    isolate({withProgress({p <- IndvpHeatmapF(); print(p)},
+                          message = "Rendering plot..", min = 0, max = 10, value = 10)
+    })
+  })
+  
+  getHeightIndvPhmap <- reactive({
+    l <- getLenInput(input$IndvPhmapGenes)
+    h <- as.numeric(l * 35)
+    return(h)
+  })
+  
+  getWidthIndvPhmap <- function() {
+    if(input$selectGrpIndvHmap == "cell.type.ident.by.data.set") {
+      w <- "1600"
+    } else {
+      w <- "800"
+    }
+    return(w)
+  }
+  
+  output$plot.uiIndvpHeatmapF <- renderUI({input$runIndvPhmap
+    isolate({
+      w <- paste0(getWidthIndvPhmap()); h <- paste0(getHeightIndvPhmap())
+      plotOutput("myIndvPhmapF", width = paste0(w, "px"), height = paste0(h, "px"))
+    })
+  })
+  
+  #download
+  output$downloadIndvhmap <- downloadHandler(
+    filename = "heatmap.png", content = function(file) {
+      png(file, height = getHeightIndvPhmap(),
+          width = 1600, units = "px")
+      print(IndvpHeatmapF())
       dev.off()
     }
   )

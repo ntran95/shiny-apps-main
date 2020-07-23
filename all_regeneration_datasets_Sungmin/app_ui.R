@@ -63,7 +63,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
           column(12, align = "left", tags$b("An important note on ambiguous gene names")),
           column(12, align = "left",
               'Gene expression in this data set is quantfied by the number of
-              deduplicated UMIs (unique molecular index) that map to Ensembl 
+              deduplicated UMIs (unique molecular index) that map to Ensembl
               gene IDs, which are identify unique coding sequences (CDS) in the 
               zebrafish genome. In some cases different Ensembl IDs
               will have the same common gene name. This may occur
@@ -273,7 +273,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
             column(6,
               numericInput("ptSizeRdg", "Input cell size:", value = 0.25,
               min = 0.00, step = 0.75, max = 2.00, width = "80%"))
-          ),          
+          ),
           
           fluidRow(tags$br()),
           fluidRow(tags$br()),
@@ -297,133 +297,184 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
     ),
 
 
-    # ================ #
-    tabPanel("Dot Plot", #fluid = FALSE,
+# ================ #
+  tabPanel("Dot Plot", #fluid = FALSE,
       sidebarLayout(fluid = TRUE,
-        
+
         sidebarPanel(fluid = FALSE, width = 4,
           column(12, align = "left  ",
-          textInput("dotGenes",
-            "Insert gene name or ensembl ID:",
-            value = smpl_genes_lg),
-          checkboxInput("dPlotClust",
-            label = "Check box to enable row clustering.", value = FALSE)),
+            textInput("dotGenes",
+              "Insert gene name or ensembl ID:",
+              value = smpl_genes_lg),
+            checkboxInput("dPlotClust",
+              label = "Check box to enable row clustering.", value = FALSE)),
 
           column(12, align = "center",
             actionButton("runDotPlot", "Generate Plots",
-            style = 'padding:5px; font-size:80%')),
+              style = 'padding:5px; font-size:80%')),
 
           column(12, tags$hr(width = "50%"), align = "center"),
           column(12, align = "center", downloadButton(
-            "downloadDotPlot", "Download pdf",
-            style = 'padding:5px; font-size:80%')),
+              "downloadDotPlot", "Download pdf",
+              style = 'padding:5px; font-size:80%')),
 
           column(12, tags$br()),
           column(12, align = "center", uiOutput("cellSelectDot")), # New
-          
+
           column(12, tags$br()),
           column(12, align = "center",
-            column(6,
-              radioGroupButtons("selectGrpDot",
-                "Group cells by:", choices = list(Time = "data.set",
-                  Cluster = "cell.type.ident"), width = "100%")),
-            column(6,
-              numericInput("dotScale", "Dot diameter:", value = 10, min = 4,
-                step = 1, max = 20, width = "80%"), align = "center")
-          ),
+              column(6,
+                radioGroupButtons("selectGrpDot",
+                  "Group cells by:", choices = list(
+                    Combined = "cell.type.ident.by.data.set",
+                    Time = "data.set", Cluster = "cell.type.ident"), width = "100%",size = "xs")),
+              column(6,
+                numericInput("dotScale", "Dot diameter:", value = 10, min = 4,
+                  step = 1, max = 20, width = "60%"), align = "center")
+                ),
 
           fluidRow(tags$br()),
           fluidRow(tags$br()),
           column(12, uiOutput("plot.uiDatFeatPlotV4"), align = "center"),
           fluidRow(tags$br()),
           fluidRow(tags$br())
-        ),
-        
-        mainPanel(
-          fluidRow(
-            column(8, tags$br()),
-            column(8, tags$b("Mismatches or genes not present"),
-                "(if applicable)", tags$b(":")),
-            column(8, uiOutput("notInDot")),
-            column(8, tags$hr()),
-            
-            column(8, align = "left",
-              # column(4,  align = "center", "Manual figure adjustment:",
-              #   column(11, style = "padding-top: 8px;",
-              #     switchInput("manAdjustDot", value = FALSE))),
-              column(3, align = "left", numericInput(
-                "manAdjustDotW", label = "Width (pixels):", value = 600, step = 50,
-                width = "100%")),
-              column(3,  align = "left", numericInput(
-                "manAdjustDotH", label = "Height (pixels):", value = 600, step = 50,
-                width = "100%"))
-              ),
-            fluidRow(tags$br()),
-            column(12, uiOutput("plot.uiDotPlotF"))
-          )
+  ),
+
+  mainPanel(
+      fluidRow(
+        column(8, tags$br()),
+        column(8, tags$b("Mismatches or genes not present"),
+          "(if applicable)", tags$b(":")),
+        column(8, uiOutput("notInDot")),
+        column(8, tags$hr()),
+
+        fluidRow(tags$br()),
+        column(12, uiOutput("plot.uiDotPlotF"))
         )
-      )
+     )
+  )
+  ),
+
+   # ================ # ggplot heatmap
+    tabPanel("Heat Map", #fluid = FALSE,
+             sidebarLayout(fluid = TRUE,
+
+                           sidebarPanel(fluid = FALSE, width = 4,
+                                        column(12, align = "left  ",
+                                               textInput("PhmapGenes",
+                                                         "Insert gene name or ensembl ID:",
+                                                         value = smpl_genes_lg),
+                                               checkboxInput("pHmapClust",
+                                                             label = "Check box to enable row clustering.", value = FALSE)),
+
+                                        column(12, align = "center",
+                                               actionButton("runPhmap", "Generate Plots",
+                                                            style = 'padding:5px; font-size:80%')),
+
+                                        column(12, tags$hr(width = "50%"), align = "center"),
+                                        column(12, align = "center", downloadButton(
+                                          "downloadhmap", "Download pdf",
+                                          style = 'padding:5px; font-size:80%')),
+
+                                        column(12, tags$br()),
+                                        column(12, align = "center", uiOutput("cellSelectHmap")), # New
+
+                                        column(12, tags$br()),
+                                        column(12, align = "center",
+                                               column(12,
+                                                      radioGroupButtons("selectGrpHmap",
+                                                                        "Group cells by:",
+                                                                        choices = list(Combined = "cell.type.ident.by.data.set",
+                                                                        Time = "data.set",
+                                                                        Cluster = "cell.type.ident"),
+                                                                        width = "100%"))
+
+                                        ),
+
+                                        fluidRow(tags$br()),
+                                        fluidRow(tags$br()),
+                                        column(12, uiOutput("plot.uiDatFeatPlotV7"), align = "center"),
+                                        fluidRow(tags$br()),
+                                        fluidRow(tags$br())
+                           ),
+
+                           mainPanel(
+                             fluidRow(
+                               column(8, tags$br()),
+                               column(8, tags$b("Mismatches or genes not present"),
+                                      "(if applicable)", tags$b(":")),
+                               column(8, uiOutput("notInPhmap")),
+                               column(8, tags$hr()),
+
+                               fluidRow(tags$br()),
+                               column(12, uiOutput("plot.uiPheatmapF"))
+                             )
+                           )
+             )
     ),
 
 
-    # ================ #
-    tabPanel("Heatmap", #fluid = FALSE,
-      fixedRow(
-        column(12, tags$br()),
+#================ # ggplot Indv. Cell heatmap
+  tabPanel("Indv. Cell Heatmap", #fluid = FALSE,
+      sidebarLayout(fluid = TRUE,
 
-        column(5, align = "left",
-          column(12, align = "left",
-            column(12,
-              textInput("PhmapGenes", width = "100%",
+        sidebarPanel(fluid = FALSE, width = 4,
+          column(12, align = "left  ",
+            textInput("IndvPhmapGenes",
               "Insert gene name or ensembl ID:",
-                value = smpl_genes_lg),
-              checkboxInput("pHmapClust",
-                label = "Check box to enable row clustering.",
-                value = FALSE),
-              column(12, align = "center", uiOutput("cellSelectHmap")),
-              column(12, tags$br())
-              ),
-            
-            column(12, align = "center",
-              actionButton("runPhmap", "Generate Plots",
-                style = 'padding:5px; font-size:80%'),
-            downloadButton("downloadPhmap", "Download pdf",
-                style = 'padding:5px; font-size:80%')),
-            column(12, tags$br())
-          )
-        ),
+              value = smpl_genes_lg),
+            checkboxInput("IndvpHmapClust",
+              label = "Check box to enable row clustering.", value = FALSE)),
 
-        column(7, align = "left",
-          column(12, tags$b("Mismatches or genes not present"),
-            "(if applicable)", tags$b(":")),
-          column(12, uiOutput("notInPhmap")),
+          column(12, align = "center",
+            actionButton("runIndvPhmap", "Generate Plots",
+              style = 'padding:5px; font-size:80%')),
 
-          column(12, tags$hr()),
-          column(9, align = "left", tags$b('Note:'),
-          'Highly expressed genes have a tendency to "wash out" the color 
-          values of genes with lower expression on this heatmap. It might 
-          be useful to remove the higher expressed genes to get a better 
-          visualization of genes with less extreme values. You can also 
-          change the expression normalization method to decrease/increase
-          the effect highly expressed genes. You can find details on each 
-          method in the ',
-            tags$a(href = "https://www.rdocumentation.org/packages/Seurat/versions/3.1.4/topics/NormalizeData",
-              tags$b("Seurat documentation")), "."),
-          
+          column(12, tags$hr(width = "50%"), align = "center"),
+          column(12, align = "center", downloadButton(
+              "downloadIndvhmap", "Download pdf",
+              style = 'padding:5px; font-size:80%')),
+
           column(12, tags$br()),
-          column(12, align = "left",
-            radioGroupButtons("mtxSelectHmap", "Normalization method:",
-              choices = list(Log = "LOG", CLR = "CLR", RC = "RC"),
-              width = "100%")
-          )
-        ),
-        
-        column(12, align = "center", tags$hr(width = "100%")),
-        column(12, tags$b("Selected analysis: all she-pos. cells")),
-        column(12, tags$br()),
-        column(12, class = "hmapID", uiOutput("plot.uiPheatmapF"))
-      )
-    ),
+          column(12, align = "center", uiOutput("cellSelectIndvHmap")), # New
+
+          column(12, tags$br()),
+          column(12, align = "center", uiOutput("SelectDownSamplePropIndvHmap")), #downsample drop down
+
+          column(12, tags$br()),
+          column(12, align = "center",
+              column(12,
+                radioGroupButtons("selectGrpIndvHmap",
+                  "Group cells by:",
+                  choices = list(
+                    Time = "data.set",
+                    Cluster = "cell.type.ident", 
+                    Combined = "cell.type.ident.by.data.set"),
+                  width = "100%"))
+
+                ),
+
+          fluidRow(tags$br()),
+          fluidRow(tags$br()),
+          column(12, uiOutput("plot.uiDatFeatPlotV8"), align = "center"),
+          fluidRow(tags$br()),
+          fluidRow(tags$br())
+),
+
+  mainPanel(
+      fluidRow(
+        column(8, tags$br()),
+        column(8, tags$b("Mismatches or genes not present"),
+          "(if applicable)", tags$b(":")),
+        column(8, uiOutput("notInIndvPhmap")),
+        column(8, tags$hr()),
+
+        fluidRow(tags$br()),
+        column(12, uiOutput("plot.uiIndvpHeatmapF"),style = "overflow-y: scroll;overflow-x: scroll;")
+        )
+     )
+  )
+  ),
 
 
     # ================ #

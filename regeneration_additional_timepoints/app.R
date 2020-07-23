@@ -44,22 +44,10 @@ for (i in 1:length(files)) {
 }
 print("done.")
 
-# hmap_files <- list.files("./data", pattern = "mtx", full.names = TRUE)
-# hmap_list <- list()
-
-# print("Loading heatmap matrices...")
-# for (i in 1:length(hmap_files)) {
-#   hmap_list[[i]] <- readRDS(hmap_files[i])
-# }
-# print("done.")
-
 
 # ! =========== items to check/change for project {START}
-# file_list <- file_list[c(6,5,1:4)]
-# hmap_list <- hmap_list[c(2,1,3)]
 
 names(file_list) <- as.character(c("all she-pos. cells"))
-# names(hmap_list) <- as.character(c("LOG", "CLR", "RC"))
 
 trt_colors <- c("green3", "gold", "darkorange", "red", "magenta",
   "mediumpurple1", "lightseagreen", "deepskyblue", "blue")

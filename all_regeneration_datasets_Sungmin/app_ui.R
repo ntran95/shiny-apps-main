@@ -102,8 +102,8 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
 												Ensembl 91 zebrafish annotation.')),
 												fluidRow(tags$br()),
 												fluidRow(tags$br())
-)
-),
+	)
+	),
 
 
 # ================ #
@@ -170,7 +170,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
 					column(12, uiOutput("plot.uiDatFeatPlotV1"), align = "center"),
 					fluidRow(tags$br()),
 					fluidRow(tags$br())
-	),
+),
 
 	mainPanel(
 			fluidRow(
@@ -226,7 +226,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
 					column(12, uiOutput("plot.uiDatFeatPlotV2"), align = "center"),
 					fluidRow(tags$br()),
 					fluidRow(tags$br())
-	),
+),
 
 	mainPanel(
 			fluidRow(
@@ -280,7 +280,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
 					column(12, uiOutput("plot.uiDatFeatPlotV3"), align = "center"),
 					fluidRow(tags$br()),
 					fluidRow(tags$br())
-	),
+),
 
 	mainPanel(
 			fluidRow(
@@ -338,7 +338,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
 					column(12, uiOutput("plot.uiDatFeatPlotV4"), align = "center"),
 					fluidRow(tags$br()),
 					fluidRow(tags$br())
-	),
+),
 
 	mainPanel(
 			fluidRow(
@@ -348,53 +348,64 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
 				column(8, uiOutput("notInDot")),
 				column(8, tags$hr()),
 
+				column(8, align = "left",
+# column(4,  align = "center", "Manual figure adjustment:",
+#   column(11, style = "padding-top: 8px;",
+#     switchInput("manAdjustDot", value = FALSE))),
+					column(3, align = "left", numericInput(
+							"manAdjustDotW", label = "Width (pixels):", value = 2400, step = 50,
+							width = "100%")),
+					column(3,  align = "left", numericInput(
+							"manAdjustDotH", label = "Height (pixels):", value = 900, step = 50,
+							width = "100%"))
+				      ),
 				fluidRow(tags$br()),
 				column(12, uiOutput("plot.uiDotPlotF"))
 				)
-		 )
-	)
-	),
+			)
+			)
+			),
 # ================ # ggplot groupedheatmap
-	tabPanel("Heat Map", #fluid = FALSE,
-			sidebarLayout(fluid = TRUE,
+			tabPanel("Heat Map", #fluid = FALSE,
+					sidebarLayout(fluid = TRUE,
 
-				sidebarPanel(fluid = FALSE, width = 4,
-					column(12, align = "left  ",
-						textInput("PhmapGenes",
-							"Insert gene name or ensembl ID:",
-							value = smpl_genes_lg),
-						checkboxInput("pHmapClust",
-							label = "Check box to enable row clustering.", value = FALSE)),
+						sidebarPanel(fluid = FALSE, width = 4,
+							column(12, align = "left  ",
+								textInput("PhmapGenes",
+									"Insert gene name or ensembl ID:",
+									value = smpl_genes_lg),
+								checkboxInput("pHmapClust",
+									label = "Check box to enable row clustering.", value = FALSE)),
 
-					column(12, align = "center",
-						actionButton("runPhmap", "Generate Plots",
-							style = 'padding:5px; font-size:80%')),
+							column(12, align = "center",
+								actionButton("runPhmap", "Generate Plots",
+									style = 'padding:5px; font-size:80%')),
 
-					column(12, tags$hr(width = "50%"), align = "center"),
-					column(12, align = "center", downloadButton(
-							"downloadhmap", "Download pdf",
-							style = 'padding:5px; font-size:80%')),
+							column(12, tags$hr(width = "50%"), align = "center"),
+							column(12, align = "center", downloadButton(
+									"downloadhmap", "Download pdf",
+									style = 'padding:5px; font-size:80%')),
 
-					column(12, tags$br()),
-					column(12, align = "center", uiOutput("cellSelectHmap")), # New
+							column(12, tags$br()),
+							column(12, align = "center", uiOutput("cellSelectHmap")), # New
 
-					column(12, tags$br()),
-					column(12, align = "center",
-							column(12,
-								radioGroupButtons("selectGrpHmap",
-									"Group cells by:",
-									choices = list(Combined = "cell.type.ident.by.data.set",
-										Time = "data.set",
-										Cluster = "cell.type.ident"),
-									width = "100%"))
+							column(12, tags$br()),
+							column(12, align = "center",
+									column(12,
+										radioGroupButtons("selectGrpHmap",
+											"Group cells by:",
+											choices = list(Combined = "cell.type.ident.by.data.set",
+												Time = "data.set",
+												Cluster = "cell.type.ident"),
+											width = "100%"))
 
-					      ),
+							      ),
 
-					fluidRow(tags$br()),
-					fluidRow(tags$br()),
-					column(12, uiOutput("plot.uiDatFeatPlotV7"), align = "center"),
-					fluidRow(tags$br()),
-					fluidRow(tags$br())
+							fluidRow(tags$br()),
+							fluidRow(tags$br()),
+							column(12, uiOutput("plot.uiDatFeatPlotV7"), align = "center"),
+							fluidRow(tags$br()),
+							fluidRow(tags$br())
 	),
 
 	mainPanel(
@@ -443,9 +454,10 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
 							column(12,
 								radioGroupButtons("selectGrpIndvHmap",
 									"Group cells by:",
-									choices = list(Combined = "cell.type.ident.by.data.set",
+									choices = list(
 										Time = "data.set",
-										Cluster = "cell.type.ident"),
+										Cluster = "cell.type.ident", 
+										Combined = "cell.type.ident.by.data.set"),
 									width = "100%"))
 
 					      ),
@@ -518,7 +530,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
 					column(12, uiOutput("plot.uiDatFeatPlotV5"), align = "center"),
 					fluidRow(tags$br()),
 					fluidRow(tags$br())
-),
+	),
 
 	mainPanel(
 			fluidRow(

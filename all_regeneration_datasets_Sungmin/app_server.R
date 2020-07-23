@@ -42,7 +42,7 @@ server <- function(input, output) {
   })
   
   printDownSampleOptions <- reactive({
-    percentage <- as.numeric(c(.75,.50,.25))
+    percentage <- as.numeric(c(1.00,.75,.50,.25))
     percentage
   })
   
@@ -573,11 +573,19 @@ server <- function(input, output) {
     })
   })
   
+  
+  
   dotHeight <- function() {
     l <- getLenInput(input$dotGenes)
     l <- as.numeric(l)
     return(l)
   }
+  
+  output$plot.uiDotPlotF <- renderUI({input$runDotPlot
+    isolate({h <- getHeightDot(); plotOutput("myDotPlotF",
+                                             width = paste0(input$manAdjustDotW, "px"),
+                                             height = paste0(input$manAdjustDotH, "px"))})
+  })
   
   output$downloadDotPlot <- downloadHandler(
     filename = "dot_plot.pdf", content = function(file) {
@@ -1055,3 +1063,4 @@ server <- function(input, output) {
     }
   )
 } # Server close
+

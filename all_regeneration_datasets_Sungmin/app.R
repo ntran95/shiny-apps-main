@@ -80,7 +80,7 @@ app_title <- "Neuromast Regeneration scRNA-seq"
 gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
   sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
-branch <- "master" # CHECK BEFORE DEPLOYMENT!
+branch <- "develop" # CHECK BEFORE DEPLOYMENT!
 app_name <- "all_regeneration_datasets_Sungmin"
 # theme_ipsum
 # ! =========== {END}
@@ -91,17 +91,17 @@ com_name <- gene_df$Gene.name.uniq
 
 
 # =========== server
-# source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
-#   branch, "/", app_name, "/app_server.R"), local = TRUE)
+source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
+  branch, "/", app_name, "/app_server.R"), local = TRUE)
 
-source(paste0("./app_server.R"), local = TRUE)
+# source(paste0("./app_server.R"), local = TRUE)
 
 
 # =========== UI
-# source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
-#   branch, "/", app_name, "/app_ui.R"), local = TRUE)
+source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
+  branch, "/", app_name, "/app_ui.R"), local = TRUE)
 
-source(paste0("./app_UI.R"), local = TRUE)
+# source(paste0("./app_UI.R"), local = TRUE)
 
 
 print("Size of all Seurat objects:")
@@ -132,8 +132,8 @@ if (FALSE) { # Not run
     "Scripts/rsconnect/shinyapps.io/", app_name, "/app.R"))
 
   #Execute app from desktop
-  options(shiny.reactlog = TRUE, shiny.fullstacktrace = TRUE)
-  shiny::runApp(paste0("~/Desktop/", app_name, "/app.R"))
+  # options(shiny.reactlog = TRUE, shiny.fullstacktrace = TRUE)
+  # shiny::runApp(paste0("~/Desktop/", app_name, "/app.R"))
 
   # Logs
   rsconnect::showLogs(account = 'piotrowskilab',

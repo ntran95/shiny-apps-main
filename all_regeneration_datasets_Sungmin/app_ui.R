@@ -242,61 +242,6 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
   )
   ),
 
-
-# ================ #
-  tabPanel("Ridge Plots", #fluid = FALSE,
-      sidebarLayout(fluid = TRUE,
-
-        sidebarPanel(fluid = FALSE, width = 4,
-          column(12, textInput("rdgGenes", width = "100%",
-              "Insert gene name or ensembl ID:",
-              value = smpl_genes_sm)),
-
-          column(12, align = "center",
-            actionButton("runRdgPlot", "Generate Plots",
-              style = 'padding:5px; font-size:80%')),
-
-          column(12, tags$hr(width = "50%"), align = "center"),
-          column(12, align = "center", downloadButton(
-              "downloadRdgPlot", "Download pdf",
-              style = 'padding:5px; font-size:80%')),
-
-          column(12, tags$br()),
-          column(12, align = "center", uiOutput("cellSelectRdg")), # New
-
-          column(12, tags$br()),
-          column(12, align = "center",
-            column(6,
-              radioGroupButtons("selectGrpRdg",
-                "Group cells by:", choices = list(Time = "data.set",
-                  Cluster = "cell.type.ident"), width = "100%")),
-            column(6,
-              numericInput("ptSizeRdg", "Input cell size:", value = 0.25,
-                min = 0.00, step = 0.75, max = 2.00, width = "80%"))
-                ),          
-
-          fluidRow(tags$br()),
-          fluidRow(tags$br()),
-          column(12, uiOutput("plot.uiDatFeatPlotV3"), align = "center"),
-          fluidRow(tags$br()),
-          fluidRow(tags$br())
-),
-
-  mainPanel(
-      fluidRow(
-        column(8, tags$br()),
-        column(8, tags$b("Gene mismatches"), "(if present)", tags$b(":")),
-        column(8,uiOutput("notInRdg")),
-        column(8, tags$hr()),
-# column(8, tags$b(uiOutput("SelectedDataRdg"))),
-        column(12, uiOutput("plot.uiRdgPlotF")
-              )
-        )
-     )
-  )
-  ),
-
-
 # ================ #
   tabPanel("Dot Plot", #fluid = FALSE,
       sidebarLayout(fluid = TRUE,
@@ -415,7 +360,14 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
           "(if applicable)", tags$b(":")),
         column(8, uiOutput("notInPhmap")),
         column(8, tags$hr()),
-
+        column(8, align = "left",
+        column(3, align = "left", numericInput(
+          "manAdjustHmapW", label = "Width (pixels):", value = 2400, step = 50,
+          width = "100%")),
+        column(3,  align = "left", numericInput(
+          "manAdjustHmapH", label = "Height (pixels):", value = 900, step = 50,
+          width = "100%"))
+      ),
         fluidRow(tags$br()),
         column(12, uiOutput("plot.uiPheatmapF"))
         )
@@ -476,7 +428,14 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
           "(if applicable)", tags$b(":")),
         column(8, uiOutput("notInIndvPhmap")),
         column(8, tags$hr()),
-
+        column(8, align = "left",
+               column(3, align = "left", numericInput(
+                 "manAdjustIndvHmapW", label = "Width (pixels):", value = 2400, step = 50,
+                 width = "100%")),
+               column(3,  align = "left", numericInput(
+                 "manAdjustIndvHmapH", label = "Height (pixels):", value = 900, step = 50,
+                 width = "100%"))
+        ),
         fluidRow(tags$br()),
         column(12, uiOutput("plot.uiIndvpHeatmapF"),style = "overflow-y: scroll;overflow-x: scroll;")
         )

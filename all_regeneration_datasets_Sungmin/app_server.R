@@ -359,92 +359,7 @@ server <- function(input, output) {
     }
   )
   
-  
-  # ======== Ridge Plot ======== #
-  RdgPlotF <- reactive({
-    seurat_obj <- SelectDataset()
-    selected <- unlist(strsplit(input$rdgGenes, " "))
-    
-    ifelse(selected %in% com_name,
-           selected <- selected[selected %in% com_name],
-           
-           ifelse(selected %in% ens_id,
-                  selected <- gene_df[ens_id %in% selected, 3],"")
-    )
-    
-    seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsRdg]
-    
-    g <- RidgePlot(seurat_obj, selected, combine = FALSE,
-                   group.by = input$selectGrpRdg, cols = cluster_clrs)
-    
-    for(k in 1:length(g)) {
-      g[[k]] <- g[[k]] + theme(legend.position = "none")
-    }
-    
-    # return(plot_grid(plotlist = g, ncol = 1))
-    
-    pg <- plot_grid(plotlist = g, ncol = 1) +
-      labs(title = paste("Selected analysis:",
-                         as.character(input$Analysis)), subtitle = "", caption = "") +
-      theme(plot.title = element_text(face = "bold", size = 15, hjust = 0))
-    
-    return(pg)
-  })
-  
-  output$cellSelectRdg <- renderUI({ # New cell type select
-    pickerInput("cellIdentsRdg", "Add or remove clusters:",
-                choices = as.character(printIdents()), multiple = TRUE,
-                selected = as.character(printIdents()), options = list(
-                  `actions-box` = TRUE), width = "85%")
-  })
-  
-  mismatchRdg <- function() {
-    selected <- unlist(strsplit(input$rdgGenes, " "))
-    
-    mismatch <- ifelse(!selected %in% c(com_name,ens_id),
-                       selected[!selected %in% c(com_name,ens_id)],"")
-    return(mismatch)
-  }
-  
-  output$notInRdg <- renderText({input$runRdgPlot
-    isolate({mismatchRdg()})
-  })
-  
-  output$SelectedDataRdg <- renderText({input$runRdgPlot
-    isolate({input$Analysis})
-  })
-  
-  output$myRdgPlotF <- renderPlot({input$runRdgPlot
-    isolate({withProgress({p <- RdgPlotF(); print(p)},
-                          message = "Rendering plot..", min = 0, max = 10, value = 10)})
-  })
-  
-  getHeightRdg <- function() {
-    l <- getLenInput(input$rdgGenes)
-    if (l == 1) {h <- "600px"
-    } else {
-      h <- as.character(ceiling(l) * 600)
-      h <- paste0(h, "px")
-    }
-    return(h)
-  }
-  
-  output$plot.uiRdgPlotF <- renderUI({input$runRdgPlot
-    isolate({h <- getHeightRdg(); plotOutput("myRdgPlotF",
-                                             width = "800px", height = h)})
-  })
-  
-  output$downloadRdgPlot <- downloadHandler(
-    filename = "Ridge_plot.pdf", content = function(file) {
-      pdf(file, onefile = FALSE,
-          width = 12,
-          height = 10 * getLenInput(input$rdgGenes))
-      print(RdgPlotF())
-      dev.off()
-    }
-  )
-  
-  
+
   # ======== Dot Plot ======== #
   DotPlotF <- reactive({
     clustering <- input$dPlotClust
@@ -567,11 +482,11 @@ server <- function(input, output) {
     return(w)
   }
   
-  output$plot.uiDotPlotF <- renderUI({input$runDotPlot
-    isolate({h <- getHeightDot(); plotOutput("myDotPlotF",
-                                             width = dplotWidth(), height = h)
-    })
-  })
+  # output$plot.uiDotPlotF <- renderUI({input$runDotPlot
+  #   isolate({h <- getHeightDot(); plotOutput("myDotPlotF",
+  #                                            width = dplotWidth(), height = h)
+  #   })
+  # })
   
   
   
@@ -589,7 +504,8 @@ server <- function(input, output) {
   
   output$downloadDotPlot <- downloadHandler(
     filename = "dot_plot.pdf", content = function(file) {
-      pdf(file, onefile = FALSE, width = 28, height = dotHeight() * 0.5)
+      png(file, height = as.numeric(input$manAdjustDotH),
+          width = as.numeric(input$manAdjustDotW), units = "px")
       print(DotPlotF())
       dev.off()
     }
@@ -620,11 +536,12 @@ server <- function(input, output) {
                          group.by = input$selectGrpHmap)
       
       g <- ggplot(dotplot$data, aes(id, features.plot, fill= avg.exp.scaled)) +
-        geom_tile() +
+        geom_tile(color = "gray", size = 1) +
         scale_fill_distiller(
           palette = "RdYlBu") +
         theme_ipsum() +
-        theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1))
+        theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1),
+              strip.text.x  = element_text(vjust = 0.5, hjust=.5,size = 12))
       
       
       g <- g + labs(title = paste("Selected analysis:",
@@ -650,12 +567,13 @@ server <- function(input, output) {
                          group.by = input$selectGrpHmap)
       
       g <- ggplot(dotplot$data, aes(id, features.plot,fill= avg.exp.scaled, width = 1, height = 1)) +
-        geom_tile() +
+        geom_tile(color = "gray", size = 1) +
         scale_fill_distiller(
           palette = "RdYlBu") +
         theme_ipsum()+
         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 13),
-              axis.title.y.right = element_text(size=13))
+              axis.title.y.right = element_text(size=13),
+              strip.text.x  = element_text(vjust = 0.5, hjust=.5,size = 12))
       
       g <- g + labs(title = paste("Selected analysis:",
                                   as.character(input$Analysis)), subtitle = "", caption = "") +
@@ -672,12 +590,13 @@ server <- function(input, output) {
       dotplot$data$groupIdent <- factor(dotplot$data$groupIdent,levels=levels(seurat_obj$cell.type.ident))
       
       g <- ggplot(dotplot$data, aes(id, features.plot,fill= avg.exp.scaled, width = 1, height = 1)) +
-        geom_tile() +
+        geom_tile(color = "gray", size = 1) +
         scale_fill_distiller(
           palette = "RdYlBu") +
         theme_ipsum()+
         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 13),
-              axis.title.y.right = element_text(size=13),panel.spacing = unit(.35, "lines")) +
+              axis.title.y.right = element_text(size=13),panel.spacing = unit(.35, "lines"),
+              strip.text.x  = element_text(vjust = 0.5, hjust=.5,size = 12)) +
         facet_grid( ~ groupIdent, scales='free_x')
       
       
@@ -737,18 +656,24 @@ server <- function(input, output) {
     return(w)
   }
   
+  # output$plot.uiPheatmapF <- renderUI({input$runPhmap
+  #   isolate({
+  #     w <- paste0(getWidthPhmap()); h <- paste0(getHeightPhmap())
+  #     plotOutput("myPhmapF", width = paste0(w, "px"), height = paste0(h, "px"))
+  #   })
+  # })
+  # 
   output$plot.uiPheatmapF <- renderUI({input$runPhmap
-    isolate({
-      w <- paste0(getWidthPhmap()); h <- paste0(getHeightPhmap())
-      plotOutput("myPhmapF", width = paste0(w, "px"), height = paste0(h, "px"))
-    })
+    isolate({h <- getHeightPhmap(); plotOutput("myPhmapF",
+                                             width = paste0(input$manAdjustHmapW, "px"),
+                                             height = paste0(input$manAdjustHmapH, "px"))})
   })
   
   #download
   output$downloadhmap <- downloadHandler(
     filename = "heatmap.png", content = function(file) {
-      png(file, height = getHeightPhmap(),
-          width = 1200, units = "px")
+      png(file, height = as.numeric(input$manAdjustHmapH),
+          width = as.numeric(input$manAdjustHmapW), units = "px")
       print(pHeatmapF())
       dev.off()
     }
@@ -956,18 +881,24 @@ server <- function(input, output) {
     return(w)
   }
   
+  # output$plot.uiIndvpHeatmapF <- renderUI({input$runIndvPhmap
+  #   isolate({
+  #     w <- paste0(getWidthIndvPhmap()); h <- paste0(getHeightIndvPhmap())
+  #     plotOutput("myIndvPhmapF", width = paste0(w, "px"), height = paste0(h, "px"))
+  #   })
+  # })
+  
   output$plot.uiIndvpHeatmapF <- renderUI({input$runIndvPhmap
-    isolate({
-      w <- paste0(getWidthIndvPhmap()); h <- paste0(getHeightIndvPhmap())
-      plotOutput("myIndvPhmapF", width = paste0(w, "px"), height = paste0(h, "px"))
-    })
+    isolate({h <- getHeightIndvPhmap(); plotOutput("myIndvPhmapF",
+                                               width = paste0(input$manAdjustIndvHmapW, "px"),
+                                               height = paste0(input$manAdjustIndvHmapH, "px"))})
   })
   
   #download
   output$downloadIndvhmap <- downloadHandler(
-    filename = "heatmap.png", content = function(file) {
-      png(file, height = getHeightIndvPhmap(),
-          width = 1600, units = "px")
+    filename = "IndvHeatmap.png", content = function(file) {
+      png(file, height = as.numeric(input$manAdjustIndvHmapH),
+          width = as.numeric(input$manAdjustIndvHmapW), units = "px")
       print(IndvpHeatmapF())
       dev.off()
     }

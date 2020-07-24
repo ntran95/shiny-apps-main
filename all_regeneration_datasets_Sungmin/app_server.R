@@ -567,11 +567,11 @@ server <- function(input, output) {
     return(w)
   }
   
-  output$plot.uiDotPlotF <- renderUI({input$runDotPlot
-    isolate({h <- getHeightDot(); plotOutput("myDotPlotF",
-                                             width = dplotWidth(), height = h)
-    })
-  })
+  # output$plot.uiDotPlotF <- renderUI({input$runDotPlot
+  #   isolate({h <- getHeightDot(); plotOutput("myDotPlotF",
+  #                                            width = dplotWidth(), height = h)
+  #   })
+  # })
   
   
   
@@ -589,7 +589,8 @@ server <- function(input, output) {
   
   output$downloadDotPlot <- downloadHandler(
     filename = "dot_plot.pdf", content = function(file) {
-      pdf(file, onefile = FALSE, width = 28, height = dotHeight() * 0.5)
+      png(file, height = as.numeric(input$manAdjustDotH),
+          width = as.numeric(input$manAdjustDotW), units = "px")
       print(DotPlotF())
       dev.off()
     }
@@ -620,11 +621,12 @@ server <- function(input, output) {
                          group.by = input$selectGrpHmap)
       
       g <- ggplot(dotplot$data, aes(id, features.plot, fill= avg.exp.scaled)) +
-        geom_tile() +
+        geom_tile(color = "gray", size = 1) +
         scale_fill_distiller(
           palette = "RdYlBu") +
         theme_ipsum() +
-        theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1))
+        theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1),
+              strip.text.x  = element_text(vjust = 0.5, hjust=.5,size = 12))
       
       
       g <- g + labs(title = paste("Selected analysis:",
@@ -650,12 +652,13 @@ server <- function(input, output) {
                          group.by = input$selectGrpHmap)
       
       g <- ggplot(dotplot$data, aes(id, features.plot,fill= avg.exp.scaled, width = 1, height = 1)) +
-        geom_tile() +
+        geom_tile(color = "gray", size = 1) +
         scale_fill_distiller(
           palette = "RdYlBu") +
         theme_ipsum()+
         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 13),
-              axis.title.y.right = element_text(size=13))
+              axis.title.y.right = element_text(size=13),
+              strip.text.x  = element_text(vjust = 0.5, hjust=.5,size = 12))
       
       g <- g + labs(title = paste("Selected analysis:",
                                   as.character(input$Analysis)), subtitle = "", caption = "") +
@@ -672,12 +675,13 @@ server <- function(input, output) {
       dotplot$data$groupIdent <- factor(dotplot$data$groupIdent,levels=levels(seurat_obj$cell.type.ident))
       
       g <- ggplot(dotplot$data, aes(id, features.plot,fill= avg.exp.scaled, width = 1, height = 1)) +
-        geom_tile() +
+        geom_tile(color = "gray", size = 1) +
         scale_fill_distiller(
           palette = "RdYlBu") +
         theme_ipsum()+
         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 13),
-              axis.title.y.right = element_text(size=13),panel.spacing = unit(.35, "lines")) +
+              axis.title.y.right = element_text(size=13),panel.spacing = unit(.35, "lines"),
+              strip.text.x  = element_text(vjust = 0.5, hjust=.5,size = 12)) +
         facet_grid( ~ groupIdent, scales='free_x')
       
       
@@ -737,18 +741,24 @@ server <- function(input, output) {
     return(w)
   }
   
+  # output$plot.uiPheatmapF <- renderUI({input$runPhmap
+  #   isolate({
+  #     w <- paste0(getWidthPhmap()); h <- paste0(getHeightPhmap())
+  #     plotOutput("myPhmapF", width = paste0(w, "px"), height = paste0(h, "px"))
+  #   })
+  # })
+  # 
   output$plot.uiPheatmapF <- renderUI({input$runPhmap
-    isolate({
-      w <- paste0(getWidthPhmap()); h <- paste0(getHeightPhmap())
-      plotOutput("myPhmapF", width = paste0(w, "px"), height = paste0(h, "px"))
-    })
+    isolate({h <- getHeightPhmap(); plotOutput("myPhmapF",
+                                             width = paste0(input$manAdjustHmapW, "px"),
+                                             height = paste0(input$manAdjustHmapH, "px"))})
   })
   
   #download
   output$downloadhmap <- downloadHandler(
     filename = "heatmap.png", content = function(file) {
-      png(file, height = getHeightPhmap(),
-          width = 1200, units = "px")
+      png(file, height = as.numeric(input$manAdjustHmapH),
+          width = as.numeric(input$manAdjustHmapW), units = "px")
       print(pHeatmapF())
       dev.off()
     }
@@ -956,18 +966,24 @@ server <- function(input, output) {
     return(w)
   }
   
+  # output$plot.uiIndvpHeatmapF <- renderUI({input$runIndvPhmap
+  #   isolate({
+  #     w <- paste0(getWidthIndvPhmap()); h <- paste0(getHeightIndvPhmap())
+  #     plotOutput("myIndvPhmapF", width = paste0(w, "px"), height = paste0(h, "px"))
+  #   })
+  # })
+  
   output$plot.uiIndvpHeatmapF <- renderUI({input$runIndvPhmap
-    isolate({
-      w <- paste0(getWidthIndvPhmap()); h <- paste0(getHeightIndvPhmap())
-      plotOutput("myIndvPhmapF", width = paste0(w, "px"), height = paste0(h, "px"))
-    })
+    isolate({h <- getHeightIndvPhmap(); plotOutput("myIndvPhmapF",
+                                               width = paste0(input$manAdjustIndvHmapW, "px"),
+                                               height = paste0(input$manAdjustIndvHmapH, "px"))})
   })
   
   #download
   output$downloadIndvhmap <- downloadHandler(
-    filename = "heatmap.png", content = function(file) {
-      png(file, height = getHeightIndvPhmap(),
-          width = 1600, units = "px")
+    filename = "IndvHeatmap.png", content = function(file) {
+      png(file, height = as.numeric(input$manAdjustIndvHmapH),
+          width = as.numeric(input$manAdjustIndvHmapW), units = "px")
       print(IndvpHeatmapF())
       dev.off()
     }

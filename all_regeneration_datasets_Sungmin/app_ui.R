@@ -415,7 +415,14 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
           "(if applicable)", tags$b(":")),
         column(8, uiOutput("notInPhmap")),
         column(8, tags$hr()),
-
+        column(8, align = "left",
+        column(3, align = "left", numericInput(
+          "manAdjustHmapW", label = "Width (pixels):", value = 2400, step = 50,
+          width = "100%")),
+        column(3,  align = "left", numericInput(
+          "manAdjustHmapH", label = "Height (pixels):", value = 900, step = 50,
+          width = "100%"))
+      ),
         fluidRow(tags$br()),
         column(12, uiOutput("plot.uiPheatmapF"))
         )
@@ -476,7 +483,14 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
           "(if applicable)", tags$b(":")),
         column(8, uiOutput("notInIndvPhmap")),
         column(8, tags$hr()),
-
+        column(8, align = "left",
+               column(3, align = "left", numericInput(
+                 "manAdjustIndvHmapW", label = "Width (pixels):", value = 2400, step = 50,
+                 width = "100%")),
+               column(3,  align = "left", numericInput(
+                 "manAdjustIndvHmapH", label = "Height (pixels):", value = 900, step = 50,
+                 width = "100%"))
+        ),
         fluidRow(tags$br()),
         column(12, uiOutput("plot.uiIndvpHeatmapF"),style = "overflow-y: scroll;overflow-x: scroll;")
         )

@@ -68,6 +68,16 @@ gene_df$ZFIN.ID <- paste0("=HYPERLINK(", '"', gene_df$ZFIN.ID, '"',")")
 avg_mtx <- readRDS(paste0("./data/mtx_CLR_nrml",
   "_scld_tmpts_in_cell_type_mphg_regen_14k_cells_seurat3_v1.0_.RDS"))
 
+# rearrange hmap to Tatjana's order
+colnames(avg_mtx) <- sub(" ", "", colnames(avg_mtx))
+to_match <- c("kng1", "actn3b", "gata3", "rbp4", "cldnh",
+  "spock3", "eomesa", "mpx", "pcna", "fabp3", "f13a1b", "mcamb", "tspan10",
+  "runx3", "irg1", "stat1b")
+
+new_order <- unlist(lapply(1:16,
+  function(i){grep(to_match[i], colnames(avg_mtx))}))
+avg_mtx <- avg_mtx[,new_order]
+
 clusterColors <- gg_color_hue(
   length(levels(seurat_obj@active.ident)))
 
@@ -589,6 +599,10 @@ server <- function(input, output) {
 
 
   # ======== pHeatmap ======== #
+  selectedCellsHmap <- reactive({
+    multiGrep2(input$cellIdentsHmap, colnames(avg_mtx))
+  })
+
   pHeatmapF <- function() {
     selected <- unlist(strsplit(input$PhmapGenes, " "))
 
@@ -599,16 +613,29 @@ server <- function(input, output) {
         selected <- gene_df[ens_id %in% selected, 3],"")
     )
     
-    goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected,]
+    goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected, selectedCellsHmap()]
     n_trt <- length(unique(seurat_obj@meta.data$data.set))
     mtx_cols <- ncol(avg_mtx) - n_trt
 
+    n_trt <- length(unique(file_list[[1]]@meta.data$data.set))
+    mtx_cols <- ncol(goi_mat) - n_trt
+
     pheatmap::pheatmap(goi_mat, cluster_rows = input$pHmapClust,
-      cluster_cols = FALSE, color = viridis::viridis(100),
-      annotation_col = NULL, legend = FALSE, annotation_colors = anno_cols,
+      cluster_cols = FALSE, annotation_col = NULL,
+      legend = FALSE, annotation_colors = anno_cols,
       gaps_col = seq(n_trt, mtx_cols, by = n_trt),
       annotation_names_col = FALSE, annotation_legend = FALSE)
   }
+
+  avg_mtx_names <- unique(unlist(lapply(seq_along(colnames(avg_mtx)),
+    function(i){strsplit(colnames(avg_mtx), "_")[[i]][1]})))
+
+  output$cellSelectHmap <- renderUI({ # New cell type selected
+  pickerInput("cellIdentsHmap", "Add or remove clusters:",
+    choices = avg_mtx_names, multiple = TRUE,
+    selected = avg_mtx_names, options = list(
+      `actions-box` = TRUE), width = "80%")
+  })
 
   mismatchPhmap <- function() {
     selected <- unlist(strsplit(input$PhmapGenes, " "))
@@ -647,13 +674,13 @@ server <- function(input, output) {
   pHmapHeight <- function() {
     l <- getLenInput(input$PhmapGenes)
     l <- as.numeric(l)
+    print(l)
     return(l)
   }
   
   output$downloadPhmap <- downloadHandler(
-    filename = "heatmap.png", content = function(file) {
-      png(file, units = "in", res = as.numeric(input$pHmapDPI),
-        width = 12, height = 12 * getLenInput(input$PhmapGenes))
+    filename = "heatmap.pdf", content = function(file) {
+      pdf(file, width = 12, height = (pHmapHeight() * 0.20) + 1)
       print(pHeatmapF())
       dev.off()
     }
@@ -1167,9 +1194,15 @@ ui <- fixedPage(theme = shinytheme("lumen"), # paper lumen cosmo spacelab
               label = "Check box to enable row clustering.", value = FALSE)),
 
           column(12, align = "center",
+            column(12, align = "center", uiOutput("cellSelectHmap")),
+              column(12, tags$br()),
             actionButton("runPhmap", "Generate Plots",
               style = 'padding:5px; font-size:80%')),
           column(12, tags$hr(width = "50%"), align = "center"),
+
+          column(12, align = "center", downloadButton(
+            "downloadPhmap", "Download Heatmap",
+            style = 'padding:5px; font-size:80%')),
 
           # column(12, tags$br()),
           # column(12, align = "center", "Plot download (png):"),
@@ -1271,10 +1304,11 @@ shinyApp(ui = ui, server = server)
 # start R session
 
 # Deploy to shinyapps.io
-# rsconnect::deployApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/all_macrophage_datasets_Nicolas', account = 'piotrowskilab')
+# options(shiny.reactlog=TRUE, shiny.fullstacktrace = TRUE); shiny::runApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/all_macrophage_datasets_Nicolas/app.R')
 
 # Execute app locally
 # options(shiny.reactlog=TRUE, shiny.fullstacktrace = TRUE); shiny::runApp('/Volumes/projects/ddiaz/Analysis/Scripts/rsconnect/shinyapps.io/all_macrophage_datasets_Nicolas/app.R')
+# options(shiny.reactlog=TRUE, shiny.fullstacktrace = TRUE); shiny::runApp('/Users/ddiaz/Desktop/macrophage-old')
 
 # Logs
 # rsconnect::showLogs(account = 'piotrowskilab', appName = 'all_macrophage_datasets_Nicolas')

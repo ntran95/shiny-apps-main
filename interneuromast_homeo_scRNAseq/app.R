@@ -1707,7 +1707,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                                     #   column(11, style = "padding-top: 8px;",
                                                     #     switchInput("manAdjustDot", value = FALSE))),
                                                     column(3, align = "left", numericInput(
-                                                      "manAdjustDotW", label = "Width (pixels):", value = 450, step = 50,
+                                                      "manAdjustDotW", label = "Width (pixels):", value = 600, step = 50,
                                                       width = "100%")),
                                                     column(3,  align = "left", numericInput(
                                                       "manAdjustDotH", label = "Height (pixels):", value = 900, step = 50,
@@ -1771,7 +1771,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                              column(8, tags$hr()),
                                              column(8, align = "left",
                                                     column(3, align = "left", numericInput(
-                                                      "manAdjustHmapW", label = "Width (pixels):", value = 450, step = 50,
+                                                      "manAdjustHmapW", label = "Width (pixels):", value = 600, step = 50,
                                                       width = "100%")),
                                                     column(3,  align = "left", numericInput(
                                                       "manAdjustHmapH", label = "Height (pixels):", value = 900, step = 50,

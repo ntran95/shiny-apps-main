@@ -24,8 +24,8 @@ files <- list.files(".", pattern = "TRIMMED", full.names = TRUE)
 file_list <- list()
 
 cell.type <- c("mature-HCs","young-HCs","HC-prog" ,"central-cells", "DV-cells","AP-cells",  
-               "amp-SCs","mantle-cells", "Inm","blood", "spi1b-pos","krt17-pos","twist3-pos","tm4sf4-pos")
-treatments <- c("homeo" ,"0min" , "30min", "1hr", "3hr","5hr", "10hr")
+               "amp-SCs","mantle-cells", "Inm")
+treatments <- c("homeo" ,"0min" , "30min", "1hr", "1.5hr", "2hr", "3hr","5hr", "10hr")
 
 readSeuratObj <- TRUE
 modifySeuratObj <-TRUE
@@ -42,10 +42,12 @@ for (i in 1:length(files)) {
     #applied to all-she-pos and neuromast analysis
     if ("cell.type.ident" %in% colnames(file_list[[i]]@meta.data)){
       print('hello')
-      file_list[[i]]@meta.data$cell.type.ident <- plyr::revalue(
-        file_list[[i]]@meta.data$cell.type.ident, c("early-HCs" = "young-HCs"))
       file_list[[i]]@meta.data$cell.type.ident.by.data.set <- factor(paste(file_list[[i]]@meta.data$cell.type.ident,
                                                                            file_list[[i]]@meta.data$data.set,sep="_"))
+      if ("early-HCs" %in% file_list[[i]]$cell.type.ident){
+        file_list[[i]]@meta.data$cell.type.ident <- plyr::revalue(
+          file_list[[i]]@meta.data$cell.type.ident, c("early-HCs" = "young-HCs"))
+      }
     }
     if ("cell_type" %in% colnames(file_list[[i]]@meta.data)){
       print(files[i])
@@ -58,6 +60,7 @@ for (i in 1:length(files)) {
     }
     file_list[[i]]$cell.type.ident.by.data.set <- factor(file_list[[i]]$cell.type.ident.by.data.set)
     
+    print("saving object...")
     saveRDS(file_list[[i]], file = files[i])
   }
 }
@@ -75,3 +78,4 @@ for (i in 1:1){
   Idents(file_list[[i]]) <- "cell.type.ident"
   saveRDS(file_list[[i]], file = files[i])
   }
+

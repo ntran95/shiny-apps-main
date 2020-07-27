@@ -540,7 +540,7 @@ server <- function(input, output) {
         scale_fill_distiller(
           palette = "RdYlBu") +
         theme_ipsum() +
-        theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1),
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
               strip.text.x  = element_text(vjust = 0.5, hjust=.5,size = 12))
       
       

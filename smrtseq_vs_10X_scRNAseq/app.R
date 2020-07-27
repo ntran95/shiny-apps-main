@@ -7,8 +7,11 @@ library(shinyWidgets)
 library(dplyr)
 library(rsconnect)
 library(profvis)
-library(stringr)
+library(hrbrthemes)
+library(reshape2)
+library(kableExtra)
 
+"%||%" <- devtools:::`%||%`
 
 # ===================== installing devel version of Seurat to help rsconnect to shin.io 
 
@@ -151,6 +154,11 @@ server <- function(input, output) {
     } else {
       sort(unique(seurat_obj@meta.data$tree.ident))
     }
+  })
+  
+  printDownSampleOptions <- reactive({
+    percentage <- as.numeric(c(1.00,.75,.50,.25))
+    percentage
   })
   
   # returns the correct ID class for cell subset
@@ -619,209 +627,6 @@ server <- function(input, output) {
     }
   )
   
-  
-  
-  # # ======== Corrected Stacked Violin Plot ======== #
-  # 
-  # StkdVlnPlotF <- reactive({
-  #   seurat_obj <- SelectDataset()
-  #   selected <- unlist(strsplit(input$vlnStkdGenes, " "))
-  #   
-  #   ifelse(selected %in% com_name,
-  #          selected <- selected[selected %in% com_name],
-  #          
-  #          ifelse(selected %in% ens_id,
-  #                 selected <- gene_df[ens_id %in% selected, 3],"")
-  #   )
-  #   
-  #   #seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsStkdVln]
-  #   
-  #   ids <- as.list(levels(seurat_obj$data.set))
-  #   
-  #   extract_max<- function(p){
-  #     ymax<- max(ggplot_build(p)$layout$panel_scales_y[[1]]$range$range)
-  #     return(ceiling(ymax))
-  #   }
-  #   
-  #   obj_trt_list <- list()[1:length(ids)]
-  #   
-  #   for (i in 1:length(ids)) {
-  #     print(ids[[i]])
-  #     obj_trt_list[[i]] <- seurat_obj[,seurat_obj[["data.set"]] == ids[[i]]]
-  #   }
-  #   
-  #   trt_plot_list <- list()[1:length(ids)]
-  #   names(trt_plot_list) <- ids
-  #   for (i in 1:length(ids)) {
-  #     vln_obj <- VlnPlot(
-  #       obj_trt_list[[i]], features = selected, pt.size = input$ptSizeStkdVln) +
-  #       xlab("") + ylab(ids[i]) + ggtitle("") +
-  #       theme(legend.position = "none", axis.text.x = element_blank(),
-  #             axis.ticks.x = element_blank(),
-  #             axis.title.y = element_text(size = rel(1), angle = 0),
-  #             axis.text.y = element_text(size = rel(1)),
-  #             plot.margin = unit(c(-0.75, 0.5, -0.75, 0.5), "cm"))
-  #     trt_plot_list[[i]] <- vln_obj
-  #   }
-  #   
-  #   trt_plot_list[[length(trt_plot_list)]]<- trt_plot_list[[length(trt_plot_list)]] +
-  #     theme(axis.text.x=element_text(), axis.ticks.x = element_line())
-  #   # change the y-axis tick to only max value
-  #   ymaxs <- purrr::map_dbl(trt_plot_list, extract_max)
-  #   trt_plot_list <- purrr::map2(trt_plot_list, ymaxs, function(x, y) x +
-  #                                  scale_y_continuous(breaks = c(y)) + expand_limits(y = y))
-  #   grid_obj <- cowplot::plot_grid(plotlist = trt_plot_list,
-  #                                  nrow = length(ids), ncol = 1, axis = "l", align = "hv") +
-  #     theme(plot.margin = margin(1.0, 1.0, 1.0, 1.0, unit = "in")) +
-  #     ggtitle(selected) + theme(plot.title = element_text(hjust = 0.5, face = "bold"))
-  #   
-  #   return(grid_obj)
-  #   
-  #   
-  # })
-  # 
-  # output$cellSelectStkdVln <- renderUI({ # New cell type select
-  #   pickerInput("cellIdentsVln", "Add or remove clusters:",
-  #               choices = as.character(printIdents()), multiple = TRUE,
-  #               selected = as.character(printIdents()), options = list(
-  #                 `actions-box` = TRUE), width = "85%")
-  # })
-  # 
-  # mismatchStkdVln <- function() {
-  #   selected <- unlist(strsplit(input$vlnStkdGenes, " "))
-  #   
-  #   mismatch <- ifelse(!selected %in% c(com_name,ens_id),
-  #                      selected[!selected %in% c(com_name,ens_id)],"")
-  #   return(mismatch)
-  # }
-  # 
-  # output$notInStkdVln <- renderText({input$runStkdVlnPlot
-  #   isolate({mismatchStkdVln()})
-  # })
-  # 
-  # output$SelectedDataStkdVln <- renderText({input$runStkdVlnPlot
-  #   isolate({input$Analysis})
-  # })
-  # 
-  # output$myStkdVlnPlotF <- renderPlot({input$runStkdVlnPlot
-  #   isolate({withProgress({p <- StkdVlnPlotF(); print(p)},
-  #                         message = "Rendering plot..",
-  #                         min = 0, max = 10, value = 10)
-  #   })
-  # })
-  # 
-  # getHeightStkdVln <- function() {
-  #   l <- getLenInput(input$vlnStkdGenes)
-  #   if (l == 1) {h <- "600px"
-  #   } else {
-  #     h <- as.character(ceiling(l) * 100)
-  #     h <- paste0(h, "px")
-  #   }
-  #   return(h)
-  # }
-  # 
-  # output$plot.uiStkdVlnPlotF <- renderUI({input$runStkdVlnPlot
-  #   isolate({h <- getHeightStkdVln(); plotOutput("myStkdVlnPlotF",
-  #                                                width = "800px", height = h)})
-  # })
-  # 
-  # output$downloadStkdVlnPlot <- downloadHandler(
-  #   filename = "StkdViolin_plot.pdf", content = function(file) {
-  #     pdf(file, onefile = FALSE,
-  #         width = 12,
-  #         height = 10 * getLenInput(input$vlnStkdGenes))
-  #     print(StkdVlnPlotF())
-  #     dev.off()
-  #   }
-  # )
-  # 
-  # 
-  
-  # # ======== Ridge Plot ======== #
-  # RdgPlotF <- reactive({
-  #   seurat_obj <- SelectDataset()
-  #   selected <- unlist(strsplit(input$rdgGenes, " "))
-  #   
-  #   ifelse(selected %in% com_name,
-  #     selected <- selected[selected %in% com_name],
-  #   
-  #     ifelse(selected %in% ens_id,
-  #       selected <- gene_df[ens_id %in% selected, 3],"")
-  #   )
-  # 
-  #   seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsRdg]
-  # 
-  #   g <- RidgePlot(seurat_obj, selected, combine = FALSE,
-  #     group.by = input$selectGrpRdg, cols = cluster_clrs)
-  # 
-  #   for(k in 1:length(g)) {
-  #     g[[k]] <- g[[k]] + theme(legend.position = "none")
-  #   }
-  # 
-  #   # return(plot_grid(plotlist = g, ncol = 1))
-  #   
-  #   pg <- plot_grid(plotlist = g, ncol = 1) +
-  #     labs(title = paste("Selected analysis:",
-  #       as.character(input$Analysis)), subtitle = "", caption = "") +
-  #       theme(plot.title = element_text(face = "bold", size = 15, hjust = 0))
-  #   
-  #   return(pg)
-  # })
-  # 
-  # output$cellSelectRdg <- renderUI({ # New cell type select
-  #   pickerInput("cellIdentsRdg", "Add or remove clusters:",
-  #     choices = as.character(printIdents()), multiple = TRUE,
-  #     selected = as.character(printIdents()), options = list(
-  #      `actions-box` = TRUE), width = "85%")
-  # })
-  # 
-  # mismatchRdg <- function() {
-  #   selected <- unlist(strsplit(input$rdgGenes, " "))
-  # 
-  #   mismatch <- ifelse(!selected %in% c(com_name,ens_id),
-  #     selected[!selected %in% c(com_name,ens_id)],"")
-  #   return(mismatch)
-  # }
-  # 
-  # output$notInRdg <- renderText({input$runRdgPlot
-  #   isolate({mismatchRdg()})
-  # })
-  # 
-  # output$SelectedDataRdg <- renderText({input$runRdgPlot
-  #   isolate({input$Analysis})
-  # })
-  # 
-  # output$myRdgPlotF <- renderPlot({input$runRdgPlot
-  #   isolate({withProgress({p <- RdgPlotF(); print(p)},
-  #     message = "Rendering plot..", min = 0, max = 10, value = 10)})
-  # })
-  # 
-  # getHeightRdg <- function() {
-  #   l <- getLenInput(input$rdgGenes)
-  #   if (l == 1) {h <- "600px"
-  #   } else {
-  #     h <- as.character(ceiling(l) * 600)
-  #     h <- paste0(h, "px")
-  #   }
-  #   return(h)
-  # }
-  # 
-  # output$plot.uiRdgPlotF <- renderUI({input$runRdgPlot
-  #   isolate({h <- getHeightRdg(); plotOutput("myRdgPlotF",
-  #     width = "800px", height = h)})
-  # })
-  # 
-  # output$downloadRdgPlot <- downloadHandler(
-  #   filename = "Ridge_plot.pdf", content = function(file) {
-  #     pdf(file, onefile = FALSE,
-  #       width = 12,
-  #       height = 10 * getLenInput(input$rdgGenes))
-  #     print(RdgPlotF())
-  #     dev.off()
-  #   }
-  # )
-  
-  
   # ======== Dot Plot ======== #
   DotPlotF <- reactive({
     clustering <- input$dPlotClust
@@ -894,6 +699,47 @@ server <- function(input, output) {
       
       g <- g + coord_flip() + theme(
         axis.text.x = element_text(angle = 90, hjust = 1))
+      
+      if (input$selectGrpDot == "data.set") {
+        smartseq_tomatch <- c("1hr-smrtseq", "homeo-smrtseq")
+        
+        tenX_tomatch <- c("homeo-10X-isl1", "homeo-10X-2047", "homeo-10X-2410-7", "homeo-10X-2410-8")
+        
+        split_heatmap <- function(seurat_obj, method, tomatch){
+          split_obj <- subset(seurat_obj, subset = seq.method == method)
+          
+          split_obj$data.set <- droplevels(split_obj$data.set)
+          
+          split_obj$cell.type.ident <- droplevels(split_obj$cell.type.ident)
+          
+          
+          return(split_obj)
+        }
+        smartseq <- split_heatmap(seurat_obj, method = "smartseq2", tomatch = smartseq_tomatch)
+        
+        s <- DotPlot(smartseq, features = selected,
+                     cols = "RdYlBu", dot.scale = input$dotScale,
+                     group.by = input$selectGrpDot)
+        s <- s + coord_flip() + theme(
+          axis.text.x = element_text(angle = 90, hjust = 1))
+        
+        
+        tenX <- split_heatmap(seurat_obj, method = "10X", tomatch = tenX_tomatch)
+        
+        t <- DotPlot(tenX, features = selected,
+                               cols = "RdYlBu", dot.scale = input$dotScale,
+                               group.by = input$selectGrpDot)
+        
+        t <- t + coord_flip() + theme(
+          axis.text.x = element_text(angle = 90, hjust = 1))
+        
+        g <-s + t
+        
+        g <- g + labs(title = paste("Selected analysis:",
+                                    as.character(input$Analysis)), subtitle = "", caption = "") +
+          theme(plot.title = element_text(face = "plain", size = 14, hjust = 0))
+        
+      }
     }
     return(g)
   })
@@ -943,28 +789,28 @@ server <- function(input, output) {
     }
   }
   
-  output$plot.uiDotPlotF <- renderUI({input$runDotPlot
-    isolate({h <- getHeightDot(); plotOutput("myDotPlotF",
-                                             width = dplotWidth(), height = h)
-    })
-  })
-  
   dotHeight <- function() {
     l <- getLenInput(input$dotGenes)
     l <- as.numeric(l)
     return(l)
   }
   
+  output$plot.uiDotPlotF <- renderUI({input$runDotPlot
+    isolate({h <- getHeightDot(); plotOutput("myDotPlotF",
+                                             width = paste0(input$manAdjustDotW, "px"),
+                                             height = paste0(input$manAdjustDotH, "px"))})
+  })
+  
   output$downloadDotPlot <- downloadHandler(
     filename = "dot_plot.pdf", content = function(file) {
-      pdf(file, onefile = FALSE, width = 12, height = dotHeight() * 0.5)
+      png(file, height = as.numeric(input$manAdjustDotH),
+          width = as.numeric(input$manAdjustDotW), units = "px")
       print(DotPlotF())
       dev.off()
     }
   )
   
-  ## ========== DoHeatMap ======= ##
-  
+  # # ======== ggplot Grouped Heatmap ======== #
   pHeatmapF <- reactive({
     clustering <- input$pHmapClust  #enable row clustering
     if (clustering == TRUE){
@@ -988,12 +834,12 @@ server <- function(input, output) {
       dotplot <- DotPlot(seurat_obj, features = markers_clust,
                          group.by = input$selectGrpHmap)
       
-      g <- ggplot(dotplot$data, aes(id, features.plot, fill= avg.exp.scaled)) + 
-        geom_tile() +
+      g <- ggplot(dotplot$data, aes(id, features.plot, fill= avg.exp.scaled)) +
+        geom_tile(color = "gray", size = 1) +
         scale_fill_distiller(
           palette = "RdYlBu") +
         theme_ipsum() +
-        theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1)) 
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
       
       
       g <- g + labs(title = paste("Selected analysis:",
@@ -1018,20 +864,17 @@ server <- function(input, output) {
       dotplot <- DotPlot(seurat_obj, features = selected,
                          group.by = input$selectGrpHmap)
       
-      g <- ggplot(dotplot$data, aes(id, features.plot,fill= avg.exp.scaled, width = 1, height = 1)) + 
-        geom_tile() +
+      g <- ggplot(dotplot$data, aes(id, features.plot, fill= avg.exp.scaled)) +
+        geom_tile(color = "gray", size = 1) +
         scale_fill_distiller(
           palette = "RdYlBu") +
-        theme_ipsum()+
-        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 13),
-              axis.title.y.right = element_text(size=13))  + scale_y_discrete(position = "right") +
-        scale_y_discrete(position = "left")
+        theme_ipsum() +
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
       
       g <- g + labs(title = paste("Selected analysis:",
                                   as.character(input$Analysis)), subtitle = "", caption = "") +
         theme(plot.title = element_text(face = "plain", size = 14))
       
-    }
       if (input$selectGrpHmap == "data.set") {
         smartseq_tomatch <- c("1hr-smrtseq", "homeo-smrtseq")
         
@@ -1050,39 +893,40 @@ server <- function(input, output) {
         smartseq <- split_heatmap(seurat_obj, method = "smartseq2", tomatch = smartseq_tomatch)
         
         dotplot_smrtseq <- DotPlot(smartseq, features = selected,
-                           group.by = "data.set")
+                                   group.by = "data.set")
         
-        s <- ggplot(dotplot_smrtseq$data, aes(id, features.plot,fill= avg.exp.scaled, width = 1, height = 1)) + 
-          geom_tile() +
+        s <- ggplot(dotplot_smrtseq$data, aes(id, features.plot, fill= avg.exp.scaled)) +
+          geom_tile(color = "gray", size = 1) +
           scale_fill_distiller(
             palette = "RdYlBu") +
-          theme_ipsum()+
-          theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 13),
-                axis.title.y.right = element_text(size=13)) 
+          theme_ipsum() +
+          theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+                axis.title.y.right = element_text(size=13),panel.spacing = unit(.25, "lines"))
         
         
         tenX <- split_heatmap(seurat_obj, method = "10X", tomatch = tenX_tomatch)
         
         dotplot_10X <- DotPlot(tenX, features = selected,
-                                   group.by = "data.set")
+                               group.by = "data.set")
         
-        t <- ggplot(dotplot_10X$data, aes(id, features.plot,fill= avg.exp.scaled, width = 1, height = 1)) + 
-          geom_tile() +
+        t <- ggplot(dotplot_10X$data, aes(id, features.plot, fill= avg.exp.scaled)) +
+          geom_tile(color = "gray", size = 1) +
           scale_fill_distiller(
             palette = "RdYlBu") +
-          theme_ipsum()+
-          theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 13),
-                axis.title.y.right = element_text(size=13)) 
+          theme_ipsum() +
+          theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+                axis.title.y.right = element_text(size=13),panel.spacing = unit(.25, "lines"))
         
         g <-s + t
         
         g <- g + labs(title = paste("Selected analysis:",
                                     as.character(input$Analysis)), subtitle = "", caption = "") +
-          theme(plot.title = element_text(face = "plain", size = 14))
+          theme(plot.title = element_text(face = "plain", size = 14, hjust = 0))
         
       }
       
-    
+    }
+      
     return(g)
     
   })
@@ -1134,120 +978,375 @@ server <- function(input, output) {
   }
   
   output$plot.uiPheatmapF <- renderUI({input$runPhmap
-    isolate({
-      w <- paste0(getWidthPhmap()); h <- paste0(getHeightPhmap())
-      plotOutput("myPhmapF", width = paste0(w, "px"), height = paste0(h, "px"))
-    })
+    isolate({h <- getHeightPhmap(); plotOutput("myPhmapF",
+                                               width = paste0(input$manAdjustHmapW, "px"),
+                                               height = paste0(input$manAdjustHmapH, "px"))})
   })
   
   #download
   output$downloadhmap <- downloadHandler(
-    filename = "heatmap.pdf", content = function(file) {
-      png(file, height = getHeightPhmap(),
-          width = 1000, units = "px")
+    filename = "heatmap.png", content = function(file) {
+      png(file, height = as.numeric(input$manAdjustHmapH),
+          width = as.numeric(input$manAdjustHmapW), units = "px")
       print(pHeatmapF())
       dev.off()
     }
   )
   
+  # # # ======== Individual Cell ggplot Heatmap ======== #
+  IndvpHeatmapF <- reactive({
+    clustering <- input$IndvpHmapClust  #enable row clustering
+    if (clustering == TRUE){
+      seurat_obj <- SelectDataset()
+      selected <- unlist(strsplit(input$IndvPhmapGenes, " "))
+      
+      ifelse(selected %in% com_name,
+             selected <- selected[selected %in% com_name],
+             
+             ifelse(selected %in% ens_id,
+                    selected <- gene_df[ens_id %in% selected, 3],"")
+      )
+      
+      seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsIndvHmap]
+      # 
+      # seurat_obj <- seurat_obj[, sample(Cells(seurat_obj), size = round(as.numeric(input$cellDownSampleIndvHmap)*length(colnames(seurat_obj))), replace=F)]
+      # 
+      # print(addmargins(table(seurat_obj$cell.type.ident))) #check
+      
+      seurat_obj_sub <- seurat_obj[rownames(seurat_obj) %in% selected,]
+      dist_mat <- dist(seurat_obj_sub@assays$RNA@data)
+      clust <- hclust(dist_mat)   #reorder genes
+      markers_clust <- clust$labels
+      
+      group.by <- input$selectGrpIndvHmap #choose group.by parameter
+      cells <- NULL
+      col.min = -2.5
+      col.max = 2.5
+      
+      cells <- cells %||% colnames(x = seurat_obj)
+      
+      data <- as.data.frame(x = t(x = as.matrix(x = GetAssayData(
+        object = seurat_obj, slot = "data")[markers_clust, cells, drop = FALSE])))
+      
+      
+      data <- scale(data)
+      data <- as.data.frame(MinMax(data = data, min = col.min, max = col.max))
+      
+      data$id <- if (is.null(x = group.by)) {
+        Idents(object = seurat_obj)[cells, drop = TRUE]
+      } else {
+        seurat_obj[[group.by, drop = TRUE]][cells, drop = TRUE]
+      }
+      if (!is.factor(x = data$id)) {
+        data$id <- factor(x = data$id)
+      }
+      data$id <- as.vector(x = data$id)
+      
+      data$Cell <- rownames(data)
+      data <- melt(data, variable.name  = "Feature")
+      
+      #preserve identity order
+      if (group.by == "data.set"){
+        data$id <- factor(data$id, levels = levels(seurat_obj$data.set))
+      }else{
+        data$id <- factor(data$id, levels = levels(seurat_obj$cell.type.ident))
+      }
+      
+      g <- ggplot(data, aes(Cell, Feature,fill= value)) +
+        geom_tile(height = .95, width = 2) +
+        scale_fill_distiller(
+          palette = "RdYlBu") +
+        theme_ipsum()+
+        theme(axis.text.x=element_blank(),
+              axis.ticks.x=element_blank(),
+              axis.title.y.right = element_text(size=13),panel.spacing = unit(.25, "lines"),
+              strip.text.x  = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 12)) + 
+        facet_grid( ~ id, space = 'free', scales = 'free')
+      
+      g <- g + labs(title = paste("Selected analysis:",
+                                  as.character(input$Analysis)), subtitle = "", caption = "") +
+        theme(plot.title = element_text(face = "plain", size = 14))
+      
+    } else {
+      seurat_obj <- SelectDataset()
+      selected <- unlist(strsplit(input$IndvPhmapGenes, " "))
+      
+      ifelse(selected %in% com_name,
+             selected <- selected[selected %in% com_name],
+             
+             ifelse(selected %in% ens_id,
+                    selected <- gene_df[ens_id %in% selected, 3],"")
+      )
+      
+      seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsIndvHmap]
+      print(input$cellIdentsIndvHmap)
+      
+      #seurat_obj <- seurat_obj[, sample(Cells(seurat_obj), size = round(as.numeric(input$cellDownSampleIndvHmap)*length(colnames(seurat_obj))), replace=F)]
+
+      print(input$cellDownSampleIndvHmap)
+      print(addmargins(table(seurat_obj$cell.type.ident))) #check
+      
+      
+      group.by <- input$selectGrpIndvHmap #choose group.by parameter
+      cells <- NULL
+      col.min = -2.5
+      col.max = 2.5
+      
+      cells <- cells %||% colnames(x = seurat_obj)
+      
+      data <- as.data.frame(x = t(x = as.matrix(x = GetAssayData(
+        object = seurat_obj, slot = "data")[selected, cells, drop = FALSE])))
+      
+      
+      data <- scale(data)
+      data <- as.data.frame(MinMax(data = data, min = col.min, max = col.max))
+      
+      data$id <- if (is.null(x = group.by)) {
+        Idents(object = seurat_obj)[cells, drop = TRUE]
+      } else {
+        seurat_obj[[group.by, drop = TRUE]][cells, drop = TRUE]
+      }
+      if (!is.factor(x = data$id)) {
+        data$id <- factor(x = data$id)
+      }
+      data$id <- as.vector(x = data$id)
+      
+      data$Cell <- rownames(data)
+      data <- melt(data, variable.name  = "Feature")
+      
+      #preserve identity order
+      if (group.by == "data.set"){
+        data$id <- factor(data$id, levels = levels(seurat_obj$data.set))
+      }else{
+        data$id <- factor(data$id, levels = levels(seurat_obj$cell.type.ident))
+      }
+      
+      g <- ggplot(data, aes(Cell, Feature,fill= value)) +
+        geom_tile(height = .95, width = 2) +
+        scale_fill_distiller(
+          palette = "RdYlBu") +
+        theme_ipsum()+
+        theme(axis.text.x=element_blank(),
+              axis.ticks.x=element_blank(),
+              axis.title.y.right = element_text(size=13),panel.spacing = unit(.25, "lines"),
+              strip.text.x  = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 12)) + 
+        facet_grid( ~ id, space = 'free', scales = 'free')
+      
+      g <- g + labs(title = paste("Selected analysis:",
+                                  as.character(input$Analysis)), subtitle = "", caption = "") +
+        theme(plot.title = element_text(face = "plain", size = 14))
+      
+      if (input$selectGrpIndvHmap == "data.set") {
+        
+        smartseq_tomatch <- c("1hr-smrtseq", "homeo-smrtseq")
+        
+        tenX_tomatch <- c("homeo-10X-isl1", "homeo-10X-2047", "homeo-10X-2410-7", "homeo-10X-2410-8")
+        
+        split_heatmap <- function(seurat_obj, method, tomatch){
+          split_obj <- subset(seurat_obj, subset = seq.method == method)
+          
+          split_obj$data.set <- droplevels(split_obj$data.set)
+          
+          split_obj$cell.type.ident <- droplevels(split_obj$cell.type.ident)
+          
+          
+          return(split_obj)
+        }
+        smartseq <- split_heatmap(seurat_obj, method = "smartseq2", tomatch = smartseq_tomatch)
+        
+        # smartseq <- smartseq[,IDtype() %in% input$cellIdentsIndvHmap]
+        # print(input$cellIdentsIndvHmap)
+        
+        
+        print(addmargins(table(smartseq$cell.type.ident))) #check
+        
+        
+        group.by <- input$selectGrpIndvHmap #choose group.by parameter
+        cells <- NULL
+        col.min = -2.5
+        col.max = 2.5
+        
+        cells <- cells %||% colnames(x = smartseq)
+        
+        data <- as.data.frame(x = t(x = as.matrix(x = GetAssayData(
+          object = smartseq, slot = "data")[selected, cells, drop = FALSE])))
+        
+        
+        data <- scale(data)
+        data <- as.data.frame(MinMax(data = data, min = col.min, max = col.max))
+        
+        data$id <- if (is.null(x = group.by)) {
+          Idents(object = smartseq)[cells, drop = TRUE]
+        } else {
+          smartseq[[group.by, drop = TRUE]][cells, drop = TRUE]
+        }
+        if (!is.factor(x = data$id)) {
+          data$id <- factor(x = data$id)
+        }
+        data$id <- as.vector(x = data$id)
+        
+        data$Cell <- rownames(data)
+        data <- melt(data, variable.name  = "Feature")
+        
+        #preserve identity order
+        data$id <- factor(data$id, levels = levels(smartseq$data.set))
+        
+        
+        s <- ggplot(data, aes(Cell, Feature,fill= value)) +
+          geom_tile(height = .95, width = 2) +
+          scale_fill_distiller(
+            palette = "RdYlBu") +
+          theme_ipsum()+
+          theme(axis.text.x=element_blank(),
+                axis.ticks.x=element_blank(),
+                axis.title.y.right = element_text(size=13),panel.spacing = unit(.25, "lines"),
+                strip.text.x  = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 12)) + 
+          facet_grid( ~ id, space = 'free', scales = 'free')
+        
+        
+        
+        tenX <- split_heatmap(seurat_obj, method = "10X", tomatch = tenX_tomatch)
+        
+        tenX <- tenX[, sample(Cells(tenX), size = round(as.numeric(input$cellDownSampleIndvHmap)*length(colnames(tenX))), replace=F)]
+        
+        print(input$cellDownSampleIndvHmap)
+        print(addmargins(table(tenX$cell.type.ident))) #check
+        
+        # tenX <- tenX[,IDtype() %in% input$cellIdentsIndvHmap]
+        print(input$cellIdentsIndvHmap)
+        
+        
+        #print(addmargins(table(tenX$input$selectGrpIndvHmap))) #check
+        
+        
+        group.by <- input$selectGrpIndvHmap #choose group.by parameter
+        cells <- NULL
+        col.min = -2.5
+        col.max = 2.5
+        
+        cells <- cells %||% colnames(x = tenX)
+        
+        data <- as.data.frame(x = t(x = as.matrix(x = GetAssayData(
+          object = tenX, slot = "data")[selected, cells, drop = FALSE])))
+        
+        
+        data <- scale(data)
+        data <- as.data.frame(MinMax(data = data, min = col.min, max = col.max))
+        
+        data$id <- if (is.null(x = group.by)) {
+          Idents(object = tenX)[cells, drop = TRUE]
+        } else {
+          tenX[[group.by, drop = TRUE]][cells, drop = TRUE]
+        }
+        if (!is.factor(x = data$id)) {
+          data$id <- factor(x = data$id)
+        }
+        data$id <- as.vector(x = data$id)
+        
+        data$Cell <- rownames(data)
+        data <- melt(data, variable.name  = "Feature")
+        
+        #preserve identity order
+        data$id <- factor(data$id, levels = levels(tenX$data.set))
+        
+        t <- ggplot(data, aes(Cell, Feature,fill= value)) +
+          geom_tile(height = .95, width = 2) +
+          scale_fill_distiller(
+            palette = "RdYlBu") +
+          theme_ipsum()+
+          theme(axis.text.x=element_blank(),
+                axis.ticks.x=element_blank(),
+                axis.title.y.right = element_text(size=13),panel.spacing = unit(.25, "lines"),
+                strip.text.x  = element_text(angle = 90, vjust = 0.5, hjust=.5,size = 12)) + 
+          facet_grid( ~ id, space = 'free', scales = 'free')
+        
+        g <-s + t
+        
+        g <- g + labs(title = paste("Selected analysis:",
+                                    as.character(input$Analysis)), subtitle = "", caption = "") +
+          theme(plot.title = element_text(face = "plain", size = 14))
+      
+      }
+      
+    }
+    
+    return(g)
+    
+  })
   
-  # # ======== pHeatmap ======== # -omit heatmap for this app
-  # selectedCellsHmap <- reactive({
-  #   multiGrep2(input$cellIdentsHmap, colnames(hmap_list[[1]]))
-  # })
-  # 
-  # pHeatmapF <- reactive({
-  #   selected <- unlist(strsplit(input$PhmapGenes, " "))
-  # 
-  #   ifelse(selected %in% com_name,
-  #     selected <- selected[selected %in% com_name],
-  # 
-  #     ifelse(selected %in% ens_id,
-  #       selected <- gene_df[ens_id %in% selected, 3],"")
-  #   )
-  # 
-  #   avg_mtx <- hmap_list[[input$mtxSelectHmap]]
-  #   goi_mat <- avg_mtx[rownames(avg_mtx) %in% selected, selectedCellsHmap()]
-  #   goi_mat <- goi_mat[match(selected, rownames(goi_mat)),]
-  # 
-  #   n_trt <- length(unique(file_list[[1]]@meta.data$data.set))
-  #   mtx_cols <- ncol(goi_mat) - n_trt
-  # 
-  #   hmapColors <- colorRampPalette(
-  #     rev(RColorBrewer::brewer.pal(n = 7, name = "RdYlBu")))(100)
-  # 
-  #   # pheatmap::pheatmap(goi_mat, cluster_rows = input$pHmapClust,
-  #   #   cluster_cols = FALSE, color = hmapColors, annotation_col = NULL,
-  #   #   legend = FALSE, annotation_colors = anno_cols,
-  #   #   gaps_col = seq(n_trt, mtx_cols, by = n_trt),
-  #   #   annotation_names_col = FALSE, annotation_legend = FALSE)
-  #   
-  #   DoHeatmap(seurat_obj, features = selected) + NoLegend()
-  # })
-  # 
-  # mismatchPhmap <- function() {
-  #   selected <- unlist(strsplit(input$PhmapGenes, " "))
-  # 
-  #   mismatch <- ifelse(!selected %in% c(com_name, ens_id),
-  #     selected[!selected %in% c(com_name, ens_id)],"")
-  #   return(mismatch)
-  # }
-  # 
-  # output$notInPhmap <- renderText({input$runPhmap
-  #   isolate({mismatchPhmap()})
-  # })
-  # 
-  # output$SelectedDataPhmap <- renderText({input$runPhmap
-  #   isolate({input$Analysis})
-  # })
-  # 
-  # avg_mtx_names <- unique(unlist(lapply(seq_along(colnames(hmap_list[[1]])),
-  #   function(i){strsplit(colnames(hmap_list[[1]]), "_")[[i]][1]})))
-  # 
-  # output$cellSelectHmap <- renderUI({ # New cell type select
-  # pickerInput("cellIdentsHmap", "Add or remove clusters:",
-  #   choices = avg_mtx_names, multiple = TRUE,
-  #   selected = avg_mtx_names, options = list(
-  #     `actions-box` = TRUE), width = "80%")
-  # })
-  # 
-  # output$myPhmapF <- renderPlot({input$runPhmap
-  #   isolate({withProgress({p <- pHeatmapF(); print(p)},
-  #     message = "Rendering plot..", min = 0, max = 10, value = 10)
-  #   })
-  # })
-  # 
-  # getWidthPhmap <- reactive({
-  #   if(input$pHmapClust == TRUE ) {
-  #     w <- (length(selectedCellsHmap()) * 14) + 150
-  #     return(w)
-  #   } else {
-  #     w <- (length(selectedCellsHmap()) * 14) + 90
-  #     return(w)
-  #   }
-  # })
-  # 
-  # getHeightPhmap <- reactive({
-  #   l <- getLenInput(input$PhmapGenes)
-  #   h <- (l * 13) + 85
-  #   return(h)
-  # })
-  # 
-  # output$plot.uiPheatmapF <- renderUI({input$runPhmap
-  #   isolate({
-  #     w <- paste0(getWidthPhmap(), "px"); h <- paste0(getHeightPhmap(), "px")
-  #       plotOutput("myPhmapF", width = w, height = h)
-  #   })
-  # })
-  # 
-  # output$downloadPhmap <- downloadHandler(
-  #   filename = "heatmap.pdf", content = function(file) {
-  #     pdf(file, width = (getWidthPhmap() / 90),
-  #         height = (getHeightPhmap() / 90))
-  #     print(pHeatmapF())
-  #     dev.off()
-  #   }
-  # )
+  
+  #renders the drop-down box w/ Ident choices
+  output$cellSelectIndvHmap <- renderUI({ # New cell type select
+    pickerInput("cellIdentsIndvHmap", "Add or remove clusters:",
+                choices = as.character(printIdents()), multiple = TRUE,
+                selected = as.character(printIdents()), options = list(
+                  `actions-box` = TRUE), width = "85%")
+  })
+  
+  #renders the drop-down box w/ downsample choices
+  output$SelectDownSamplePropIndvHmap <- renderUI({ # New cell type select
+    pickerInput("cellDownSampleIndvHmap", "Choose downsample proportion:",
+                choices = as.character(printDownSampleOptions()), multiple = FALSE,
+                selected = as.character(printDownSampleOptions()[1]), options = list(
+                  `actions-box` = TRUE), width = "85%")
+  })
+  
+  
+  mismatchIndvPhmap <- function() {
+    selected <- unlist(strsplit(input$IndvPhmapGenes, " "))
+    
+    mismatch <- ifelse(!selected %in% c(com_name, ens_id),
+                       selected[!selected %in% c(com_name, ens_id)],"")
+    return(mismatch)
+  }
+  
+  #prints the mismatches or genes not present (for ui.R)
+  output$notInIndvPhmap <- renderText({input$runIndvPhmap
+    isolate({mismatchIndvPhmap()})
+  })
+  
+  output$SelectedDataIndvPhmap <- renderText({input$runIndvPhmap
+    isolate({input$Analysis})
+  })
+  
+  #renders plot w/ progress bar
+  output$myIndvPhmapF <- renderPlot({input$runIndvPhmap
+    isolate({withProgress({p <- IndvpHeatmapF(); print(p)},
+                          message = "Rendering plot..", min = 0, max = 10, value = 10)
+    })
+  })
+  
+  getHeightIndvPhmap <- reactive({
+    l <- getLenInput(input$IndvPhmapGenes)
+    h <- as.numeric(l * 35)
+    return(h)
+  })
+  
+  getWidthIndvPhmap <- function() {
+    if(input$selectGrpIndvHmap == "cell.type.ident") {
+      w <- "1600"
+    } else {
+      w <- "800"
+    }
+    return(w)
+  }
+  
+  
+  output$plot.uiIndvpHeatmapF <- renderUI({input$runIndvPhmap
+    isolate({h <- getHeightIndvPhmap(); plotOutput("myIndvPhmapF",
+                                                   width = paste0(input$manAdjustIndvHmapW, "px"),
+                                                   height = paste0(input$manAdjustIndvHmapH, "px"))})
+  })
+  
+  #download
+  output$downloadIndvhmap <- downloadHandler(
+    filename = "IndvHeatmap.png", content = function(file) {
+      png(file, height = as.numeric(input$manAdjustIndvHmapH),
+          width = as.numeric(input$manAdjustIndvHmapW), units = "px")
+      print(IndvpHeatmapF())
+      dev.off()
+    }
+  )
   
   
   # ======== Differential Expression ======== #
@@ -1587,59 +1686,6 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                   ),
                   
                   
-                  #    # ================ # Stacked Vln Plts
-                  #    tabPanel("Stacked Violin Plots", #fluid = FALSE,
-                  #       sidebarLayout(fluid = TRUE,
-                  # 
-                  #       sidebarPanel(fluid = FALSE, width = 4,
-                  #         column(12, textInput("vlnStkdGenes", width = "100%",
-                  #                         "Insert gene name or ensembl ID:",
-                  #                         value = smpl_genes_lg)),
-                  #    
-                  #         column(12, align = "center",
-                  #           actionButton("runStkdVlnPlot", "Generate Plots",
-                  #                        style = 'padding:5px; font-size:80%')),
-                  #    
-                  #         column(12, tags$hr(width = "50%"), align = "center"),
-                  #         column(12, align = "center", downloadButton(
-                  #      "downloadStkdVlnPlot", "Download pdf",
-                  #      style = 'padding:5px; font-size:80%')),
-                  #    
-                  #         column(12, tags$br()),
-                  #         column(12, align = "center", uiOutput("cellSelectStkdVln")), # New
-                  #    
-                  #         column(12, tags$br()),
-                  #           column(12, align = "center",
-                  #           column(6,
-                  #                  radioGroupButtons("selectGrpStkdVln",
-                  #                                    "Group cells by:", choices = list(Time = "data.set",
-                  #                                                                      Cluster = "cell.type.ident"), width = "100%")),
-                  #           column(6,
-                  #                  numericInput("ptSizeStkdVln", "Input cell size:", value = 0.25,
-                  #                               min = 0.00, step = 0.75, max = 2.00, width = "80%"))
-                  #    ),
-                  #    
-                  #    fluidRow(tags$br()),
-                  #    fluidRow(tags$br()),
-                  #    column(12, uiOutput("plot.uiDatFeatPlotV8"), align = "center"),
-                  #    fluidRow(tags$br()),
-                  #    fluidRow(tags$br())
-                  #   ),
-                  # 
-                  #   mainPanel(
-                  #     fluidRow(
-                  #     column(8, tags$br()),
-                  #     column(8, tags$b("Gene mismatches"), "(if present)", tags$b(":")),
-                  #     column(8,uiOutput("notInStkdVln")),
-                  #     column(8, tags$hr()),
-                  # # column(8, tags$b(uiOutput("SelectedDataVln"))),
-                  #     column(12, uiOutput("plot.uiStkdVlnPlotF")
-                  #     )
-                  #     )
-                  #     )
-                  #     )
-                  #     ),
-                  
                   # ================ # Stacked Vln Plts
                   tabPanel("Stacked Violin Plots", #fluid = FALSE,
                            sidebarLayout(fluid = TRUE,
@@ -1668,7 +1714,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                                       column(12, align = "center",
                                                              column(6,
                                                                     radioGroupButtons("selectGrpStkdVln",
-                                                                                      "Group cells by:", choices = list(data.set = "data.set"), 
+                                                                                      "Group cells by:", choices = list(Dataset = "data.set"), 
                                                                                       width = "100%")),
                                                              column(6,
                                                                     numericInput("ptSizeStkdVln", "Input cell size:", 
@@ -1696,60 +1742,6 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                          )
                            )
                   ),
-                  
-                  # # ================ #
-                  # tabPanel("Ridge Plots", #fluid = FALSE,
-                  #   sidebarLayout(fluid = TRUE,
-                  #     
-                  #     sidebarPanel(fluid = FALSE, width = 4,
-                  #       column(12, textInput("rdgGenes", width = "100%",
-                  #         "Insert gene name or ensembl ID:",
-                  #         value = smpl_genes_sm)),
-                  #       
-                  #       column(12, align = "center",
-                  #         actionButton("runRdgPlot", "Generate Plots",
-                  #         style = 'padding:5px; font-size:80%')),
-                  # 
-                  #       column(12, tags$hr(width = "50%"), align = "center"),
-                  #       column(12, align = "center", downloadButton(
-                  #         "downloadRdgPlot", "Download pdf",
-                  #         style = 'padding:5px; font-size:80%')),
-                  # 
-                  #       column(12, tags$br()),
-                  #       column(12, align = "center", uiOutput("cellSelectRdg")), # New
-                  #       
-                  #       column(12, tags$br()),
-                  #        column(12, align = "center",
-                  #         column(6,
-                  #           radioGroupButtons("selectGrpRdg",
-                  #             "Group cells by:", choices = list(Time = "data.set",
-                  #               Cluster = "cell.type.ident"), width = "100%")),
-                  #         column(6,
-                  #           numericInput("ptSizeRdg", "Input cell size:", value = 0.25,
-                  #           min = 0.00, step = 0.75, max = 2.00, width = "80%"))
-                  #       ),          
-                  #       
-                  #       fluidRow(tags$br()),
-                  #       fluidRow(tags$br()),
-                  #       column(12, uiOutput("plot.uiDatFeatPlotV3"), align = "center"),
-                  #       fluidRow(tags$br()),
-                  #       fluidRow(tags$br())
-                  #     ),
-                  #     
-                  #     mainPanel(
-                  #       fluidRow(
-                  #         column(8, tags$br()),
-                  #         column(8, tags$b("Gene mismatches"), "(if present)", tags$b(":")),
-                  #         column(8,uiOutput("notInRdg")),
-                  #         column(8, tags$hr()),
-                  #         # column(8, tags$b(uiOutput("SelectedDataRdg"))),
-                  #         column(12, uiOutput("plot.uiRdgPlotF")
-                  #         )
-                  #       )
-                  #     )
-                  #   )
-                  # ),
-                  # 
                   
                   # ================ #
                   tabPanel("Dot Plot", #fluid = FALSE,
@@ -1801,6 +1793,17 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                              column(8, uiOutput("notInDot")),
                                              column(8, tags$hr()),
                                              
+                                             column(8, align = "left",
+                                                    # column(4,  align = "center", "Manual figure adjustment:",
+                                                    #   column(11, style = "padding-top: 8px;",
+                                                    #     switchInput("manAdjustDot", value = FALSE))),
+                                                    column(3, align = "left", numericInput(
+                                                      "manAdjustDotW", label = "Width (pixels):", value = 800, step = 50,
+                                                      width = "100%")),
+                                                    column(3,  align = "left", numericInput(
+                                                      "manAdjustDotH", label = "Height (pixels):", value = 900, step = 50,
+                                                      width = "100%"))
+                                             ),
                                              fluidRow(tags$br()),
                                              column(12, uiOutput("plot.uiDotPlotF"))
                                            )
@@ -1808,7 +1811,7 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                            )
                   ),
                   
-                  # ================ # DoHeatmap
+                  # # ======== ggplot Grouped Heatmap ======== #
                   tabPanel("Heat Map", #fluid = FALSE,
                            sidebarLayout(fluid = TRUE,
                                          
@@ -1857,74 +1860,88 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
                                                     "(if applicable)", tags$b(":")),
                                              column(8, uiOutput("notInPhmap")),
                                              column(8, tags$hr()),
-                                             
+                                             column(8, align = "left",
+                                                    column(3, align = "left", numericInput(
+                                                      "manAdjustHmapW", label = "Width (pixels):", value = 800, step = 50,
+                                                      width = "100%")),
+                                                    column(3,  align = "left", numericInput(
+                                                      "manAdjustHmapH", label = "Height (pixels):", value = 900, step = 50,
+                                                      width = "100%"))
+                                             ),
                                              fluidRow(tags$br()),
                                              column(12, uiOutput("plot.uiPheatmapF"))
                                            )
                                          )
                            )
                   ),
-                  
-                  
-                  
-                  # # ================ # Phmap - omit
-                  # tabPanel("Heatmap", #fluid = FALSE,
-                  #   fixedRow(
-                  #     column(12, tags$br()),
-                  # 
-                  #     column(5, align = "left",
-                  #       column(12, align = "left",
-                  #         column(12,
-                  #           textInput("PhmapGenes", width = "100%",
-                  #           "Insert gene name or ensembl ID:",
-                  #             value = smpl_genes_lg),
-                  #           checkboxInput("pHmapClust",
-                  #             label = "Check box to enable row clustering.",
-                  #             value = FALSE),
-                  #           column(12, align = "center", uiOutput("cellSelectHmap")),
-                  #           column(12, tags$br())
-                  #           ),
-                  #         
-                  #         column(12, align = "center",
-                  #           actionButton("runPhmap", "Generate Plots",
-                  #             style = 'padding:5px; font-size:80%'),
-                  #         downloadButton("downloadPhmap", "Download pdf",
-                  #             style = 'padding:5px; font-size:80%')),
-                  #         column(12, tags$br())
-                  #       )
-                  #     ),
-                  # 
-                  #     column(7, align = "left",
-                  #       column(12, tags$b("Mismatches or genes not present"),
-                  #         "(if applicable)", tags$b(":")),
-                  #       column(12, uiOutput("notInPhmap")),
-                  # 
-                  #       column(12, tags$hr()),
-                  #       column(9, align = "left", tags$b('Note:'),
-                  #       'Highly expressed genes have a tendency to "wash out" the color 
-                  #       values of genes with lower expression on this heatmap. It might 
-                  #       be useful to remove the higher expressed genes to get a better 
-                  #       visualization of genes with less extreme values. You can also 
-                  #       change the expression normalization method to decrease/increase
-                  #       the effect highly expressed genes. You can find details on each 
-                  #       method in the ',
-                  #         tags$a(href = "https://www.rdocumentation.org/packages/Seurat/versions/3.1.4/topics/NormalizeData",
-                  #           tags$b("Seurat documentation")), "."),
-                  #       
-                  #       column(12, tags$br()),
-                  #       column(12, align = "left",
-                  #         radioGroupButtons("mtxSelectHmap", "Normalization method:",
-                  #           choices = list(Log = "LOG", CLR = "CLR", RC = "RC"),
-                  #           width = "100%")
-                  #       )
-                  #     ),
-                  #     
-                  #     column(12, align = "center", tags$hr(width = "100%")),
-                  #     column(12, tags$b("Selected analysis: all she-pos. cells")),
-                  #     column(12, tags$br()),
-                  #     column(12, class = "hmapID", uiOutput("plot.uiPheatmapF"))
-                  #   )
-                  # ),
+                  #================ # ggplot Indv. Cell heatmap
+                  tabPanel("Indv. Cell Heatmap", #fluid = FALSE,
+                           sidebarLayout(fluid = TRUE,
+                                         
+                                         sidebarPanel(fluid = FALSE, width = 4,
+                                                      column(12, align = "left  ",
+                                                             textInput("IndvPhmapGenes",
+                                                                       "Insert gene name or ensembl ID:",
+                                                                       value = smpl_genes_lg),
+                                                             checkboxInput("IndvpHmapClust",
+                                                                           label = "Check box to enable row clustering.", value = FALSE)),
+                                                      
+                                                      column(12, align = "center",
+                                                             actionButton("runIndvPhmap", "Generate Plots",
+                                                                          style = 'padding:5px; font-size:80%')),
+                                                      
+                                                      column(12, tags$hr(width = "50%"), align = "center"),
+                                                      column(12, align = "center", downloadButton(
+                                                        "downloadIndvhmap", "Download pdf",
+                                                        style = 'padding:5px; font-size:80%')),
+                                                      
+                                                      column(12, tags$br()),
+                                                      column(12, align = "center", uiOutput("cellSelectIndvHmap")), # New
+                                                      
+                                                      column(12, tags$br()),
+                                                      column(12, align = "center", uiOutput("SelectDownSamplePropIndvHmap")), #downsample drop down
+                                                      column(12, em("Please note downsample is only applied when cells are grouped by Dataset, excluding smartseq2 cells")),
+                                                      
+                                                      column(12, tags$br()),
+                                                      column(12, align = "center",
+                                                             column(12,
+                                                                    radioGroupButtons("selectGrpIndvHmap",
+                                                                                      "Group cells by:",
+                                                                                      choices = list(
+                                                                                        Cluster = "cell.type.ident",
+                                                                                        Dataset = "data.set"),
+                                                                                      width = "100%"))
+                                                             
+                                                      ),
+                                                      
+                                                      fluidRow(tags$br()),
+                                                      fluidRow(tags$br()),
+                                                      column(12, uiOutput("plot.uiDatFeatPlotV3"), align = "center"),
+                                                      fluidRow(tags$br()),
+                                                      fluidRow(tags$br())
+                                         ),
+                                         
+                                         mainPanel(
+                                           fluidRow(
+                                             column(8, tags$br()),
+                                             column(8, tags$b("Mismatches or genes not present"),
+                                                    "(if applicable)", tags$b(":")),
+                                             column(8, uiOutput("notInIndvPhmap")),
+                                             column(8, tags$hr()),
+                                             column(8, align = "left",
+                                                    column(3, align = "left", numericInput(
+                                                      "manAdjustIndvHmapW", label = "Width (pixels):", value = 800, step = 50,
+                                                      width = "100%")),
+                                                    column(3,  align = "left", numericInput(
+                                                      "manAdjustIndvHmapH", label = "Height (pixels):", value = 900, step = 50,
+                                                      width = "100%"))
+                                             ),
+                                             fluidRow(tags$br()),
+                                             column(12, uiOutput("plot.uiIndvpHeatmapF"),style = "overflow-y: scroll;")
+                                           )
+                                         )
+                           )
+                  ),
                   
                   
                   # ================ #

@@ -365,66 +365,6 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
 			),
 
 
-# ================ #
-# tabPanel("Heatmap", #fluid = FALSE,
-#   fixedRow(
-#     column(12, tags$br()),
-
-#     column(5, align = "left",
-#       column(12, align = "left",
-#         column(12,
-#           textInput("PhmapGenes", width = "100%",
-#           "Insert gene name or ensembl ID:",
-#             value = smpl_genes_lg),
-#           checkboxInput("pHmapClust",
-#             label = "Check box to enable row clustering.",
-#             value = FALSE),
-#           column(12, align = "center", uiOutput("cellSelectHmap")),
-#           column(12, tags$br())
-#           ),
-
-#         column(12, align = "center",
-#           actionButton("runPhmap", "Generate Plots",
-#             style = 'padding:5px; font-size:80%'),
-#         downloadButton("downloadPhmap", "Download pdf",
-#             style = 'padding:5px; font-size:80%')),
-#         column(12, tags$br())
-#       )
-#     ),
-
-#     column(7, align = "left",
-#       column(12, tags$b("Mismatches or genes not present"),
-#         "(if applicable)", tags$b(":")),
-#       column(12, uiOutput("notInPhmap")),
-
-#       column(12, tags$hr()),
-#       column(9, align = "left", tags$b('Note:'),
-#       'Highly expressed genes have a tendency to "wash out" the color 
-#       values of genes with lower expression on this heatmap. It might 
-#       be useful to remove the higher expressed genes to get a better 
-#       visualization of genes with less extreme values. You can also 
-#       change the expression normalization method to decrease/increase
-#       the effect highly expressed genes. You can find details on each 
-#       method in the ',
-#         tags$a(href = "https://www.rdocumentation.org/packages/Seurat/versions/3.1.4/topics/NormalizeData",
-#           tags$b("Seurat documentation")), "."),
-
-#       column(12, tags$br()),
-#       column(12, align = "left",
-#         radioGroupButtons("mtxSelectHmap", "Normalization method:",
-#           choices = list(Log = "LOG", CLR = "CLR", RC = "RC"),
-#           width = "100%")
-#       )
-#     ),
-
-#     column(12, align = "center", tags$hr(width = "100%")),
-#     column(12, tags$b("Selected analysis: all she-pos. cells")),
-#     column(12, tags$br()),
-#     column(12, class = "hmapID", uiOutput("plot.uiPheatmapF"))
-#   )
-# ),
-
-
 # ================ # ggplot groupedheatmap
 			tabPanel("Heat Map", #fluid = FALSE,
 					sidebarLayout(fluid = TRUE,

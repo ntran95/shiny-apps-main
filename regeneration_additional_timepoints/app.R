@@ -1,12 +1,12 @@
 library(shiny)
-	library(cowplot)
-	library(Seurat)
-	library(ggplot2)
-	library(shinythemes)
-	library(shinyWidgets)
-	library(dplyr)
-	library(rsconnect)
-	library(hrbrthemes)
+library(cowplot)
+library(Seurat)
+library(ggplot2)
+library(shinythemes)
+library(shinyWidgets)
+library(dplyr)
+library(rsconnect)
+library(hrbrthemes)
 library(reshape2)
 
 	"%||%" <- devtools:::`%||%`
@@ -66,7 +66,7 @@ app_title <- "Neuromast Regeneration scRNA-seq"
 gene_df <- read.table("./data/Danio_Features_unique_Ens91_v2.tsv",
 		sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
-branch <- "develop" # CHECK BEFORE DEPLOYMENT!
+branch <- "master" # CHECK BEFORE DEPLOYMENT!
 app_name <- "regeneration_additional_timepoints"
 # ! =========== {END}
 
@@ -79,13 +79,13 @@ com_name <- gene_df$Gene.name.uniq
 source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
 			branch, "/", app_name, "/app_server.R"), local = TRUE)
 
-source(paste0("./app_server.R"), local = TRUE)
+# source(paste0("./app_server.R"), local = TRUE)
 
 # =========== UI
 source(paste0("https://raw.githubusercontent.com/diazdc/shiny-apps-main/",
 			branch, "/", app_name, "/app_ui.R"), local = TRUE)
 
-source(paste0("./app_ui.R"), local = TRUE)
+# source(paste0("./app_ui.R"), local = TRUE)
 
 print("Size of all Seurat objects:")
 print(object.size(file_list), units = "MB")

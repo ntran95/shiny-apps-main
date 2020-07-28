@@ -528,6 +528,10 @@ ui <- fixedPage(theme = shinythemes::shinytheme("lumen"), # paper lumen cosmo
 									width = "100%"))
 
 					      ),
+					column(12,tags$br()),
+					column(12,dataTableOutput('tableIndvHmap')),
+					
+					
 
 					fluidRow(tags$br()),
 					fluidRow(tags$br()),

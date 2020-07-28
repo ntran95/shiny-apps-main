@@ -170,7 +170,7 @@ server <- function(input, output) {
 				plotOutput("myDatFeatPlotH1", width = "850px", height = "450px")
 				})
 
-	n_panels <- 1:6
+	n_panels <- 1:8
 
 		lapply(n_panels, function(i) {
 				output[[paste0("myDatFeatPlotV", i)]] <- 
@@ -1102,6 +1102,21 @@ server <- function(input, output) {
 				return(g)
 
 		})
+		
+		getSummaryTable <- reactive({
+		  seurat_obj <- SelectDataset()
+		  seurat_obj <- seurat_obj[,IDtype() %in% input$cellIdentsIndvHmap]
+		  seurat_obj <- seurat_obj[, sample(Cells(seurat_obj), size = round(as.numeric(input$cellDownSampleIndvHmap)*length(colnames(seurat_obj))), replace=F)]
+		  group.by <- input$selectGrpIndvHmap #choose group.by parameter
+		  df <- seurat_obj[[group.by, drop = TRUE]]
+		  df <- addmargins(table(df))
+		  print(df)
+		  return(df)
+		  
+		})
+		
+		output$tableIndvHmap <- renderDataTable({
+		  getSummaryTable()})
 
 #renders the drop-down box w/ Ident choices
 	output$cellSelectIndvHmap <- renderUI({ # New cell type select
